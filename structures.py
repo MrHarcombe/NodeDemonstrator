@@ -3,10 +3,11 @@ from collections import defaultdict
 from heapq import heappush, heappop
 from time import time
 
+
 class TreeNode:
-    """ Simple, open, class for use in a binary search tree. Stores a given value, and
-                references to parent, left and right children. Traversal methods pass in the whole
-                node and allow access to all attributes. """
+    """Simple, open, class for use in a binary search tree. Stores a given value, and
+    references to parent, left and right children. Traversal methods pass in the whole
+    node and allow access to all attributes."""
 
     def __init__(self, value):
         self.value = value
@@ -40,8 +41,8 @@ class TreeNode:
 
 
 class RedBlackNode(TreeNode):
-    """ Extends TreeNode for use in a RedBlackTree, adds an attribute to store the colour
-                of the node; True if the node is black, False if the node is red. """
+    """Extends TreeNode for use in a RedBlackTree, adds an attribute to store the colour
+    of the node; True if the node is black, False if the node is red."""
 
     def __init__(self, value, parent):
         super().__init__(value)
@@ -53,13 +54,13 @@ class RedBlackNode(TreeNode):
 
     @staticmethod
     def is_right_child(node):
-        """ Returns True if the node is a right child of its parent, False otherwise. """
+        """Returns True if the node is a right child of its parent, False otherwise."""
         return node.parent != None and node == node.parent.right
 
 
 class Tree:
-    """ Vanilla binary search tree implementation. Only provides checks for empty and
-                presence. Addition and standard traversal methods are also provided, no delete. """
+    """Vanilla binary search tree implementation. Only provides checks for empty and
+    presence. Addition and standard traversal methods are also provided, no delete."""
 
     def __init__(self):
         self.root = None
@@ -172,18 +173,19 @@ class Tree:
 
 
 class RedBlackTree(Tree):
-    """ Implementation of the RedBlackTree detailed on Wikipedia as a child class of the
-                binary search tree implemented above (see https://en.wikipedia.org/wiki/Red%E2%80%93black_tree). """
+    """Implementation of the RedBlackTree detailed on Wikipedia as a child class of the
+    binary search tree implemented above (see https://en.wikipedia.org/wiki/Red%E2%80%93black_tree).
+    """
 
     def __init__(self):
         super().__init__()
 
     def __rotate_subtree(self, parent, direction):
-        """ Rotates the subtree (which may be the root of the tree) in the given direction
-                        (True -> right, False -> left). """
+        """Rotates the subtree (which may be the root of the tree) in the given direction
+        (True -> right, False -> left)."""
         grandparent = parent.parent
         sibling = parent.left if direction else parent.right
-        assert (sibling != None)
+        assert sibling != None
         child = sibling.right if direction else sibling.left
 
         if direction:
@@ -225,7 +227,7 @@ class RedBlackTree(Tree):
         while True:
             if parent.is_black:
                 # Case_I1 (P is black):
-                return    # insertion complete
+                return  # insertion complete
 
             # From now on P is red.
             grandparent = parent.parent
@@ -237,29 +239,32 @@ class RedBlackTree(Tree):
 
             # else: P red and G!=NULL.
             on_right = RedBlackNode.is_right_child(
-                parent)    # the side of parent G on which node P is located
+                parent
+            )  # the side of parent G on which node P is located
             uncle = grandparent.left if on_right else grandparent.right
-            if (uncle == None or uncle.is_black):    # considered black
+            if uncle == None or uncle.is_black:  # considered black
                 # P is red && U is black
                 # goto Case_I56
                 if node == (parent.left if on_right else parent.right):
                     # Case_I5 (P is red && U is black && N is inner grandchild of G):
-                    self.__rotate_subtree(parent, on_right)    # P is never the root
-                    node = parent    # new current node
-                    parent = grandparent.right if on_right else grandparent.left    # new parent of N
+                    self.__rotate_subtree(parent, on_right)  # P is never the root
+                    node = parent  # new current node
+                    parent = (
+                        grandparent.right if on_right else grandparent.left
+                    )  # new parent of N
                     # fall through to Case_I6
 
                 # Case_I6 (P is red && U is black && N is outer grandchild of G):
-                self.__rotate_subtree(grandparent, not on_right)    # G may be the root
+                self.__rotate_subtree(grandparent, not on_right)  # G may be the root
                 parent.is_black = True
                 grandparent.is_black = False
-                return    # insertion complete
+                return  # insertion complete
 
             # Case_I2 (P+U red):
             parent.is_black = True
             uncle.is_black = True
             grandparent.is_black = False
-            node = grandparent    # new current node
+            node = grandparent  # new current node
             # iterate 1 black level higher
             #     (= 2 tree levels)
 
@@ -426,14 +431,14 @@ class MatrixGraph:
             self.matrix[to_index + 1][from_index] = True
             if self.undirected or undirected:
                 self.matrix[to_index + 1][from_index] = True
-        
+
     def delete_edge(self, from_node, to_node, undirected=False):
         if self.is_connected(from_node, to_node):
             from_index = self.matrix[0].index(from_node)
             to_index = self.matrix[0].index(to_node)
-            self.matrix[from_index+1][to_index] = False
+            self.matrix[from_index + 1][to_index] = False
             if self.undirected or undirected:
-                self.matrix[to_index+1][from_index] = False
+                self.matrix[to_index + 1][from_index] = False
 
     def is_connected(self, from_node, to_node):
         if from_node in self.matrix[0] and to_node in self.matrix[0]:
@@ -444,9 +449,15 @@ class MatrixGraph:
 
     def get_connections(self, node):
         if node in self.matrix[0]:
-            return iter([
-                c for c in zip(self.matrix[0], self.matrix[self.matrix[0].index(node) + 1]) if c[1]
-            ])
+            return iter(
+                [
+                    c
+                    for c in zip(
+                        self.matrix[0], self.matrix[self.matrix[0].index(node) + 1]
+                    )
+                    if c[1]
+                ]
+            )
         return []
 
     def depth_first(self, start_node):
@@ -485,7 +496,7 @@ class MatrixGraph:
 
 
 class WeightedMatrixGraph(MatrixGraph):
-    """ a weighted, (maybe) directional graph """
+    """a weighted, (maybe) directional graph"""
 
     def __init__(self, undirected=False):
         super().__init__(undirected)
@@ -507,10 +518,10 @@ class WeightedMatrixGraph(MatrixGraph):
 
         while len(queue) > 0:
             current_cost, current_node = heappop(queue)
-            
+
             if current_node == end_node:
                 break
-            
+
             for neighbour, cost in self.get_connections(current_node):
                 previous_cost, _ = data[neighbour]
                 if current_cost + cost < previous_cost:
@@ -530,7 +541,7 @@ class WeightedMatrixGraph(MatrixGraph):
         return path[::-1]
 
     def astar_manhattan_distance(node_from, node_to):
-        return sum(abs(val1-val2) for val1, val2 in zip(node_from, node_to))
+        return sum(abs(val1 - val2) for val1, val2 in zip(node_from, node_to))
 
     def reconstruct_astar_path(self, came_from, current):
         total_path = [current]
@@ -543,10 +554,10 @@ class WeightedMatrixGraph(MatrixGraph):
         open_set = []
         came_from = {}
 
-        g_score = defaultdict(lambda: float('inf'))
+        g_score = defaultdict(lambda: float("inf"))
         g_score[start_node] = 0
 
-        f_score = defaultdict(lambda: float('inf'))
+        f_score = defaultdict(lambda: float("inf"))
         f_score[start_node] = func(start_node, end_node)
 
         heappush(open_set, (f_score[start_node], start_node))
@@ -575,10 +586,10 @@ if __name__ == "__main__":
         t = Tree()
         for n in (7, 4, 2, 6, 16, 12, 19):
             t.add(n)
-        assert (12 in t)
-        assert (13 not in t)
+        assert 12 in t
+        assert 13 not in t
         t.add(10)
-        assert (10 in t)
+        assert 10 in t
 
         tree = []
         print("Pre-order traversal:")
@@ -712,7 +723,14 @@ if __name__ == "__main__":
         print("shortest path from A to H:", ",".join(g.dijkstra("A", "H")))
         print("Elapsed:", time() - start)
         start = time()
-        print("shortest A* path from A to H:", ",".join(g.reconstruct_astar_path(g.astar("A", "H", lambda a,b: ord(b) - ord(a) - ord("A")), "H")))
+        print(
+            "shortest A* path from A to H:",
+            ",".join(
+                g.reconstruct_astar_path(
+                    g.astar("A", "H", lambda a, b: ord(b) - ord(a) - ord("A")), "H"
+                )
+            ),
+        )
         print("Elapsed:", time() - start)
         print("shortest path from F to C:", ",".join(g.dijkstra("F", "C")))
 
