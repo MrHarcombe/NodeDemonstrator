@@ -97,12 +97,6 @@ class CanvasFrame(ttk.Frame):
             # the user can only drag from one node to another to create a new edge, or to drag around a loopback for
             # visibility - anything should be ignored, even if it was a valid click
             if self.__selected is not None:
-                print("on click, selected =", self.__selected)
-                tags = [
-                    (selected, self.__canvas.gettags(selected))
-                    for selected in self.__selected
-                ]
-                print("pre, selected tags =", tags)
                 self.__selected = list(
                     filter(
                         lambda tagOrId: any(
@@ -115,11 +109,6 @@ class CanvasFrame(ttk.Frame):
                 if len(self.__selected) == 0:
                     self.__selected = None
                     self.__current = None
-                tags = [
-                    (selected, self.__canvas.gettags(selected))
-                    for selected in self.__selected
-                ]
-                print("post, selected tags =", tags)
 
     def __release(self, event):
         """
@@ -184,23 +173,25 @@ class CanvasFrame(ttk.Frame):
                     )
 
                 else:
-                    # loopback time
-                    lx1, ly1, lx2, ly2 = self.__canvas.coords(from_id)
-                    lcx, lcy = (lx1 + lx2) / 2, (ly1 + ly2) / 2
-                    self.__canvas.tag_lower(
-                        self.__create_loopback_as_polygon(
-                            (lcx + NODE_RADIUS, lcy + NODE_RADIUS),
-                            NODE_RADIUS,
-                            (
-                                "edge",
-                                "edge_loopback",
-                                f"edge_loopback_{from_node}",
-                                f"edge_{from_node}",
-                                f"edge_{from_node}_{to_node}",
+                    existing = self.__canvas.find_withtag(f"edge_loopback_{from_node}")
+                    if existing is None or len(existing) == 0:
+                        # loopback time
+                        lx1, ly1, lx2, ly2 = self.__canvas.coords(from_id)
+                        lcx, lcy = (lx1 + lx2) / 2, (ly1 + ly2) / 2
+                        self.__canvas.tag_lower(
+                            self.__create_loopback_as_polygon(
+                                (lcx + NODE_RADIUS, lcy + NODE_RADIUS),
+                                NODE_RADIUS,
+                                (
+                                    "edge",
+                                    "edge_loopback",
+                                    f"edge_loopback_{from_node}",
+                                    f"edge_{from_node}",
+                                    f"edge_{from_node}_{to_node}",
+                                ),
                             ),
-                        ),
-                        1,
-                    )
+                            1,
+                        )
 
     def __drag(self, event):
         """
@@ -242,26 +233,31 @@ class CanvasFrame(ttk.Frame):
                 self.__current = (event.x, event.y)
 
             elif operation == "Edges":
-                assert len(self.__selected) != 0
-                loopback = next(
-                    tagOrId
-                    for tagOrId in self.__selected
-                    for tag in self.__canvas.gettags(tagOrId)
-                    if tag == "edge_loopback"
-                )
+                try:
+                    loopback = next(
+                        tagOrId
+                        for tagOrId in self.__selected
+                        for tag in self.__canvas.gettags(tagOrId)
+                        if tag == "edge_loopback"
+                    )
 
-                node = next(
-                    tagOrId
-                    for tagOrId in self.__selected
-                    for tag in self.__canvas.gettags(tagOrId)
-                    if tag == "node"
-                )
-                nx1, ny1, nx2, ny2 = self.__canvas.coords(node)
-                ncx, ncy = (nx1 + nx2) / 2, (ny1 + ny2) / 2
+                    node = next(
+                        tagOrId
+                        for tagOrId in self.__selected
+                        for tag in self.__canvas.gettags(tagOrId)
+                        if tag == "node"
+                    )
 
-                rotation = event.x - self.__current[0]
-                self.__rotate_object(loopback, (ncx, ncy), -rotation)
-                self.__current = (event.x, event.y)
+                    nx1, ny1, nx2, ny2 = self.__canvas.coords(node)
+                    ncx, ncy = (nx1 + nx2) / 2, (ny1 + ny2) / 2
+
+                    rotation = event.x - self.__current[0]
+                    self.__rotate_object(loopback, (ncx, ncy), -rotation)
+                    self.__current = (event.x, event.y)
+
+                except StopIteration:
+                    # almost certainly means user is not dragging a loopback
+                    pass
 
     def __double_click(self, event):
         """
