@@ -7,8 +7,7 @@ from usage_controls_frame import UsageControlsFrame
 
 class ToolFrame(ttk.Notebook):
     """
-    Class to handle setting up the Notebook which holds all the control frames
-     apart from the actual Canvas.
+    Class to handle setting up the Notebook which holds all the control frames apart from the actual Canvas.
     """
 
     def __init__(self, parent):

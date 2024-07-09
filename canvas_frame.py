@@ -1,10 +1,14 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
+from collections import namedtuple
 from math import radians, sin, cos
 
 from rename_dialog import rename_dialog
 from state_model import StateModel
+
+# Standard conversion type
+Canvas_XY = namedtuple("Canvas_XY", "x,y")
 
 # drawing dimensions
 NODE_RADIUS = 50
@@ -36,6 +40,19 @@ class CanvasFrame(ttk.Frame):
         self.__canvas.bind("<Double-Button-1>", self.__double_click)
         self.__canvas.bind("<Double-Button-3>", self.__right_double_click)
 
+        ###
+        # Mouse wheel scrolling taken from the answer at
+        # https://stackoverflow.com/questions/17355902/tkinter-binding-mousewheel-to-scrollbar
+        # w
+        self.__canvas.bind(
+            "<MouseWheel>",
+            lambda event: self.__canvas.yview_scroll(-1 * event.delta // 120, "units"),
+        )
+        self.__canvas.bind(
+            "<Shift-MouseWheel>",
+            lambda event: self.__canvas.xview_scroll(-1 * event.delta // 120, "units"),
+        )
+
         self.__selected = None
         self.__current = None
 
@@ -49,34 +66,36 @@ class CanvasFrame(ttk.Frame):
 
         If creating, always create a circle and text node with associated tags.
         """
+        canvas_xy = self.__event_to_canvas(event)
+
         operation = StateModel().get_operation()
         if operation == "Nodes":
             possible = self.__canvas.find_overlapping(
-                event.x - NODE_RADIUS,
-                event.y - NODE_RADIUS,
-                event.x + NODE_RADIUS,
-                event.y + NODE_RADIUS,
+                canvas_xy.x - NODE_RADIUS,
+                canvas_xy.y - NODE_RADIUS,
+                canvas_xy.x + NODE_RADIUS,
+                canvas_xy.y + NODE_RADIUS,
             )
 
             if len(possible) != 0:
                 self.__selected = self.__find_associated_ids(possible)
-                self.__current = (event.x, event.y)
+                self.__current = (canvas_xy.x, canvas_xy.y)
 
             else:
                 node_name = StateModel().get_next_node_name()
                 StateModel().add_node(node_name)
                 self.__canvas.create_oval(
-                    event.x - NODE_RADIUS,
-                    event.y - NODE_RADIUS,
-                    event.x + NODE_RADIUS,
-                    event.y + NODE_RADIUS,
+                    canvas_xy.x - NODE_RADIUS,
+                    canvas_xy.y - NODE_RADIUS,
+                    canvas_xy.x + NODE_RADIUS,
+                    canvas_xy.y + NODE_RADIUS,
                     fill="black",
                     width=0,
                     tags=("node", f"node_{node_name}"),
                 )
                 self.__canvas.create_text(
-                    event.x,
-                    event.y,
+                    canvas_xy.x,
+                    canvas_xy.y,
                     fill="white",
                     text=node_name,
                     tags=("node", f"nodetext_{node_name}"),
@@ -84,15 +103,15 @@ class CanvasFrame(ttk.Frame):
 
         elif operation == "Edges":
             possible = self.__canvas.find_overlapping(
-                event.x - NODE_RADIUS,
-                event.y - NODE_RADIUS,
-                event.x + NODE_RADIUS,
-                event.y + NODE_RADIUS,
+                canvas_xy.x - NODE_RADIUS,
+                canvas_xy.y - NODE_RADIUS,
+                canvas_xy.x + NODE_RADIUS,
+                canvas_xy.y + NODE_RADIUS,
             )
 
             if len(possible) != 0:
                 self.__selected = self.__find_associated_ids(possible)
-                self.__current = (event.x, event.y)
+                self.__current = (canvas_xy.x, canvas_xy.y)
 
             # the user can only drag from one node to another to create a new edge, or to drag around a loopback for
             # visibility - anything should be ignored, even if it was a valid click
@@ -121,13 +140,15 @@ class CanvasFrame(ttk.Frame):
         if self.__selected is None:
             return
 
+        canvas_xy = self.__event_to_canvas(event)
         operation = StateModel().get_operation()
+
         if operation == "Edges":
             possible = self.__canvas.find_overlapping(
-                event.x - NODE_RADIUS,
-                event.y - NODE_RADIUS,
-                event.x + NODE_RADIUS,
-                event.y + NODE_RADIUS,
+                canvas_xy.x - NODE_RADIUS,
+                canvas_xy.y - NODE_RADIUS,
+                canvas_xy.x + NODE_RADIUS,
+                canvas_xy.y + NODE_RADIUS,
             )
 
             if len(possible) != 0:
@@ -169,7 +190,7 @@ class CanvasFrame(ttk.Frame):
                                 f"edge_to_{to_node}",
                             ),
                         ),
-                        1,
+                        "node",
                     )
 
                 else:
@@ -190,7 +211,7 @@ class CanvasFrame(ttk.Frame):
                                     f"edge_{from_node}_{to_node}",
                                 ),
                             ),
-                            1,
+                            "node",
                         )
 
     def __drag(self, event):
@@ -205,13 +226,17 @@ class CanvasFrame(ttk.Frame):
         so behave accordingly.
         """
         if self.__selected is not None:
+            canvas_xy = self.__event_to_canvas(event)
             operation = StateModel().get_operation()
+
             if operation == "Nodes":
                 for id in self.__selected:
                     tags = self.__canvas.gettags(id)
                     if "node" in tags or "edge_loopback" in tags:
                         self.__canvas.move(
-                            id, event.x - self.__current[0], event.y - self.__current[1]
+                            id,
+                            canvas_xy.x - self.__current[0],
+                            canvas_xy.y - self.__current[1],
                         )
 
                 for id in self.__selected:
@@ -228,9 +253,9 @@ class CanvasFrame(ttk.Frame):
                         tx1, ty1, tx2, ty2 = self.__canvas.coords(f"node_{to_node}")
                         tcx, tcy = (tx1 + tx2) / 2, (ty1 + ty2) / 2
                         self.__canvas.coords(id, fcx, fcy, tcx, tcy)
-                        self.__canvas.tag_lower(id, 1)
+                        self.__canvas.tag_lower(id, "node")
 
-                self.__current = (event.x, event.y)
+                self.__current = (canvas_xy.x, canvas_xy.y)
 
             elif operation == "Edges":
                 try:
@@ -251,9 +276,9 @@ class CanvasFrame(ttk.Frame):
                     nx1, ny1, nx2, ny2 = self.__canvas.coords(node)
                     ncx, ncy = (nx1 + nx2) / 2, (ny1 + ny2) / 2
 
-                    rotation = event.x - self.__current[0]
+                    rotation = canvas_xy.x - self.__current[0]
                     self.__rotate_object(loopback, (ncx, ncy), -rotation)
-                    self.__current = (event.x, event.y)
+                    self.__current = (canvas_xy.x, canvas_xy.y)
 
                 except StopIteration:
                     # almost certainly means user is not dragging a loopback
@@ -268,13 +293,15 @@ class CanvasFrame(ttk.Frame):
 
         If editing "Edges" then there should only be one id returned.
         """
+        canvas_xy = self.__event_to_canvas(event)
         operation = StateModel().get_operation()
+
         if operation == "Nodes":
             possible = self.__canvas.find_overlapping(
-                event.x - NODE_RADIUS,
-                event.y - NODE_RADIUS,
-                event.x + NODE_RADIUS,
-                event.y + NODE_RADIUS,
+                canvas_xy.x - NODE_RADIUS,
+                canvas_xy.y - NODE_RADIUS,
+                canvas_xy.x + NODE_RADIUS,
+                canvas_xy.y + NODE_RADIUS,
             )
 
             if len(possible) != 0:
@@ -301,13 +328,15 @@ class CanvasFrame(ttk.Frame):
 
         If deleting "Edges" then there should only be one id returned - just remove that one.
         """
+        canvas_xy = self.__event_to_canvas(event)
         operation = StateModel().get_operation()
+
         if operation == "Nodes":
             possible = self.__canvas.find_overlapping(
-                event.x - NODE_RADIUS,
-                event.y - NODE_RADIUS,
-                event.x + NODE_RADIUS,
-                event.y + NODE_RADIUS,
+                canvas_xy.x - NODE_RADIUS,
+                canvas_xy.y - NODE_RADIUS,
+                canvas_xy.x + NODE_RADIUS,
+                canvas_xy.y + NODE_RADIUS,
             )
 
             if len(possible) != 0:
@@ -321,7 +350,7 @@ class CanvasFrame(ttk.Frame):
                             if messagebox.askyesno(
                                 message=f"Are you sure you want to delete '{node}'"
                             ):
-                                self.__delete_element(node)
+                                StateModel().delete_node(node)
                                 for id in selected:
                                     self.__canvas.delete(id)
 
@@ -407,11 +436,17 @@ class CanvasFrame(ttk.Frame):
             points, width=2, fill="", outline="black", smooth=True, tags=tags
         )
 
-    ###
-    # Rotation script adapted from
-    # https://wiki.tcl-lang.org/page/Canvas+Rotation
-    #
     def __rotate_object(self, tagOrId, origin, angle):
+        """
+        Rotate object on the canvas (expected to be a loopback, at the minute). Script adapted from
+        https://wiki.tcl-lang.org/page/Canvas+Rotation
+
+        Args:
+            tagOrId (int or string): Object to be rotated, can be a single id or a composite given by a tag
+            origin (int pair): x, y for the point of rotation
+            angle (int): amount of turn, in degrees
+        """
+
         ox, oy = origin
         rangle = radians(angle)
 
@@ -428,3 +463,18 @@ class CanvasFrame(ttk.Frame):
                 new_coords += (rx, ry)
 
             self.__canvas.coords(id, new_coords)
+
+    def __event_to_canvas(self, event):
+        """
+        Given this is a scrollable Canvas, cope with converting the Event x/y into an actual Canvas x/y
+
+        Args:
+            event: for the given event, assume will contain x/y pair
+
+        Returns:
+            Canvas_XY: named tuple containing x/y values
+        """
+        return Canvas_XY(
+            event.x + self.__canvas.canvasx(0),
+            event.y + self.__canvas.canvasy(0),
+        )

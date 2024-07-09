@@ -69,6 +69,9 @@ class StateModel:
     def add_node(self, node_name):
         self.__graph.add_node(node_name)
 
+    def delete_node(self, node_name):
+        self.__graph.delete_node(node_name)
+
     def add_edge(self, from_node, to_node, undirected=False, weight=1):
         if isinstance(self.__graph, WeightedMatrixGraph):
             self.__graph.add_edge(from_node, to_node, weight, undirected)

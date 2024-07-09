@@ -1,7 +1,5 @@
 import tkinter as tk
 
-# from xcanvas import XCanvas
-
 from canvas_frame import CanvasFrame
 from tool_frame import ToolFrame
 
