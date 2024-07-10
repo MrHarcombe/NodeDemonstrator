@@ -1,5 +1,6 @@
-import tkinter as tk
+# import tkinter as tk
 from tkinter import messagebox
+import customtkinter as ctk
 
 from itertools import chain, product
 from string import ascii_uppercase
@@ -42,7 +43,7 @@ class StateModel:
             pass
 
         # ask if the graph is to be weighted
-        if messagebox.askyesno(message="Will the graph be weighted?") == tk.YES:
+        if messagebox.askyesno(message="Will the graph be weighted?") == ctk.YES:
             self.__graph = WeightedMatrixGraph()
         else:
             self.__graph = MatrixGraph()

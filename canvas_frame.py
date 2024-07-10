@@ -1,5 +1,6 @@
-import tkinter as tk
-from tkinter import ttk
+# import tkinter as tk
+# from tkinter import ttk
+import customtkinter as ctk
 from tkinter import messagebox
 from collections import namedtuple
 from math import radians, sin, cos
@@ -14,7 +15,7 @@ Canvas_XY = namedtuple("Canvas_XY", "x,y")
 NODE_RADIUS = 50
 
 
-class CanvasFrame(ttk.Frame):
+class CanvasFrame(ctk.CTkFrame):
     """
     Class to be in charge of interacting with the Canvas - handles clicks, drags, etc and translates those into actions
     depending on the current toggles as set by the user.
@@ -22,17 +23,17 @@ class CanvasFrame(ttk.Frame):
 
     def __init__(self, parent):
         super().__init__(parent)
-        self.__canvas = tk.Canvas(
+        self.__canvas = ctk.CTkCanvas(
             self, width=100, height=100, scrollregion=(0, 0, 10000, 10000)
         )
-        hs = tk.Scrollbar(self, orient=tk.HORIZONTAL)
-        hs.pack(side=tk.BOTTOM, fill=tk.X)
-        hs.config(command=self.__canvas.xview)
-        vs = tk.Scrollbar(self, orient=tk.VERTICAL)
-        vs.pack(side=tk.RIGHT, fill=tk.Y)
-        vs.config(command=self.__canvas.yview)
-        self.__canvas.config(xscrollcommand=hs.set, yscrollcommand=vs.set)
-        self.__canvas.pack(side=tk.LEFT, expand=True, fill=tk.BOTH)
+        hs = ctk.CTkScrollbar(self, orientation=ctk.HORIZONTAL)
+        hs.pack(side=ctk.BOTTOM, fill=ctk.X)
+        hs.configure(command=self.__canvas.xview)
+        vs = ctk.CTkScrollbar(self, orientation=ctk.VERTICAL)
+        vs.pack(side=ctk.RIGHT, fill=ctk.Y)
+        vs.configure(command=self.__canvas.yview)
+        self.__canvas.configure(xscrollcommand=hs.set, yscrollcommand=vs.set)
+        self.__canvas.pack(side=ctk.LEFT, expand=True, fill=ctk.BOTH)
 
         self.__canvas.bind("<Button-1>", self.__click)
         self.__canvas.bind("<ButtonRelease-1>", self.__release)
@@ -162,12 +163,14 @@ class CanvasFrame(ttk.Frame):
                         if tag.startswith("node_"):
                             from_id = id
                             from_node = tag[tag.index("_") + 1 :]
+                            print("from:", from_id, from_node)
 
                 for destination in self.__find_associated_ids(possible):
                     for tag in self.__canvas.gettags(destination):
                         if tag.startswith("node_"):
                             to_id = destination
                             to_node = tag[tag.index("_") + 1 :]
+                            print("to:", to_id, to_node)
 
                 StateModel().add_edge(from_node, to_node)
                 if from_node != to_node:
@@ -318,7 +321,7 @@ class CanvasFrame(ttk.Frame):
                             )
                             if new_name is not None:
                                 self.__canvas.dchars(id, 0, "end")
-                                self.__canvas.insert(id, tk.INSERT, new_name)
+                                self.__canvas.insert(id, ctk.INSERT, new_name)
 
     def __double_right_click(self, event):
         """

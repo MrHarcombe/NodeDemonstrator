@@ -1,4 +1,5 @@
-import tkinter as tk
+# import tkinter as tk
+import customtkinter as ctk
 
 from canvas_frame import CanvasFrame
 from tool_frame import ToolFrame
@@ -8,7 +9,7 @@ WIDTH = 1280
 HEIGHT = 720
 
 
-class NodeApplication(tk.Tk):
+class NodeApplication(ctk.CTk):
     """
     Specialisation of the standard Tk application to provide the
     NodeDemonstrator.
@@ -19,8 +20,8 @@ class NodeApplication(tk.Tk):
         self.title("Node Demonstrator")
         self.geometry(f"{WIDTH}x{HEIGHT}+10+10")
 
-        self.canvas = CanvasFrame(self).grid(column=0, row=0, sticky=tk.NSEW)
-        self.tools = ToolFrame(self).grid(column=1, row=0, sticky=tk.NSEW)
+        self.canvas = CanvasFrame(self).grid(column=0, row=0, sticky=ctk.NSEW)
+        self.tools = ToolFrame(self).grid(column=1, row=0, sticky=ctk.NSEW)
 
         self.columnconfigure(0, weight=85)
         self.columnconfigure(1, weight=15)
