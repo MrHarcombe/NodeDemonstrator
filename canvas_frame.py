@@ -38,7 +38,7 @@ class CanvasFrame(ttk.Frame):
         self.__canvas.bind("<ButtonRelease-1>", self.__release)
         self.__canvas.bind("<B1-Motion>", self.__drag)
         self.__canvas.bind("<Double-Button-1>", self.__double_click)
-        self.__canvas.bind("<Double-Button-3>", self.__right_double_click)
+        self.__canvas.bind("<Double-Button-3>", self.__double_right_click)
 
         ###
         # Mouse wheel scrolling taken from the answer at
@@ -188,6 +188,7 @@ class CanvasFrame(ttk.Frame):
                                 f"edge_{to_node}",
                                 f"edge_from_{from_node}",
                                 f"edge_to_{to_node}",
+                                f"edge_fromto_{from_node}_{to_node}",
                             ),
                         ),
                         "node",
@@ -319,7 +320,7 @@ class CanvasFrame(ttk.Frame):
                                 self.__canvas.dchars(id, 0, "end")
                                 self.__canvas.insert(id, tk.INSERT, new_name)
 
-    def __right_double_click(self, event):
+    def __double_right_click(self, event):
         """
         On a double (right) click event, the user is choosing to delete the current item - whatever that may be.
 
@@ -348,11 +349,42 @@ class CanvasFrame(ttk.Frame):
                         if tag.startswith("node_"):
                             node = tag[tag.index("_") + 1 :]
                             if messagebox.askyesno(
-                                message=f"Are you sure you want to delete '{node}'"
+                                message=f"Are you sure you want to delete '{node}'?"
                             ):
                                 StateModel().delete_node(node)
                                 for id in selected:
                                     self.__canvas.delete(id)
+
+        elif operation == "Edges":
+            possible = self.__canvas.find_overlapping(
+                canvas_xy.x - NODE_RADIUS,
+                canvas_xy.y - NODE_RADIUS,
+                canvas_xy.x + NODE_RADIUS,
+                canvas_xy.y + NODE_RADIUS,
+            )
+
+            if len(possible) != 0:
+                # selected = self.__find_associated_ids(possible)
+                for id in possible:
+                    for tag in self.__canvas.gettags(id):
+                        # there may be multiple hits, but the one we want to use has multiple tags, one is the generic
+                        # "edge", one of the others contains the text we need...
+                        if tag.startswith("edge_fromto_"):
+                            suffix = tag[12:]
+                            node_from, node_to = suffix.split("_")
+                            if messagebox.askyesno(
+                                message=f"Are you sure you want to delete the edge from '{node_from}' to '{node_to}'?"
+                            ):
+                                StateModel().delete_edge(node_from, node_to)
+                                self.__canvas.delete(id)
+
+                        elif tag.startswith("edge_loopback_"):
+                            node = tag[14:]
+                            if messagebox.askyesno(
+                                message=f"Are you sure you want to delete the loopback edge on '{node}'?"
+                            ):
+                                StateModel().delete_edge(node, node)
+                                self.__canvas.delete(id)
 
     def __find_associated_by_tag(self, possible, tag):
         for id in possible:
