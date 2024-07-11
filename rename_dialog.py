@@ -17,7 +17,7 @@ class RenameDialog(ctk.CTkToplevel):
         self.__response = False
         self.__var = ctk.StringVar(value=current_value)
 
-        ctk.CTkLabel(self, text=f"Enter the new value for '{self.__var.get()}'").grid(
+        ctk.CTkLabel(self, text=f"Enter the new value for '{self.__var.get()}': ").grid(
             row=0, column=0, columnspan=2, sticky=ctk.EW
         )
         entry = ctk.CTkEntry(self, textvariable=self.__var)
