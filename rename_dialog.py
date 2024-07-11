@@ -10,16 +10,17 @@ import customtkinter as ctk
 
 
 class RenameDialog(ctk.CTkToplevel):
-    def __init__(self, root, title, text_var):
+    def __init__(self, root, title, current_value):
         super().__init__(root)
         self.title(title)
         self.resizable(False, False)
         self.__response = False
+        self.__var = ctk.StringVar(value=current_value)
 
-        ctk.CTkLabel(self, text=f"Enter the new value for '{text_var.get()}'").grid(
+        ctk.CTkLabel(self, text=f"Enter the new value for '{self.__var.get()}'").grid(
             row=0, column=0, columnspan=2, sticky=ctk.EW
         )
-        entry = ctk.CTkEntry(self, textvariable=text_var)
+        entry = ctk.CTkEntry(self, textvariable=self.__var)
         entry.grid(row=1, column=0, columnspan=2, sticky=ctk.EW)
         entry.focus()
         entry.select_range(0, ctk.END)
@@ -36,6 +37,9 @@ class RenameDialog(ctk.CTkToplevel):
         self.bind("<Return>", self.okay)
         self.bind("<Escape>", self.cancel)
 
+    def get_value(self):
+        return self.__var.get()
+
     def okay(self, *args):
         self.__response = True
         self.destroy()
@@ -51,14 +55,12 @@ class RenameDialog(ctk.CTkToplevel):
 
 
 def rename_dialog(root, title, current_value):
-    text = ctk.StringVar(value=current_value)
-    dialog = RenameDialog(root, title, text)
-    # dialog.after("idle", dialog.lift)
+    dialog = RenameDialog(root, title, current_value)
     dialog.grab_set()
     response = dialog.show()
 
     if response:
-        return text.get()
+        return dialog.get_value()
 
 
 if __name__ == "__main__":
