@@ -6,6 +6,7 @@ from collections import namedtuple
 from math import radians, sin, cos
 
 from rename_dialog import rename_dialog
+from amend_dialog import amend_edge_dialog
 from state_model import StateModel
 
 # Standard conversion type
@@ -150,6 +151,8 @@ class CanvasFrame(ctk.CTkFrame):
 
         canvas_xy = self.__event_to_canvas(event)
         operation = StateModel().get_operation()
+        directed = StateModel().get_directed()
+        weight = StateModel().get_weight()
 
         if operation == "Edges":
             possible = self.__canvas.find_overlapping(
@@ -170,16 +173,16 @@ class CanvasFrame(ctk.CTkFrame):
                         if tag.startswith("node_"):
                             from_id = id
                             from_node = tag[tag.index("_") + 1 :]
-                            print("from:", from_id, from_node)
+                            # print("from:", from_id, from_node)
 
                 for destination in self.__find_associated_ids(possible):
                     for tag in self.__canvas.gettags(destination):
                         if tag.startswith("node_"):
                             to_id = destination
                             to_node = tag[tag.index("_") + 1 :]
-                            print("to:", to_id, to_node)
+                            # print("to:", to_id, to_node)
 
-                StateModel().add_edge(from_node, to_node)
+                StateModel().add_edge(from_node, to_node, not directed, weight)
                 if from_node != to_node:
                     fx1, fy1, fx2, fy2 = self.__canvas.bbox(from_id)
                     fcx, fcy = (fx1 + fx2) / 2, (fy1 + fy2) / 2
@@ -192,6 +195,7 @@ class CanvasFrame(ctk.CTkFrame):
                             tcx,
                             tcy,
                             width=2,
+                            arrow="last" if directed else None,
                             tags=(
                                 "edge",
                                 f"edge_{from_node}",
@@ -337,6 +341,63 @@ class CanvasFrame(ctk.CTkFrame):
                             self.__canvas.insert(id, ctk.INSERT, new_name)
                             self.__canvas.addtag_withtag(f"nodelabel_{new_name}", id)
 
+        elif operation == "Edges":
+            # editing the cost of travelling the path
+            if StateModel().is_weighted():
+                possible = self.__canvas.find_overlapping(
+                    canvas_xy.x - NODE_RADIUS,
+                    canvas_xy.y - NODE_RADIUS,
+                    canvas_xy.x + NODE_RADIUS,
+                    canvas_xy.y + NODE_RADIUS,
+                )
+
+                if len(possible) != 0:
+                    # print(id, self.__canvas.gettags(id))
+                    tags = self.__canvas.gettags(possible[0])
+                    from_node = None
+                    to_node = None
+                    for tag in tags:
+                        if tag.startswith("edge_from_"):
+                            from_node = tag[10:]
+                        if tag.startswith("edge_to_"):
+                            to_node = tag[8:]
+
+                    fromto = StateModel().get_edge(from_node, to_node)
+                    tofrom = StateModel().get_edge(to_node, from_node)
+
+                    if fromto == tofrom:
+                        values = amend_edge_dialog(
+                            self,
+                            "Amend edge weight",
+                            from_node,
+                            to_node,
+                            [fromto],
+                        )
+                        # print(values)
+                        if values:
+                            if values[0] != "None":
+                                StateModel().add_edge(
+                                    from_node, to_node, True, values[0]
+                                )
+                    else:
+                        values = amend_edge_dialog(
+                            self,
+                            "Amend edge weights",
+                            from_node,
+                            to_node,
+                            [fromto, tofrom],
+                        )
+                        # print(values)
+                        if values:
+                            if values[0] != "None":
+                                StateModel().add_edge(
+                                    from_node, to_node, False, values[0]
+                                )
+                            if values[1] != "None":
+                                StateModel().add_edge(
+                                    to_node, from_node, False, values[1]
+                                )
+
     def __double_right_click(self, event):
         """
         On a double (right) click event, the user is choosing to delete the current item - whatever that may be.
@@ -364,7 +425,6 @@ class CanvasFrame(ctk.CTkFrame):
 
                 for id in selected:
                     for tag in self.__canvas.gettags(id):
-                        print(tag)
                         # there may be multiple hits, but the one we want to use has multiple tags, one is the generic
                         # "node", the others contain the values we need...
                         if tag.startswith("node_"):

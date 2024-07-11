@@ -35,7 +35,7 @@ class StateModel:
         Based on an answer from one of the answers at
         https://stackoverflow.com/questions/42176498/repeating-letters-like-excel-columns
         generates the next node name in an Excel-like sequence of letters (up to a finite, if improbably large, limit
-        of 1000 uppercase characters).
+        of 1,000 uppercase characters).
         """
         yield from chain(*[product(ascii_uppercase, repeat=i) for i in range(1, 1_000)])
 
@@ -47,8 +47,10 @@ class StateModel:
         # ask if the graph is to be weighted
         if messagebox.askyesno(message="Will the graph be weighted?") == ctk.YES:
             self.__graph = WeightedMatrixGraph()
+            self.__weight = 1
         else:
             self.__graph = MatrixGraph()
+            self.__weight = None
 
         # restart the node name generator
         self.__generator = StateModel.__next_node_name_generator()
@@ -63,6 +65,9 @@ class StateModel:
     def save_current(self):
         pass
 
+    def is_weighted(self):
+        return isinstance(self.__graph, WeightedMatrixGraph)
+
     def set_operation_parameters(self, mode, directed, cost):
         self.__operation = mode
         self.__directed = directed
@@ -71,20 +76,33 @@ class StateModel:
     def get_operation(self):
         return self.__operation
 
+    def get_directed(self):
+        return self.__directed
+
+    def get_weight(self):
+        return self.__weight
+
     def get_next_node_name(self):
         return "".join(next(self.__generator))
 
     def add_node(self, node_name):
         self.__graph.add_node(node_name)
+        print(self.__graph.matrix)
 
     def delete_node(self, node_name):
         self.__graph.delete_node(node_name)
+        print(self.__graph.matrix)
 
-    def delete_edge(self, node_from, node_to):
-        self.__graph.delete_edge(node_from, node_to)
+    def get_edge(self, from_node, to_node):
+        return self.__graph.is_connected(from_node, to_node)
 
     def add_edge(self, from_node, to_node, undirected=False, weight=1):
         if isinstance(self.__graph, WeightedMatrixGraph):
             self.__graph.add_edge(from_node, to_node, weight, undirected)
         else:
             self.__graph.add_edge(from_node, to_node, undirected)
+        print(self.__graph.matrix)
+
+    def delete_edge(self, node_from, node_to):
+        self.__graph.delete_edge(node_from, node_to)
+        print(self.__graph.matrix)
