@@ -17,27 +17,31 @@ class TreeNode:
 
     def pre_traverse(self, op):
         op(self)
-        if self.left != None:
+        if self.left is not None:
             self.left.pre_traverse(op)
-        if self.right != None:
+        if self.right is not None:
             self.right.pre_traverse(op)
 
     def in_traverse(self, op):
-        if self.left != None:
+        if self.left is not None:
             self.left.in_traverse(op)
         op(self)
-        if self.right != None:
+        if self.right is not None:
             self.right.in_traverse(op)
 
     def post_traverse(self, op):
-        if self.left != None:
+        if self.left is not None:
             self.left.post_traverse(op)
-        if self.right != None:
+        if self.right is not None:
             self.right.post_traverse(op)
         op(self)
 
     def __str__(self):
-        return f"TreeNode({self.value}, {'Root' if self.parent == None else 'HasParent'}, {'NoLeft' if self.left == None else 'HasLeft'}, {'NoRight' if self.right == None else 'HasRight'})"
+        return
+        f"TreeNode({self.value}, "
+        f"{'Root' if self.parent is None else 'HasParent'}, "
+        f"{'NoLeft' if self.left is None else 'HasLeft'}, "
+        f"{'NoRight' if self.right is None else 'HasRight'})"
 
 
 class RedBlackNode(TreeNode):
@@ -50,12 +54,17 @@ class RedBlackNode(TreeNode):
         self.is_black = False
 
     def __str__(self):
-        return f"RedBlackNode({self.value}, {'Black' if self.is_black else 'Red'}, {'Root' if self.parent == None else 'HasParent'}, {'NoLeft' if self.left == None else 'HasLeft'}, {'NoRight' if self.right == None else 'HasRight'})"
+        return
+        f"RedBlackNode({self.value}, "
+        f"{'Black' if self.is_black else 'Red'}, "
+        f"{'Root' if self.parent is None else 'HasParent'}, "
+        f"{'NoLeft' if self.left is None else 'HasLeft'}, "
+        f"{'NoRight' if self.right is None else 'HasRight'})"
 
     @staticmethod
     def is_right_child(node):
         """Returns True if the node is a right child of its parent, False otherwise."""
-        return node.parent != None and node == node.parent.right
+        return node.parent is not None and node == node.parent.right
 
 
 class Tree:
@@ -66,12 +75,12 @@ class Tree:
         self.root = None
 
     def is_empty(self):
-        return self.root == None
+        return self.root is None
 
     def _insert(self, value: object, parent: TreeNode, on_right: bool):
         new_node = TreeNode(value)
 
-        if parent == None:
+        if parent is None:
             self.root = new_node
 
         elif on_right:
@@ -91,14 +100,14 @@ class Tree:
             looking = True
             while looking:
                 if value < current.value:
-                    if current.left == None:
+                    if current.left is None:
                         self._insert(value, current, False)
                         looking = False
                     else:
                         current = current.left
 
                 else:
-                    if current.right == None:
+                    if current.right is None:
                         self._insert(value, current, True)
                         looking = False
                     else:
@@ -120,13 +129,13 @@ class Tree:
                     self._delete(current)
 
                 elif value < current.value:
-                    if current.left == None:
+                    if current.left is None:
                         return
                     else:
                         current = current.left
 
                 elif value > current.value:
-                    if current.right == None:
+                    if current.right is None:
                         return
                     else:
                         current = current.right
@@ -146,13 +155,13 @@ class Tree:
                     looking = False
 
                 elif value < current.value:
-                    if current.left == None:
+                    if current.left is None:
                         looking = False
                     else:
                         current = current.left
 
                 else:
-                    if current.right == None:
+                    if current.right is None:
                         looking = False
                     else:
                         current = current.right
@@ -185,7 +194,7 @@ class RedBlackTree(Tree):
         (True -> right, False -> left)."""
         grandparent = parent.parent
         sibling = parent.left if direction else parent.right
-        assert sibling != None
+        assert sibling is not None
         child = sibling.right if direction else sibling.left
 
         if direction:
@@ -195,13 +204,13 @@ class RedBlackTree(Tree):
             parent.right = child
             sibling.left = parent
 
-        if child != None:
+        if child is not None:
             child.parent = parent
 
         parent.parent = sibling
         sibling.parent = grandparent
 
-        if grandparent != None:
+        if grandparent is not None:
             if parent == grandparent.right:
                 grandparent.right = sibling
             else:
@@ -214,7 +223,7 @@ class RedBlackTree(Tree):
     def _insert(self, value, parent, on_right):
         node = RedBlackNode(value, parent)
 
-        if parent == None:
+        if parent is None:
             self.root = node
             return
 
@@ -231,7 +240,7 @@ class RedBlackTree(Tree):
 
             # From now on P is red.
             grandparent = parent.parent
-            if grandparent == None:
+            if grandparent is None:
                 # P is red and root
                 # goto Case_I4
                 parent.is_black = True
@@ -242,7 +251,7 @@ class RedBlackTree(Tree):
                 parent
             )  # the side of parent G on which node P is located
             uncle = grandparent.left if on_right else grandparent.right
-            if uncle == None or uncle.is_black:  # considered black
+            if uncle is None or uncle.is_black:  # considered black
                 # P is red && U is black
                 # goto Case_I56
                 if node == (parent.left if on_right else parent.right):
@@ -269,7 +278,7 @@ class RedBlackTree(Tree):
             #     (= 2 tree levels)
 
             parent = node.parent
-            if parent == None:
+            if parent is None:
                 break
         # end of the (do while)-loop
 
@@ -315,9 +324,9 @@ class RedBlackTree(Tree):
                         N = P; // new current node (maybe the root)
                         // iterate 1 black level
                         //     (= 1 tree level) higher
-                
+
                         parent = candidate.parent
-                        if parent == None:
+                        if parent is None:
                                 break
                 # end of the (do while)-loop
 """
@@ -354,7 +363,7 @@ class ListGraph:
         return False
 
     def add_node(self, node):
-        if not node in self:
+        if node not in self:
             self.nodes.append(ListGraph.ListGraphNode(node))
 
     def delete_node(self, node):
@@ -405,7 +414,7 @@ class MatrixGraph:
         return self.contains(node)
 
     def add_node(self, node):
-        if not node in self.matrix[0]:
+        if node not in self.matrix[0]:
             self.matrix[0].append(node)
             for n in range(1, len(self.matrix)):
                 self.matrix[n].append(False)
@@ -444,7 +453,7 @@ class MatrixGraph:
         if from_node in self.matrix[0] and to_node in self.matrix[0]:
             from_index = self.matrix[0].index(from_node)
             to_index = self.matrix[0].index(to_node)
-            return self.matrix[to_index + 1][from_index]
+            return self.matrix[from_index + 1][to_index]
         return False
 
     def get_connections(self, node):
@@ -471,7 +480,7 @@ class MatrixGraph:
                 visited.append(current)
 
                 for node, weight in self.get_connections(current):
-                    if not node in discovered:
+                    if node not in discovered:
                         discovered.add(node)
                         stack.append(node)
             return visited
@@ -488,7 +497,7 @@ class MatrixGraph:
                 visited.append(current)
 
                 for node, weight in self.get_connections(current):
-                    if not node in discovered:
+                    if node not in discovered:
                         discovered.add(node)
                         queue.append(node)
             return visited
@@ -502,6 +511,15 @@ class WeightedMatrixGraph(MatrixGraph):
         super().__init__(undirected)
 
     def add_edge(self, from_node, to_node, weight=1, undirected=False):
+        """
+        Adds an edge from one node to another; re-add to update the edge
+
+        Args:
+            from_node (string): Name of the node at one end of the edge
+            to_node (string): Name of the node at the other end of the edge
+            weight (int, optional): Cost of travelling the edge. Defaults to 1.
+            undirected (bool, optional): If True, will create the matching edge in reverse. Defaults to False.
+        """
         if from_node in self.matrix[0] and to_node in self.matrix[0]:
             from_index = self.matrix[0].index(from_node)
             to_index = self.matrix[0].index(to_node)
@@ -529,7 +547,7 @@ class WeightedMatrixGraph(MatrixGraph):
                     data[neighbour][1] = current_node
                     heappush(queue, (data[neighbour][0], neighbour))
 
-        if end_node == None:
+        if end_node is None:
             return data.items()
 
         path = []
@@ -706,7 +724,7 @@ if __name__ == "__main__":
         g.add_edge("F", "H", 6)
         g.add_edge("G", "H", 1)
         print("D" in g)
-        print(g.is_connected("D", "F"))
+        print(g.is_connected("F", "D"))
 
         print("IsEmpty:", g.is_empty())
         print("Len:", len(g))
@@ -717,7 +735,7 @@ if __name__ == "__main__":
         visited = g.breadth_first("A")
         print("breadth first from A: ", ",".join(visited))
 
-        print("shortest path from A:", g.dijkstra("A"))
+        print("shortest path info from A:", g.dijkstra("A"))
 
         start = time()
         print("shortest path from A to H:", ",".join(g.dijkstra("A", "H")))
