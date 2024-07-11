@@ -11,9 +11,15 @@ class ToolFrame(ctk.CTkTabview):
     Class to handle setting up the Notebook which holds all the control frames apart from the actual Canvas.
     """
 
-    def __init__(self, parent):
+    def __init__(self, parent, canvas_frame):
         super().__init__(parent)
         self.__tabs = [
-            DrawControlsFrame(self.add("Draw")).pack(expand=True, fill=ctk.BOTH),
-            UsageControlsFrame(self.add("Algorithms")).pack(expand=True, fill=ctk.BOTH),
+            DrawControlsFrame(
+                self.add("Draw"),
+                canvas_frame,
+            ).pack(expand=True, fill=ctk.BOTH),
+            UsageControlsFrame(
+                self.add("Algorithms"),
+                canvas_frame,
+            ).pack(expand=True, fill=ctk.BOTH),
         ]

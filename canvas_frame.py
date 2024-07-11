@@ -57,6 +57,13 @@ class CanvasFrame(ctk.CTkFrame):
         self.__selected = None
         self.__current = None
 
+    def empty(self):
+        """
+        Called from outside, to clear down the Canvas
+        """
+        for id in self.__canvas.find_all():
+            self.__canvas.delete(id)
+
     def __click(self, event):
         """
         On a mouse down event, if the user is currently operating on "Nodes" then this will either be the start of a
@@ -99,7 +106,7 @@ class CanvasFrame(ctk.CTkFrame):
                     canvas_xy.y,
                     fill="white",
                     text=node_name,
-                    tags=("node", f"nodetext_{node_name}"),
+                    tags=("node", f"nodename_{node_name}"),
                 )
 
         elif operation == "Edges":
@@ -174,9 +181,9 @@ class CanvasFrame(ctk.CTkFrame):
 
                 StateModel().add_edge(from_node, to_node)
                 if from_node != to_node:
-                    fx1, fy1, fx2, fy2 = self.__canvas.coords(from_id)
+                    fx1, fy1, fx2, fy2 = self.__canvas.bbox(from_id)
                     fcx, fcy = (fx1 + fx2) / 2, (fy1 + fy2) / 2
-                    tx1, ty1, tx2, ty2 = self.__canvas.coords(to_id)
+                    tx1, ty1, tx2, ty2 = self.__canvas.bbox(to_id)
                     tcx, tcy = (tx1 + tx2) / 2, (ty1 + ty2) / 2
                     self.__canvas.tag_lower(
                         self.__canvas.create_line(
@@ -201,7 +208,7 @@ class CanvasFrame(ctk.CTkFrame):
                     existing = self.__canvas.find_withtag(f"edge_loopback_{from_node}")
                     if existing is None or len(existing) == 0:
                         # loopback time
-                        lx1, ly1, lx2, ly2 = self.__canvas.coords(from_id)
+                        lx1, ly1, lx2, ly2 = self.__canvas.bbox(from_id)
                         lcx, lcy = (lx1 + lx2) / 2, (ly1 + ly2) / 2
                         self.__canvas.tag_lower(
                             self.__create_loopback_as_polygon(
@@ -252,9 +259,9 @@ class CanvasFrame(ctk.CTkFrame):
                             if tag.startswith("edge_to_"):
                                 to_node = tag[8:]
 
-                        fx1, fy1, fx2, fy2 = self.__canvas.coords(f"node_{from_node}")
+                        fx1, fy1, fx2, fy2 = self.__canvas.bbox(f"node_{from_node}")
                         fcx, fcy = (fx1 + fx2) / 2, (fy1 + fy2) / 2
-                        tx1, ty1, tx2, ty2 = self.__canvas.coords(f"node_{to_node}")
+                        tx1, ty1, tx2, ty2 = self.__canvas.bbox(f"node_{to_node}")
                         tcx, tcy = (tx1 + tx2) / 2, (ty1 + ty2) / 2
                         self.__canvas.coords(id, fcx, fcy, tcx, tcy)
                         self.__canvas.tag_lower(id, "node")
@@ -277,7 +284,7 @@ class CanvasFrame(ctk.CTkFrame):
                         if tag == "node"
                     )
 
-                    nx1, ny1, nx2, ny2 = self.__canvas.coords(node)
+                    nx1, ny1, nx2, ny2 = self.__canvas.bbox(node)
                     ncx, ncy = (nx1 + nx2) / 2, (ny1 + ny2) / 2
 
                     rotation = canvas_xy.x - self.__current[0]
@@ -312,16 +319,23 @@ class CanvasFrame(ctk.CTkFrame):
                 selected = self.__find_associated_ids(possible)
 
                 for id in selected:
+                    nodelabel = None
                     for tag in self.__canvas.gettags(id):
                         # there may be multiple hits, but the one we want to use has two tags, one is the generic
                         # "node", the other contains the text we need...
-                        if tag.startswith("nodetext_"):
-                            new_name = rename_dialog(
-                                self, "Rename Node", tag[tag.index("_") + 1 :]
-                            )
-                            if new_name is not None:
-                                self.__canvas.dchars(id, 0, "end")
-                                self.__canvas.insert(id, ctk.INSERT, new_name)
+                        if tag.startswith("nodename_"):
+                            if nodelabel is None:
+                                nodelabel = tag[9:]
+
+                        if tag.startswith("nodelabel_"):
+                            nodelabel = tag[10:]
+
+                    if nodelabel is not None:
+                        new_name = rename_dialog(self, "Rename Node", nodelabel)
+                        if new_name is not None:
+                            self.__canvas.dchars(id, 0, "end")
+                            self.__canvas.insert(id, ctk.INSERT, new_name)
+                            self.__canvas.addtag_withtag(f"nodelabel_{new_name}", id)
 
     def __double_right_click(self, event):
         """
@@ -345,18 +359,29 @@ class CanvasFrame(ctk.CTkFrame):
 
             if len(possible) != 0:
                 selected = self.__find_associated_ids(possible)
+                node = None
+                node_label = None
+
                 for id in selected:
                     for tag in self.__canvas.gettags(id):
-                        # there may be multiple hits, but the one we want to use has two tags, one is the generic
-                        # "node", the other contains the text we need...
+                        print(tag)
+                        # there may be multiple hits, but the one we want to use has multiple tags, one is the generic
+                        # "node", the others contain the values we need...
                         if tag.startswith("node_"):
-                            node = tag[tag.index("_") + 1 :]
-                            if messagebox.askyesno(
-                                message=f"Are you sure you want to delete '{node}'?"
-                            ):
-                                StateModel().delete_node(node)
-                                for id in selected:
-                                    self.__canvas.delete(id)
+                            node = tag[5:]
+
+                        if tag.startswith("nodelabel_"):
+                            node_label = tag[10:]
+
+                if node_label is None:
+                    node_label = node
+
+                if messagebox.askyesno(
+                    message=f"Are you sure you want to delete '{node_label}'?"
+                ):
+                    StateModel().delete_node(node)
+                    for id in selected:
+                        self.__canvas.delete(id)
 
         elif operation == "Edges":
             possible = self.__canvas.find_overlapping(
@@ -420,10 +445,10 @@ class CanvasFrame(ctk.CTkFrame):
                     if tag.startswith("node_"):
                         node = tag[5:]
                         associated = associated.union(
-                            self.__canvas.find_withtag(f"nodetext_{node}")
+                            self.__canvas.find_withtag(f"nodename_{node}")
                         )
 
-                    elif tag.startswith("nodetext_"):
+                    elif tag.startswith("nodename_"):
                         node = tag[8:]
                         associated = associated.union(
                             self.__canvas.find_withtag(f"node_{node}")
@@ -443,7 +468,7 @@ class CanvasFrame(ctk.CTkFrame):
                             self.__canvas.find_withtag(f"node_{node}")
                         )
                         associated = associated.union(
-                            self.__canvas.find_withtag(f"nodetext_{node}")
+                            self.__canvas.find_withtag(f"nodename_{node}")
                         )
 
             elif "edge" in tags:

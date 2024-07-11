@@ -9,6 +9,8 @@ class UsageControlsFrame(ctk.CTkFrame):
     path-finding using Dijkstra or A*, and other algorithms will be triggered (and the results displayed) here.
     """
 
-    def __init__(self, parent):
+    def __init__(self, parent, canvas_frame):
         super().__init__(parent)
         ctk.CTkLabel(self, text="This will be the graph usage frame").grid()
+        self.rowconfigure(0, weight=1)
+        self.columnconfigure(0, weight=1)

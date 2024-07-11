@@ -23,6 +23,8 @@ class StateModel:
             cls.__instance.__graph = WeightedMatrixGraph()
             cls.__instance.__filename = None
             cls.__instance.__operation = "Nodes"
+            cls.__instance.__directed = False
+            cls.__instance.__weight = 1
             cls.__instance.__changed = True
             cls.__instance.__generator = StateModel.__next_node_name_generator()
 
@@ -48,6 +50,9 @@ class StateModel:
         else:
             self.__graph = MatrixGraph()
 
+        # restart the node name generator
+        self.__generator = StateModel.__next_node_name_generator()
+
         # whatever was created, has now been changed (so need this to think
         # about saving later)
         self.__changed = True
@@ -58,8 +63,10 @@ class StateModel:
     def save_current(self):
         pass
 
-    def set_operation(self, operation):
-        self.__operation = operation
+    def set_operation_parameters(self, mode, directed, cost):
+        self.__operation = mode
+        self.__directed = directed
+        self.__weight = cost
 
     def get_operation(self):
         return self.__operation

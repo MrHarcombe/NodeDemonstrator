@@ -20,11 +20,14 @@ class NodeApplication(ctk.CTk):
         self.title("Node Demonstrator")
         self.geometry(f"{WIDTH}x{HEIGHT}+10+10")
 
-        self.canvas = CanvasFrame(self).grid(column=0, row=0, sticky=ctk.NSEW)
-        self.tools = ToolFrame(self).grid(column=1, row=0, sticky=ctk.NSEW)
+        self.canvas = CanvasFrame(self)
+        self.canvas.grid(column=0, row=0, sticky=ctk.NSEW)
 
-        self.columnconfigure(0, weight=85)
-        self.columnconfigure(1, weight=15)
+        self.tools = ToolFrame(self, self.canvas)
+        self.tools.grid(column=1, row=0, sticky=ctk.NSEW)
+
+        self.columnconfigure(0, weight=95)
+        self.columnconfigure(1, weight=5)
         self.rowconfigure(0, weight=1)
 
 
