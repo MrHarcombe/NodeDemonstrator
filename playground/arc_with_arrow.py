@@ -50,7 +50,7 @@ coords = []
 #     )
 #     coords += next_xy
 
-for t in range(100, 200, 4):
+for t in range(270, 360, 4):
     x = radius * cos(radians(t))
     y = radius * sin(radians(t))
     coords += (x, y)
