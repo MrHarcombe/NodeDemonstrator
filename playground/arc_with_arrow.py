@@ -6,7 +6,7 @@
 # use Tk;
 
 import tkinter as tk
-from math import pi, sin, cos, radians
+from math import pi, sin, cos
 
 # my $top = MainWindow->new;
 # my $can = $top->Canvas()->pack();
@@ -14,7 +14,7 @@ from math import pi, sin, cos, radians
 root = tk.Tk()
 root.geometry("1280x720")
 canvas = tk.Canvas(root)
-canvas.pack()
+canvas.pack(expand=True, fill=tk.BOTH)
 
 # my @offset = (100, 100);
 
@@ -25,7 +25,7 @@ canvas.pack()
 # my $end=$max-22;
 
 max = 10
-radius = 250
+radius = 100
 start = 1
 end = max
 
@@ -42,18 +42,13 @@ coords = []
 #     push(@coords, @nextXY);
 # }
 
-# for i in range(1, end + 1, 2):
-#     radians = (i + start) * 2 * pi / max
-#     next_xy = (
-#         radius * sin(radians),
-#         radius * cos(radians),
-#     )
-#     coords += next_xy
-
-for t in range(270, 360, 4):
-    x = radius * cos(radians(t))
-    y = radius * sin(radians(t))
-    coords += (x, y)
+for i in range(1, end + 1):
+    radians = (i + start) * 2 * pi / max
+    next_xy = (
+        radius * sin(radians),
+        radius * cos(radians),
+    )
+    coords += next_xy
 
 # Fix things for the arrowhead...
 # $coords[-1] -= 2; # y

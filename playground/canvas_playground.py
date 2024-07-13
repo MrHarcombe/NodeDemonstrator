@@ -1,5 +1,6 @@
 import tkinter as tk
 from math import radians, cos, sin
+from pickle import dump, HIGHEST_PROTOCOL
 
 current_x = None
 
@@ -38,6 +39,20 @@ def drag(event):
     current_x = event.x
 
 
+def save_canvas():
+    canvas_dict = {
+        id: (
+            canvas.type(id),
+            canvas.coords(id),
+            canvas.gettags(id),
+        )
+        for id in canvas.find_all()
+    }
+
+    with open("canvas.pickle", "wb") as file:
+        dump(canvas_dict, file, protocol=HIGHEST_PROTOCOL)
+
+
 root = tk.Tk()
 root.title("Canvas Playground")
 root.geometry("1000x720")
@@ -47,6 +62,9 @@ canvas.pack(side=tk.LEFT, expand=True, fill=tk.BOTH)
 
 canvas.bind("<Button-1>", click)
 canvas.bind("<B1-Motion>", drag)
+
+button = tk.Button(root, text="Save", command=save_canvas)
+canvas.create_window(10, 10, anchor=tk.NW, window=button)
 
 canvas.create_arc(100, 100, 200, 200, style=tk.ARC, start=170, extent=300, width=2)
 canvas.create_text(150, 150, text="Drawn as an arc")
