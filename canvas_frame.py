@@ -77,7 +77,63 @@ class CanvasFrame(ctk.CTkFrame):
 
     def set_canvas_from_dict(self, saved_canvas):
         self.empty()
-        pass
+        for id in sorted(saved_canvas.keys()):
+            type, coords, tags = saved_canvas[id]
+            print(type, tags)
+
+            if type == "oval":
+                x1, y1, x2, y2 = coords
+                cx = (x1 + x2) / 2
+                cy = (y1 + y2) / 2
+                self.__canvas.create_oval(
+                    cx - NODE_RADIUS,
+                    cy - NODE_RADIUS,
+                    cx + NODE_RADIUS,
+                    cy + NODE_RADIUS,
+                    fill="black",
+                    width=0,
+                    tags=tags,
+                )
+
+            elif type == "text":
+                node_name = None
+                node_label = None
+                for tag in tags:
+                    if tag.startswith("nodename_"):
+                        node_name = tag[9:]
+
+                    if tag.startswith("nodelabel_"):
+                        node_label = tag[10:]
+
+                self.__canvas.tag_raise(
+                    self.__canvas.create_text(
+                        *coords,
+                        fill="white",
+                        text=node_name if node_label is None else node_label,
+                        tags=tags,
+                    ),
+                    "node",
+                )
+
+            elif type == "line":
+                self.__canvas.tag_lower(
+                    self.__canvas.create_line(
+                        *coords,
+                        width=2,
+                        tags=tags,
+                    ),
+                    "node",
+                )
+
+            elif type == "polygon":
+                self.__canvas.create_polygon(
+                    coords,
+                    width=2,
+                    fill="",
+                    outline="black",
+                    smooth=True,
+                    tags=tags,
+                )
 
     def __click(self, event):
         """
@@ -275,11 +331,13 @@ class CanvasFrame(ctk.CTkFrame):
 
                     if directed:
                         self.__canvas.tag_lower(
-                            self.__create_arc_with_arrow(
+                            self.__canvas.create_line(
                                 fcx,
                                 fcy,
                                 tcx,
                                 tcy,
+                                arrow=ctk.LAST,
+                                width=2,
                                 tags=(
                                     "edge",
                                     f"edge_{from_node}",
@@ -507,25 +565,6 @@ class CanvasFrame(ctk.CTkFrame):
                             ):
                                 StateModel().delete_edge(node, node)
                                 self.__canvas.delete(id)
-
-    def __find_associated_by_tag(self, possible, tag):
-        for id in possible:
-            tags = self.__canvas.gettags(id)
-            if "node" in tags:
-                node_name = next()
-                looking_for = f"{tag}_{node_name}"
-
-            elif "edge" in tags:
-                edge_name = next()
-                looking_for = f"{tag}_{edge_name}"
-
-            else:
-                raise ValueError(f"Unknown object on canvas with tags {tags}")
-
-            if tag in tags:
-                return [possible] + filter(
-                    lambda id: id != possible, self.__find_associated(looking_for)
-                )
 
     def __find_associated_ids(self, possible):
         associated = set()

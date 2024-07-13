@@ -26,9 +26,9 @@ class DrawControlsFrame(ctk.CTkFrame):
         ctk.CTkButton(upper, text="New", command=self.__create_new).grid(
             sticky=ctk.NSEW
         )
-        ctk.CTkButton(
-            upper, text="Load", command=lambda: StateModel().load_existing()
-        ).grid(sticky=ctk.NSEW)
+        ctk.CTkButton(upper, text="Load", command=self.__load_file).grid(
+            sticky=ctk.NSEW
+        )
         ctk.CTkButton(upper, text="Save", command=self.__save_file).grid(
             sticky=ctk.NSEW
         )
@@ -139,7 +139,7 @@ class DrawControlsFrame(ctk.CTkFrame):
                 dump(file_contents, file)  # , protocol=HIGHEST_PROTOCOL)
 
     def __load_file(self):
-        filename = ctk.filedialog.askopenfile(
+        filename = ctk.filedialog.askopenfilename(
             parent=self,
             title="Load Graph",
             defaultextension=".nd",
