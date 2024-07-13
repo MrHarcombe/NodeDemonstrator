@@ -2,6 +2,8 @@
 # from tkinter import ttk
 import customtkinter as ctk
 
+# from pickle import dump, load, HIGHEST_PROTOCOL
+from json import dump, load
 from state_model import StateModel
 
 
@@ -27,9 +29,9 @@ class DrawControlsFrame(ctk.CTkFrame):
         ctk.CTkButton(
             upper, text="Load", command=lambda: StateModel().load_existing()
         ).grid(sticky=ctk.NSEW)
-        ctk.CTkButton(
-            upper, text="Save", command=lambda: StateModel().save_current()
-        ).grid(sticky=ctk.NSEW)
+        ctk.CTkButton(upper, text="Save", command=self.__save_file).grid(
+            sticky=ctk.NSEW
+        )
         upper.grid(sticky=ctk.NSEW)
         upper.columnconfigure(0, weight=1)
         upper.rowconfigure((0, 1, 2), weight=1)
@@ -118,3 +120,33 @@ class DrawControlsFrame(ctk.CTkFrame):
         self.__operation.set("Nodes")
         self.__directed.set(False)
         self.__weight.set("1" if StateModel().is_weighted() else "None")
+
+    def __save_file(self):
+        file_contents = {
+            "canvas": self.__canvas_frame.get_canvas_as_dict(),
+            "graph": StateModel().get_graph_matrix(),
+        }
+
+        filename = ctk.filedialog.asksaveasfilename(
+            parent=self,
+            title="Save Graph",
+            defaultextension=".nd",
+            filetypes=[("Node Demonstrator", ".nd")],
+            confirmoverwrite=True,
+        )
+        if filename is not None:
+            with open(filename, "w") as file:
+                dump(file_contents, file)  # , protocol=HIGHEST_PROTOCOL)
+
+    def __load_file(self):
+        filename = ctk.filedialog.askopenfile(
+            parent=self,
+            title="Load Graph",
+            defaultextension=".nd",
+            filetypes=[("Node Demonstrator", ".nd")],
+        )
+        if filename is not None:
+            with open(filename, "r") as file:
+                file_contents = load(file)
+                self.__canvas_frame.set_canvas_from_dict(file_contents["canvas"])
+                StateModel().set_graph_matrix(file_contents["graph"])

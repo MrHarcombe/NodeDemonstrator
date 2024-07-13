@@ -65,6 +65,20 @@ class CanvasFrame(ctk.CTkFrame):
         for id in self.__canvas.find_all():
             self.__canvas.delete(id)
 
+    def get_canvas_as_dict(self):
+        return {
+            id: (
+                self.__canvas.type(id),
+                self.__canvas.coords(id),
+                self.__canvas.gettags(id),
+            )
+            for id in self.__canvas.find_all()
+        }
+
+    def set_canvas_from_dict(self, saved_canvas):
+        self.empty()
+        pass
+
     def __click(self, event):
         """
         On a mouse down event, if the user is currently operating on "Nodes" then this will either be the start of a
@@ -138,97 +152,6 @@ class CanvasFrame(ctk.CTkFrame):
                     self.__selected = None
                     self.__current = None
 
-    def __release(self, event):
-        """
-        When the mouse is released, assuming the user is trying to create a new edge; the program will need to
-        determine which is the destination node and then create an edge from the starting node to this destination
-        (note: loopbacks are allowed).
-        """
-
-        # don't try and do anything if there's nothing selected
-        if self.__selected is None:
-            return
-
-        canvas_xy = self.__event_to_canvas(event)
-        operation = StateModel().get_operation()
-        directed = StateModel().get_directed()
-        weight = StateModel().get_weight()
-
-        if operation == "Edges":
-            possible = self.__canvas.find_overlapping(
-                canvas_xy.x - NODE_RADIUS,
-                canvas_xy.y - NODE_RADIUS,
-                canvas_xy.x + NODE_RADIUS,
-                canvas_xy.y + NODE_RADIUS,
-            )
-
-            if len(possible) != 0:
-                from_id = None
-                from_node = None
-                to_id = None
-                to_node = None
-
-                for id in self.__selected:
-                    for tag in self.__canvas.gettags(id):
-                        if tag.startswith("node_"):
-                            from_id = id
-                            from_node = tag[tag.index("_") + 1 :]
-                            # print("from:", from_id, from_node)
-
-                for destination in self.__find_associated_ids(possible):
-                    for tag in self.__canvas.gettags(destination):
-                        if tag.startswith("node_"):
-                            to_id = destination
-                            to_node = tag[tag.index("_") + 1 :]
-                            # print("to:", to_id, to_node)
-
-                StateModel().add_edge(from_node, to_node, not directed, weight)
-                if from_node != to_node:
-                    fx1, fy1, fx2, fy2 = self.__canvas.bbox(from_id)
-                    fcx, fcy = (fx1 + fx2) / 2, (fy1 + fy2) / 2
-                    tx1, ty1, tx2, ty2 = self.__canvas.bbox(to_id)
-                    tcx, tcy = (tx1 + tx2) / 2, (ty1 + ty2) / 2
-                    self.__canvas.tag_lower(
-                        self.__canvas.create_line(
-                            fcx,
-                            fcy,
-                            tcx,
-                            tcy,
-                            width=2,
-                            arrow="last" if directed else None,
-                            tags=(
-                                "edge",
-                                f"edge_{from_node}",
-                                f"edge_{to_node}",
-                                f"edge_from_{from_node}",
-                                f"edge_to_{to_node}",
-                                f"edge_fromto_{from_node}_{to_node}",
-                            ),
-                        ),
-                        "node",
-                    )
-
-                else:
-                    existing = self.__canvas.find_withtag(f"edge_loopback_{from_node}")
-                    if existing is None or len(existing) == 0:
-                        # loopback time
-                        lx1, ly1, lx2, ly2 = self.__canvas.bbox(from_id)
-                        lcx, lcy = (lx1 + lx2) / 2, (ly1 + ly2) / 2
-                        self.__canvas.tag_lower(
-                            self.__create_loopback_as_polygon(
-                                (lcx + NODE_RADIUS, lcy + NODE_RADIUS),
-                                NODE_RADIUS,
-                                (
-                                    "edge",
-                                    "edge_loopback",
-                                    f"edge_loopback_{from_node}",
-                                    f"edge_{from_node}",
-                                    f"edge_{from_node}_{to_node}",
-                                ),
-                            ),
-                            "node",
-                        )
-
     def __drag(self, event):
         """
         This method is just a staging point for when the user is dragging something around, which is mostly only
@@ -298,6 +221,117 @@ class CanvasFrame(ctk.CTkFrame):
                 except StopIteration:
                     # almost certainly means user is not dragging a loopback
                     pass
+
+    def __release(self, event):
+        """
+        When the mouse is released, assuming the user is trying to create a new edge; the program will need to
+        determine which is the destination node and then create an edge from the starting node to this destination
+        (note: loopbacks are allowed).
+        """
+
+        # don't try and do anything if there's nothing selected
+        if self.__selected is None:
+            return
+
+        canvas_xy = self.__event_to_canvas(event)
+        operation = StateModel().get_operation()
+        directed = StateModel().get_directed()
+        weight = StateModel().get_weight()
+
+        if operation == "Edges":
+            possible = self.__canvas.find_overlapping(
+                canvas_xy.x - NODE_RADIUS,
+                canvas_xy.y - NODE_RADIUS,
+                canvas_xy.x + NODE_RADIUS,
+                canvas_xy.y + NODE_RADIUS,
+            )
+
+            if len(possible) != 0:
+                from_id = None
+                from_node = None
+                to_id = None
+                to_node = None
+
+                for id in self.__selected:
+                    for tag in self.__canvas.gettags(id):
+                        if tag.startswith("node_"):
+                            from_id = id
+                            from_node = tag[5:]
+                            # print("from:", from_id, from_node)
+
+                for destination in self.__find_associated_ids(possible):
+                    for tag in self.__canvas.gettags(destination):
+                        if tag.startswith("node_"):
+                            to_id = destination
+                            to_node = tag[5:]
+                            # print("to:", to_id, to_node)
+
+                StateModel().add_edge(from_node, to_node, not directed, weight)
+                if from_node != to_node:
+                    fx1, fy1, fx2, fy2 = self.__canvas.bbox(from_id)
+                    fcx, fcy = (fx1 + fx2) / 2, (fy1 + fy2) / 2
+                    tx1, ty1, tx2, ty2 = self.__canvas.bbox(to_id)
+                    tcx, tcy = (tx1 + tx2) / 2, (ty1 + ty2) / 2
+
+                    if directed:
+                        self.__canvas.tag_lower(
+                            self.__create_arc_with_arrow(
+                                fcx,
+                                fcy,
+                                tcx,
+                                tcy,
+                                tags=(
+                                    "edge",
+                                    f"edge_{from_node}",
+                                    f"edge_{to_node}",
+                                    f"edge_from_{from_node}",
+                                    f"edge_to_{to_node}",
+                                    f"edge_fromto_{from_node}_{to_node}",
+                                ),
+                            ),
+                            "node",
+                        )
+
+                    else:
+                        self.__canvas.tag_lower(
+                            self.__canvas.create_line(
+                                fcx,
+                                fcy,
+                                tcx,
+                                tcy,
+                                width=2,
+                                tags=(
+                                    "edge",
+                                    f"edge_{from_node}",
+                                    f"edge_{to_node}",
+                                    f"edge_from_{from_node}",
+                                    f"edge_to_{to_node}",
+                                    f"edge_fromto_{from_node}_{to_node}",
+                                ),
+                            ),
+                            "node",
+                        )
+
+                else:
+                    existing = self.__canvas.find_withtag(f"edge_loopback_{from_node}")
+                    if existing is None or len(existing) == 0:
+                        # loopback time
+                        lx1, ly1, lx2, ly2 = self.__canvas.bbox(from_id)
+                        lcx, lcy = (lx1 + lx2) / 2, (ly1 + ly2) / 2
+                        self.__canvas.tag_lower(
+                            self.__create_loopback_as_polygon(
+                                (lcx + NODE_RADIUS, lcy + NODE_RADIUS),
+                                NODE_RADIUS,
+                                (
+                                    "edge",
+                                    "edge_loopback",
+                                    f"edge_loopback_{from_node}",
+                                    f"edge_{from_node}",
+                                    f"edge_{from_node}_{to_node}",
+                                ),
+                            ),
+                            "node",
+                        )
 
     def __double_click(self, event):
         """
@@ -553,8 +587,31 @@ class CanvasFrame(ctk.CTkFrame):
             points.append((x, y))
 
         return self.__canvas.create_polygon(
-            points, width=2, fill="", outline="black", smooth=True, tags=tags
+            points,
+            width=2,
+            fill="",
+            outline="black",
+            smooth=True,
+            tags=tags,
         )
+
+    def __create_arc_with_arrow(self, from_cx, from_cy, to_cx, to_cy, tags):
+        radius = 250
+        coords = []
+
+        for t in range(270, 360, 4):
+            x = radius * cos(radians(t))
+            y = radius * sin(radians(t))
+            coords += (x, y)
+
+        id = self.__canvas.create_line(
+            coords,
+            arrow="last",
+            smooth=1,
+            tags=tags,
+        )
+        self.__canvas.coords(id, from_cx, from_cy, to_cx, to_cy)
+        return id
 
     def __rotate_object(self, tagOrId, origin, angle):
         """

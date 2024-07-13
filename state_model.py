@@ -59,11 +59,11 @@ class StateModel:
         # about saving later)
         self.__changed = True
 
-    def load_existing(self):
-        pass
+    def get_graph_matrix(self):
+        return self.__graph.matrix
 
-    def save_current(self):
-        pass
+    def set_graph_matrix(self, saved_matrix):
+        self.__graph.matrix = saved_matrix
 
     def is_weighted(self):
         return isinstance(self.__graph, WeightedMatrixGraph)
