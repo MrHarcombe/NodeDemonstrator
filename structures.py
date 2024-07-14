@@ -692,10 +692,6 @@ if __name__ == "__main__":
 
         visited = g.breadth_first("A")
         print("breadth first from A: ", ",".join(visited))
-
-        print("shortest path from A:", g.dijkstra("A"))
-        print("shortest path from A to H:", ",".join(g.dijkstra("A", "H")))
-        print("shortest path from F to C:", ",".join(g.dijkstra("F", "C")))
         print("...done")
 
     def test_weighted_graph():
