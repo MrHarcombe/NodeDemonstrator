@@ -22,24 +22,70 @@ class DrawControlsFrame(ctk.CTkFrame):
             value=("1" if StateModel().is_weighted() else "None")
         )
 
+        ###
+        # upper frame just has the new / load / save buttons
+        #
         upper = ctk.CTkFrame(self)
-        ctk.CTkButton(upper, text="New", command=self.__create_new).grid(
-            sticky=ctk.NSEW
+        ctk.CTkButton(
+            upper,
+            text="New",
+            border_width=2,
+            border_color="",
+            command=self.__create_new,
+        ).grid(
+            row=0,
+            column=0,
+            sticky=ctk.NSEW,
         )
-        ctk.CTkButton(upper, text="Load", command=self.__load_file).grid(
-            sticky=ctk.NSEW
+        ctk.CTkButton(
+            upper,
+            text="Load",
+            border_width=2,
+            border_color="",
+            command=self.__load_file,
+        ).grid(
+            row=1,
+            column=0,
+            sticky=ctk.NSEW,
         )
-        ctk.CTkButton(upper, text="Save", command=self.__save_file).grid(
-            sticky=ctk.NSEW
+        ctk.CTkButton(
+            upper,
+            text="Save",
+            border_width=2,
+            border_color="",
+            command=self.__save_file,
+        ).grid(
+            row=2,
+            column=0,
+            sticky=ctk.NSEW,
         )
         upper.grid(sticky=ctk.NSEW)
+
         upper.columnconfigure(0, weight=1)
         upper.rowconfigure((0, 1, 2), weight=1)
 
+        ###
+        # middle frame has an empty label for spacing
+        #
+
+        middle = ctk.CTkFrame(self)
+        ctk.CTkLabel(middle, text=" ").grid(sticky=ctk.NSEW)
+        middle.grid(sticky=ctk.NSEW)
+
+        middle.columnconfigure(0, weight=1)
+        middle.rowconfigure(0, weight=1)
+
+        ###
+        # lower frame has the actual drawing controls
+        #
+
         lower = ctk.CTkFrame(self)
-        label = ctk.CTkLabel(lower, text="Mode:")
-        label.configure(justify=ctk.RIGHT)
-        label.grid(row=0, column=0, sticky=ctk.NSEW)
+        ctk.CTkLabel(lower, text="Mode:", anchor=ctk.E).grid(
+            row=0,
+            column=0,
+            sticky=ctk.NSEW,
+            padx=(0, 3),
+        )
         ctk.CTkSwitch(
             lower,
             text=None,
@@ -48,11 +94,19 @@ class DrawControlsFrame(ctk.CTkFrame):
             offvalue="Edges",
             command=self.__toggle_mode_switch,
         ).grid(row=0, column=1, sticky=ctk.NSEW)
-        label = ctk.CTkEntry(lower, textvariable=self.__operation, state=ctk.DISABLED)
-        label.grid(row=0, column=2, sticky=ctk.NSEW)
-        label = ctk.CTkLabel(lower, text="Directed:")
-        label.configure(justify=ctk.RIGHT)
-        label.grid(row=1, column=0, sticky=ctk.NSEW)
+        ctk.CTkEntry(
+            lower,
+            textvariable=self.__operation,
+            fg_color="lightgreen",
+            justify=ctk.CENTER,
+            state=ctk.DISABLED,
+        ).grid(row=0, column=2, sticky=ctk.NSEW)
+        ctk.CTkLabel(lower, text="Directed:", anchor=ctk.E).grid(
+            row=1,
+            column=0,
+            sticky=ctk.NSEW,
+            padx=(0, 3),
+        )
         self.__directed_check = ctk.CTkCheckBox(
             lower,
             text=None,
@@ -61,9 +115,12 @@ class DrawControlsFrame(ctk.CTkFrame):
             state=ctk.DISABLED,
         )
         self.__directed_check.grid(row=1, column=1, columnspan=2, sticky=ctk.NSEW)
-        label = ctk.CTkLabel(lower, text="Weight:")
-        label.configure(justify=ctk.RIGHT)
-        label.grid(row=2, column=0, sticky=ctk.NSEW)
+        ctk.CTkLabel(lower, text="Weight:", anchor=ctk.E).grid(
+            row=2,
+            column=0,
+            sticky=ctk.NSEW,
+            padx=(0, 3),
+        )
         validation_callback = self.register(self.__validation_wrapper)
         self.__weight_entry = ctk.CTkEntry(
             lower,
@@ -75,11 +132,26 @@ class DrawControlsFrame(ctk.CTkFrame):
         )
         self.__weight_entry.grid(row=2, column=1, columnspan=2, sticky=ctk.NSEW)
         lower.grid(sticky=ctk.NSEW)
+
         lower.rowconfigure((0, 1, 2), weight=1)
         lower.columnconfigure((0, 1, 2), weight=1)
 
-        self.rowconfigure(0, weight=3)
-        self.rowconfigure(1, weight=1)
+        ###
+        # footer frame has an empty label for spacing, and to absorb the space
+        #
+
+        footer = ctk.CTkFrame(self)
+        ctk.CTkLabel(footer, text=" ").grid(sticky=ctk.NSEW)
+        footer.grid(sticky=ctk.NSEW)
+
+        footer.columnconfigure(0, weight=1)
+        footer.rowconfigure(0, weight=1)
+
+        ###
+        # don't want any of the heights to change, just the widths of the frames, which can then decide which other
+        # controls can be resized, accordingly
+        #
+
         self.columnconfigure(0, weight=1)
 
     def __toggle_mode_switch(self):
