@@ -64,6 +64,13 @@ class StateModel:
 
     def set_graph_matrix(self, saved_matrix):
         self.__graph.matrix = saved_matrix
+        last_node = max(self.__graph.matrix[0])
+
+        # restart the node name generator
+        self.__generator = StateModel.__next_node_name_generator()
+
+        while self.get_next_node_name() < last_node:
+            pass
 
     def is_weighted(self):
         return isinstance(self.__graph, WeightedMatrixGraph)

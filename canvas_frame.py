@@ -150,10 +150,10 @@ class CanvasFrame(ctk.CTkFrame):
         operation = StateModel().get_operation()
         if operation == "Nodes":
             possible = self.__canvas.find_overlapping(
-                canvas_xy.x - NODE_RADIUS,
-                canvas_xy.y - NODE_RADIUS,
-                canvas_xy.x + NODE_RADIUS,
-                canvas_xy.y + NODE_RADIUS,
+                canvas_xy.x - NODE_RADIUS // 2,
+                canvas_xy.y - NODE_RADIUS // 2,
+                canvas_xy.x + NODE_RADIUS // 2,
+                canvas_xy.y + NODE_RADIUS // 2,
             )
 
             if len(possible) != 0:
@@ -182,10 +182,10 @@ class CanvasFrame(ctk.CTkFrame):
 
         elif operation == "Edges":
             possible = self.__canvas.find_overlapping(
-                canvas_xy.x - NODE_RADIUS,
-                canvas_xy.y - NODE_RADIUS,
-                canvas_xy.x + NODE_RADIUS,
-                canvas_xy.y + NODE_RADIUS,
+                canvas_xy.x - NODE_RADIUS // 2,
+                canvas_xy.y - NODE_RADIUS // 2,
+                canvas_xy.x + NODE_RADIUS // 2,
+                canvas_xy.y + NODE_RADIUS // 2,
             )
 
             if len(possible) != 0:
@@ -296,10 +296,10 @@ class CanvasFrame(ctk.CTkFrame):
 
         if operation == "Edges":
             possible = self.__canvas.find_overlapping(
-                canvas_xy.x - NODE_RADIUS,
-                canvas_xy.y - NODE_RADIUS,
-                canvas_xy.x + NODE_RADIUS,
-                canvas_xy.y + NODE_RADIUS,
+                canvas_xy.x - NODE_RADIUS // 2,
+                canvas_xy.y - NODE_RADIUS // 2,
+                canvas_xy.x + NODE_RADIUS // 2,
+                canvas_xy.y + NODE_RADIUS // 2,
             )
 
             if len(possible) != 0:
@@ -405,10 +405,10 @@ class CanvasFrame(ctk.CTkFrame):
 
         if operation == "Nodes":
             possible = self.__canvas.find_overlapping(
-                canvas_xy.x - NODE_RADIUS,
-                canvas_xy.y - NODE_RADIUS,
-                canvas_xy.x + NODE_RADIUS,
-                canvas_xy.y + NODE_RADIUS,
+                canvas_xy.x - NODE_RADIUS // 2,
+                canvas_xy.y - NODE_RADIUS // 2,
+                canvas_xy.x + NODE_RADIUS // 2,
+                canvas_xy.y + NODE_RADIUS // 2,
             )
 
             if len(possible) != 0:
@@ -437,10 +437,10 @@ class CanvasFrame(ctk.CTkFrame):
             # editing the cost of travelling the path
             if StateModel().is_weighted():
                 possible = self.__canvas.find_overlapping(
-                    canvas_xy.x - NODE_RADIUS,
-                    canvas_xy.y - NODE_RADIUS,
-                    canvas_xy.x + NODE_RADIUS,
-                    canvas_xy.y + NODE_RADIUS,
+                    canvas_xy.x - NODE_RADIUS // 2,
+                    canvas_xy.y - NODE_RADIUS // 2,
+                    canvas_xy.x + NODE_RADIUS // 2,
+                    canvas_xy.y + NODE_RADIUS // 2,
                 )
 
                 if len(possible) != 0:
@@ -504,10 +504,10 @@ class CanvasFrame(ctk.CTkFrame):
 
         if operation == "Nodes":
             possible = self.__canvas.find_overlapping(
-                canvas_xy.x - NODE_RADIUS,
-                canvas_xy.y - NODE_RADIUS,
-                canvas_xy.x + NODE_RADIUS,
-                canvas_xy.y + NODE_RADIUS,
+                canvas_xy.x - NODE_RADIUS // 2,
+                canvas_xy.y - NODE_RADIUS // 2,
+                canvas_xy.x + NODE_RADIUS // 2,
+                canvas_xy.y + NODE_RADIUS // 2,
             )
 
             if len(possible) != 0:
@@ -537,10 +537,10 @@ class CanvasFrame(ctk.CTkFrame):
 
         elif operation == "Edges":
             possible = self.__canvas.find_overlapping(
-                canvas_xy.x - NODE_RADIUS,
-                canvas_xy.y - NODE_RADIUS,
-                canvas_xy.x + NODE_RADIUS,
-                canvas_xy.y + NODE_RADIUS,
+                canvas_xy.x - NODE_RADIUS // 2,
+                canvas_xy.y - NODE_RADIUS // 2,
+                canvas_xy.x + NODE_RADIUS // 2,
+                canvas_xy.y + NODE_RADIUS // 2,
             )
 
             if len(possible) != 0:
