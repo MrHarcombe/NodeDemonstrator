@@ -1,15 +1,59 @@
 import tkinter as tk
+from math import sqrt
+
+# def from_x_solutions(x1, y1, x2, y2, radius):
+#     def a(x1, y1, x2, y2):
+#         return 1 + (y2 - y1) ** 2 / (x2 - x1) ** 2
+
+#     def b(x1, y1, x2, y2):
+#         return 2 * (y2 - y1) * (x1 * y1 - x1 * y2) / (x2 - x1) ** 2 - 2 * x1
+
+#     def c(x1, y1, x2, y2, radius):
+#         return x1**2 + (x1 * y1 - x1 * y2) ** 2 / (x2 - x1) ** 2 - radius**2
+
+#     a_ans = a(x1, y1, x2, y2)
+#     b_ans = b(x1, y1, x2, y2)
+#     c_ans = c(x1, y1, x2, y2, radius)
+
+#     return (
+#         (-b_ans + (b_ans**2 - 4 * a_ans * c_ans) ** 0.5 / 2 * a_ans),
+#         (-b_ans - (b_ans**2 - 4 * a_ans * c_ans) ** 0.5 / 2 * a_ans),
+#     )
 
 
-def from_x_solutions(x1, y1, x2, y2, radius):
+# def from_y_solution(x, x1, y1, x2, y2):
+#     return ((y2 - y1) / (x2 - x1)) * (x - x1) + y1
+
+
+# def x_solutions(x1, y1, x2, y2, radius):
+#     def a(x1, y1, x2, y2):
+#         return 1 + (y2 - y1) ** 2 / (x2 - x1) ** 2
+
+#     def b(x1, y1, x2, y2):
+#         return 2 * (y2 - y1) * (x2 * y1 - x2 * y2) / (x2 - x1) ** 2 - 2 * x2
+
+#     def c(x1, y1, x2, y2, radius):
+#         return x2**2 + (x2 * y1 - x2 * y2) ** 2 / (x2 - x1) ** 2 - radius**2
+
+#     a_ans = a(x1, y1, x2, y2)
+#     b_ans = b(x1, y1, x2, y2)
+#     c_ans = c(x1, y1, x2, y2, radius)
+
+#     return (
+#         (-b_ans + (b_ans**2 - 4 * a_ans * c_ans) ** 0.5 / 2 * a_ans),
+#         (-b_ans - (b_ans**2 - 4 * a_ans * c_ans) ** 0.5 / 2 * a_ans),
+#     )
+
+
+def x_solutions(x1, y1, x2, y2, radius):
     def a(x1, y1, x2, y2):
-        return 1 + (y2 - y1) ** 2 / (x2 - x1) ** 2
+        return 1 + y1**2 - 2 * y1 * y2**2
 
     def b(x1, y1, x2, y2):
-        return 2 * (y2 - y1) * (x1 * y1 - x1 * y2) / (x2 - x1) ** 2 - 2 * x1
+        return 2 * x1 * y1 * y2 - 2 * x1 * y2**2 - x2 * y1**2 - 2 * x1
 
     def c(x1, y1, x2, y2, radius):
-        return x1**2 + (x1 * y1 - x1 * y2) ** 2 / (x2 - x1) ** 2 - radius**2
+        return x1**2 + x2**2 * y1**2 + x1 * x2 * y1 * y2 - radius**2
 
     a_ans = a(x1, y1, x2, y2)
     b_ans = b(x1, y1, x2, y2)
@@ -21,31 +65,35 @@ def from_x_solutions(x1, y1, x2, y2, radius):
     )
 
 
-def from_y_solution(x, x1, y1, x2, y2):
-    return ((y2 - y1) / (x2 - x1)) * (x - x1) + y1
+# def x_solutions(x1, x2, y1, y2, r):
+#     """
+#     According to sympy, for a radius of 50...
+#     [
+#         {
+#             x: x1 - 50*(x1 - x2)/sqrt(x1**2 - 2*x1*x2 + x2**2 + y1**2 - 2*y1*y2 + y2**2)
+#         },
+#         {
+#             x: x1 + 50*(x1 - x2)/sqrt(x1**2 - 2*x1*x2 + x2**2 + y1**2 - 2*y1*y2 + y2**2)
+#         }
+#     ]
+#     """
+#     return (
+#         (
+#             x1
+#             - 50
+#             * (x1 - x2)
+#             / max(1, sqrt(x1**2 - 2 * x1 * x2 + x2**2 + y1**2 - 2 * y1 * y2 + y2**2))
+#         ),
+#         (
+#             x1
+#             + 50
+#             * (x1 - x2)
+#             / max(1, sqrt(x1**2 - 2 * x1 * x2 + x2**2 + y1**2 - 2 * y1 * y2 + y2**2))
+#         ),
+#     )
 
 
-def to_x_solutions(x1, y1, x2, y2, radius):
-    def a(x1, y1, x2, y2):
-        return 1 + (y2 - y1) ** 2 / (x2 - x1) ** 2
-
-    def b(x1, y1, x2, y2):
-        return 2 * (y2 - y1) * (x2 * y1 - x2 * y2) / (x2 - x1) ** 2 - 2 * x2
-
-    def c(x1, y1, x2, y2, radius):
-        return x2**2 + (x2 * y1 - x2 * y2) ** 2 / (x2 - x1) ** 2 - radius**2
-
-    a_ans = a(x1, y1, x2, y2)
-    b_ans = b(x1, y1, x2, y2)
-    c_ans = c(x1, y1, x2, y2, radius)
-
-    return (
-        (-b_ans + (b_ans**2 - 4 * a_ans * c_ans) ** 0.5 / 2 * a_ans),
-        (-b_ans - (b_ans**2 - 4 * a_ans * c_ans) ** 0.5 / 2 * a_ans),
-    )
-
-
-def to_y_solution(x, x1, y1, x2, y2):
+def y_solution(x, x1, y1, x2, y2):
     return ((y2 - y1) / (x2 - x1)) * (x - x2) + y2
 
 
@@ -89,17 +137,19 @@ cy1 = (tl_n1 + br_n1) / 2
 cx2 = (tl_n2 + br_n2) / 2
 cy2 = (tl_n2 + br_n2) / 2
 
-x1s = from_x_solutions(cx1, cy1, cx2, cy2, RADIUS)
-y1 = from_y_solution(x1s[0], cx1, cy1, cx2, cy2)
+print(cx1, cy1, cx2, cy2)
 
-x2s = to_x_solutions(cx1, cy1, cx2, cy2, RADIUS)
-y2 = to_y_solution(x2s[0], cx1, cy1, cx2, cy2)
+x1s = x_solutions(cx1, cy1, cx2, cy2, RADIUS)
+y1 = y_solution(x1s[0], cx1, cy1, cx2, cy2)
+
+x2s = x_solutions(cx2, cy2, cx1, cy1, RADIUS)
+y2 = y_solution(x2s[0], cx2, cy2, cx1, cy1)
 
 print(x1s, y1, x2s, y2)
 
 for x1 in x1s:
     for x2 in x2s:
-        canvas.create_line(x1, y1, x2, y2)
+        canvas.create_line(x1, y1, x2, y2, arrow=tk.BOTH)
 
 # canvas.line(ax1, ay1, ax2, ay2, arrow=tk.BOTH, width=2)
 
