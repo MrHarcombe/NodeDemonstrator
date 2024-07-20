@@ -469,7 +469,7 @@ class MatrixGraph:
             )
         return []
 
-    def depth_first(self, start_node):
+    def depth_first(self, start_node, end_node=None):
         if start_node in self.matrix[0]:
             discovered = set([start_node])
             visited = []
@@ -479,6 +479,9 @@ class MatrixGraph:
                 current = stack.pop()
                 visited.append(current)
 
+                if current == end_node:
+                    break
+
                 for node, weight in self.get_connections(current):
                     if node not in discovered:
                         discovered.add(node)
@@ -486,7 +489,7 @@ class MatrixGraph:
             return visited
         return None
 
-    def breadth_first(self, start_node):
+    def breadth_first(self, start_node, end_node=None):
         if start_node in self.matrix[0]:
             discovered = set([start_node])
             visited = []
@@ -495,6 +498,9 @@ class MatrixGraph:
             while len(queue) > 0:
                 current = queue.pop(0)
                 visited.append(current)
+
+                if current == end_node:
+                    break
 
                 for node, weight in self.get_connections(current):
                     if node not in discovered:

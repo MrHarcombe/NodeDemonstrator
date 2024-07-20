@@ -7,7 +7,7 @@ from structures import MatrixGraph
 class AnimatedMatrixGraph(MatrixGraph):
     """provides overrides of traversal methods that can be used to pause and/or step through the methods as required"""
 
-    def depth_first(self, start_node):
+    def depth_first(self, start_node, end_node=None):
         if start_node in self.matrix[0]:
             discovered = set([start_node])
             visited = []
@@ -17,16 +17,20 @@ class AnimatedMatrixGraph(MatrixGraph):
                 current = stack.pop()
                 visited.append(current)
 
-                yield (current, visited, stack)
+                if current == end_node:
+                    break
 
-                for node, weight in self.get_connections(current):
-                    if node not in discovered:
-                        discovered.add(node)
-                        stack.append(node)
+                else:
+                    yield (current, visited, stack)
+
+                    for node, weight in self.get_connections(current):
+                        if node not in discovered:
+                            discovered.add(node)
+                            stack.append(node)
             yield visited
         return None
 
-    def breadth_first(self, start_node):
+    def breadth_first(self, start_node, end_node=None):
         if start_node in self.matrix[0]:
             discovered = set([start_node])
             visited = []
@@ -36,12 +40,16 @@ class AnimatedMatrixGraph(MatrixGraph):
                 current = queue.pop(0)
                 visited.append(current)
 
-                yield (current, visited, queue)
+                if current == end_node:
+                    break
 
-                for node, weight in self.get_connections(current):
-                    if node not in discovered:
-                        discovered.add(node)
-                        queue.append(node)
+                else:
+                    yield (current, visited, queue)
+
+                    for node, weight in self.get_connections(current):
+                        if node not in discovered:
+                            discovered.add(node)
+                            queue.append(node)
             yield visited
         return None
 

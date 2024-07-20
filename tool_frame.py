@@ -1,5 +1,3 @@
-# import tkinter as tk
-# from tkinter import ttk
 import customtkinter as ctk
 
 from draw_controls_frame import DrawControlsFrame

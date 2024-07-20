@@ -1,5 +1,3 @@
-# import tkinter as tk
-# from tkinter import ttk
 import customtkinter as ctk
 from tkinter import messagebox
 from collections import namedtuple
@@ -454,8 +452,8 @@ class CanvasFrame(ctk.CTkFrame):
                         if tag.startswith("edge_to_"):
                             to_node = tag[8:]
 
-                    fromto = StateModel().get_edge(from_node, to_node)
-                    tofrom = StateModel().get_edge(to_node, from_node)
+                    fromto = StateModel().has_edge(from_node, to_node)
+                    tofrom = StateModel().has_edge(to_node, from_node)
 
                     if fromto == tofrom:
                         values = amend_edge_dialog(

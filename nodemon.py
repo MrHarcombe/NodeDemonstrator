@@ -1,4 +1,3 @@
-# import tkinter as tk
 import customtkinter as ctk
 
 from canvas_frame import CanvasFrame
@@ -26,8 +25,8 @@ class NodeApplication(ctk.CTk):
         self.tools = ToolFrame(self, self.canvas)
         self.tools.grid(column=1, row=0, sticky=ctk.NSEW)
 
-        self.columnconfigure(0, weight=95)
-        self.columnconfigure(1, weight=5)
+        self.columnconfigure(0, weight=1)
+        # self.columnconfigure(1, weight=0)
         self.rowconfigure(0, weight=1)
 
 

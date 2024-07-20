@@ -1,5 +1,3 @@
-# import tkinter as tk
-# from tkinter import ttk
 import customtkinter as ctk
 
 # from pickle import dump, load, HIGHEST_PROTOCOL
@@ -29,58 +27,50 @@ class DrawControlsFrame(ctk.CTkFrame):
         ctk.CTkButton(
             upper,
             text="New",
-            border_width=2,
-            border_color="",
+            # border_width=2,
+            # border_color="",
             command=self.__create_new,
-        ).grid(
-            row=0,
-            column=0,
-            sticky=ctk.NSEW,
-        )
+        ).grid(row=0, column=0, sticky=ctk.NSEW, pady=(0, 3))
         ctk.CTkButton(
             upper,
             text="Load",
-            border_width=2,
-            border_color="",
+            # border_width=2,
+            # border_color="",
             command=self.__load_file,
         ).grid(
             row=1,
             column=0,
             sticky=ctk.NSEW,
+            pady=(0, 3),
         )
         ctk.CTkButton(
             upper,
             text="Save",
-            border_width=2,
-            border_color="",
+            # border_width=2,
+            # border_color="",
             command=self.__save_file,
         ).grid(
             row=2,
             column=0,
             sticky=ctk.NSEW,
+            pady=(0, 3),
         )
-        upper.grid(sticky=ctk.NSEW)
+        upper.grid(sticky=ctk.NSEW, pady=(0, 15))
 
         upper.columnconfigure(0, weight=1)
         upper.rowconfigure((0, 1, 2), weight=1)
 
         ###
-        # middle frame has an empty label for spacing
-        #
-
-        middle = ctk.CTkFrame(self)
-        ctk.CTkLabel(middle, text=" ").grid(sticky=ctk.NSEW)
-        middle.grid(sticky=ctk.NSEW)
-
-        middle.columnconfigure(0, weight=1)
-        middle.rowconfigure(0, weight=1)
-
-        ###
         # lower frame has the actual drawing controls
         #
 
-        lower = ctk.CTkFrame(self)
-        ctk.CTkLabel(lower, text="Mode:", anchor=ctk.E).grid(
+        lower = ctk.CTkFrame(self, fg_color="transparent", bg_color="transparent")
+        ctk.CTkLabel(
+            lower,
+            text="Mode:",
+            anchor=ctk.E,
+            bg_color=self.cget("bg_color"),
+        ).grid(
             row=0,
             column=0,
             sticky=ctk.NSEW,
@@ -92,16 +82,23 @@ class DrawControlsFrame(ctk.CTkFrame):
             variable=self.__operation,
             onvalue="Nodes",
             offvalue="Edges",
+            bg_color=self.cget("bg_color"),
             command=self.__toggle_mode_switch,
         ).grid(row=0, column=1, sticky=ctk.NSEW)
         ctk.CTkEntry(
             lower,
             textvariable=self.__operation,
             fg_color="lightgreen",
+            bg_color=self.cget("bg_color"),
             justify=ctk.CENTER,
             state=ctk.DISABLED,
         ).grid(row=0, column=2, sticky=ctk.NSEW)
-        ctk.CTkLabel(lower, text="Directed:", anchor=ctk.E).grid(
+        ctk.CTkLabel(
+            lower,
+            text="Directed:",
+            anchor=ctk.E,
+            bg_color=self.cget("bg_color"),
+        ).grid(
             row=1,
             column=0,
             sticky=ctk.NSEW,
@@ -113,9 +110,15 @@ class DrawControlsFrame(ctk.CTkFrame):
             variable=self.__directed,
             command=self.__update_operation_parameters,
             state=ctk.DISABLED,
+            bg_color=self.cget("bg_color"),
         )
         self.__directed_check.grid(row=1, column=1, columnspan=2, sticky=ctk.NSEW)
-        ctk.CTkLabel(lower, text="Weight:", anchor=ctk.E).grid(
+        ctk.CTkLabel(
+            lower,
+            text="Weight:",
+            anchor=ctk.E,
+            bg_color=self.cget("bg_color"),
+        ).grid(
             row=2,
             column=0,
             sticky=ctk.NSEW,
@@ -127,25 +130,15 @@ class DrawControlsFrame(ctk.CTkFrame):
             textvariable=self.__weight,
             placeholder_text="1",
             state=ctk.DISABLED,
+            bg_color=self.cget("bg_color"),
             validate="key",
             validatecommand=(validation_callback, "%P"),
         )
         self.__weight_entry.grid(row=2, column=1, columnspan=2, sticky=ctk.NSEW)
-        lower.grid(sticky=ctk.NSEW)
+        lower.grid(sticky=ctk.NSEW, pady=(0, 50))
 
         lower.rowconfigure((0, 1, 2), weight=1)
         lower.columnconfigure((0, 1, 2), weight=1)
-
-        ###
-        # footer frame has an empty label for spacing, and to absorb the space
-        #
-
-        footer = ctk.CTkFrame(self)
-        ctk.CTkLabel(footer, text=" ").grid(sticky=ctk.NSEW)
-        footer.grid(sticky=ctk.NSEW)
-
-        footer.columnconfigure(0, weight=1)
-        footer.rowconfigure(0, weight=1)
 
         ###
         # don't want any of the heights to change, just the widths of the frames, which can then decide which other
@@ -187,11 +180,14 @@ class DrawControlsFrame(ctk.CTkFrame):
         )
 
     def __create_new(self):
-        StateModel().create_new()
+        weighted = (
+            ctk.messagebox.askyesno(message="Will the graph be weighted?") == ctk.YES
+        )
+        StateModel().create_new(weighted)
         self.__canvas_frame.empty()
         self.__operation.set("Nodes")
         self.__directed.set(False)
-        self.__weight.set("1" if StateModel().is_weighted() else "None")
+        self.__weight.set("1" if weighted else "None")
 
     def __save_file(self):
         file_contents = {
