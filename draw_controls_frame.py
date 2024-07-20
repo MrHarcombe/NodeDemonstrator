@@ -27,15 +27,11 @@ class DrawControlsFrame(ctk.CTkFrame):
         ctk.CTkButton(
             upper,
             text="New",
-            # border_width=2,
-            # border_color="",
             command=self.__create_new,
         ).grid(row=0, column=0, sticky=ctk.NSEW, pady=(0, 3))
         ctk.CTkButton(
             upper,
             text="Load",
-            # border_width=2,
-            # border_color="",
             command=self.__load_file,
         ).grid(
             row=1,
@@ -46,8 +42,6 @@ class DrawControlsFrame(ctk.CTkFrame):
         ctk.CTkButton(
             upper,
             text="Save",
-            # border_width=2,
-            # border_color="",
             command=self.__save_file,
         ).grid(
             row=2,
