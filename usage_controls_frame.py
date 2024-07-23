@@ -31,17 +31,20 @@ class UsageControlsFrame(ctk.CTkFrame):
             variable=self.__algochoice,
             state="readonly",
         ).grid(
-            # columnspan=2,
             sticky=ctk.NSEW,
             pady=(0, 15),
         )
 
-        nodes = ctk.CTkFrame(self, fg_color="transparent", bg_color="transparent")
-        nodes.grid(sticky=ctk.NSEW)
-        nodes.columnconfigure(1, weight=1)
+        nodes_frame = ctk.CTkFrame(
+            self,
+            fg_color="transparent",
+            bg_color="transparent",
+        )
+        nodes_frame.grid(sticky=ctk.NSEW)
+        nodes_frame.columnconfigure(1, weight=1)
 
         ctk.CTkLabel(
-            nodes,
+            nodes_frame,
             text="From:",
             anchor=ctk.E,
             bg_color=self.cget("bg_color"),
@@ -50,18 +53,22 @@ class UsageControlsFrame(ctk.CTkFrame):
             column=0,
             padx=(0, 3),
         )
-        ctk.CTkEntry(
-            nodes,
-            textvariable=self.__from,
+        from_combo = ctk.CTkComboBox(
+            nodes_frame,
+            variable=self.__from,
+            values=self.__canvas_frame.get_node_labels(),
             bg_color=self.cget("bg_color"),
-        ).grid(
-            row=2,
-            column=1,
-            sticky=ctk.NSEW,
+        )
+        from_combo.grid(row=2, column=1, sticky=ctk.NSEW, pady=(0, 3))
+        from_combo.bind(
+            "<Expose>",
+            lambda event: from_combo.configure(
+                values=self.__canvas_frame.get_node_labels()
+            ),
         )
 
         ctk.CTkLabel(
-            nodes,
+            nodes_frame,
             text="To:",
             anchor=ctk.E,
             bg_color=self.cget("bg_color"),
@@ -70,34 +77,51 @@ class UsageControlsFrame(ctk.CTkFrame):
             column=0,
             padx=(0, 3),
         )
-        ctk.CTkEntry(
-            nodes,
-            textvariable=self.__to,
+        to_combo = ctk.CTkComboBox(
+            nodes_frame,
+            variable=self.__to,
+            values=self.__canvas_frame.get_node_labels(),
             bg_color=self.cget("bg_color"),
-        ).grid(
+        )
+        to_combo.grid(
             row=3,
             column=1,
             sticky=ctk.NSEW,
-            pady=(0, 15),
+        )
+        to_combo.bind(
+            "<Expose>",
+            lambda event: to_combo.configure(
+                values=self.__canvas_frame.get_node_labels()
+            ),
         )
 
-        ctk.CTkButton(
+        self.__action_button = ctk.CTkButton(
             self,
             text="Start",
             bg_color=self.cget("bg_color"),
             command=self.__trace_step,
-        ).grid(sticky=ctk.NSEW, pady=(0, 3))
-        ctk.CTkSlider(
-            self,
-            from_=1,
-            to=5,
-            number_of_steps=4,
-            bg_color=self.cget("bg_color"),
-            variable=self.__speed,
-        ).grid(sticky=ctk.NSEW, pady=(0, 15))
+        )
+        self.__action_button.grid(sticky=ctk.NSEW, pady=(15, 15))
+        # ctk.CTkSlider(
+        #     self,
+        #     from_=1,
+        #     to=5,
+        #     number_of_steps=4,
+        #     bg_color=self.cget("bg_color"),
+        #     variable=self.__speed,
+        # ).grid(sticky=ctk.NSEW, pady=(0, 15))
 
         self.columnconfigure(0, weight=1)
-        self.rowconfigure(4, weight=1)
+
+    def end_trace(self):
+        self.__action_button.configure(text="Stop")
+        self.__action_button.configure(command=self.__reset_trace)
+
+    def __reset_trace(self):
+        self.__canvas_frame.unhighlight_all_nodes()
+        self.__trace_frame.grid_remove()
+        self.__action_button.configure(text="Start")
+        self.__action_button.configure(command=self.__trace_step)
 
     def __trace_step(self):
         match self.__algochoice.get():
@@ -110,7 +134,11 @@ class UsageControlsFrame(ctk.CTkFrame):
                     self, self.__canvas_frame, self.__from.get(), self.__to.get()
                 )
 
+        self.__action_button.configure(text="Step")
+        self.__action_button.configure(command=self.__trace_frame.step)
+
         self.__trace_frame.grid(
             sticky=ctk.NSEW,
-            # columnspan=2,
+            pady=(15, 0),
         )
+        self.rowconfigure(3, weight=1)
