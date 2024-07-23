@@ -27,7 +27,9 @@ class AnimatedMatrixGraph(MatrixGraph):
                         if node not in discovered:
                             discovered.add(node)
                             stack.append(node)
-            yield visited
+
+            yield ("", visited, stack)
+
         return None
 
     def breadth_first(self, start_node, end_node=None):
@@ -50,7 +52,9 @@ class AnimatedMatrixGraph(MatrixGraph):
                         if node not in discovered:
                             discovered.add(node)
                             queue.append(node)
-            yield visited
+
+            yield ("", visited, queue)
+
         return None
 
 

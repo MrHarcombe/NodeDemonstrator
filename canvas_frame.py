@@ -77,7 +77,7 @@ class CanvasFrame(ctk.CTkFrame):
         self.empty()
         for id in sorted(saved_canvas.keys()):
             type, coords, tags = saved_canvas[id]
-            print(type, tags)
+            # print(type, tags)
 
             if type == "oval":
                 x1, y1, x2, y2 = coords
@@ -132,6 +132,90 @@ class CanvasFrame(ctk.CTkFrame):
                     smooth=True,
                     tags=tags,
                 )
+
+    def get_node_labels(self):
+        node_labels = []
+        for node in StateModel().get_graph_matrix()[0]:
+            node_label = None
+
+            for id in self.__canvas.find_withtag(f"nodename_{node}"):
+                for tag in self.__canvas.gettags(id):
+                    if tag.startswith("nodelabel_"):
+                        node_label = tag[10:]
+
+            if node_label is None:
+                node_label = node
+
+            node_labels.append(node_label)
+
+        return node_labels
+
+    def highlight_start_node(self, node_name):
+        self.__highlight_node(
+            node_name,
+            True,
+            "#006400",  # dark green
+            "#FFFF00",  # yellow
+        )
+
+    def highlight_end_node(self, node_name):
+        self.__highlight_node(
+            node_name,
+            True,
+            "#800000",  # maroon
+            "#FFFF00",  # yellow
+        )
+
+    def highlight_current_node(self, node_name):
+        self.__highlight_node(
+            node_name,
+            True,
+            "#00FF00",  # lime
+            "#000000",  # black
+        )
+
+    def highlight_processed_node(self, node_name):
+        self.__highlight_node(
+            node_name,
+            True,
+            "#CD5C5C",  # "indian red"
+            "#FFFF00",  # yellow
+        )
+
+    def highlight_pending_node(self, node_name):
+        self.__highlight_node(
+            node_name,
+            True,
+            "#808000",  # olive
+            "#FFFF00",  # yellow
+        )
+
+    def unhighlight_all_nodes(self):
+        for node in self.get_node_labels():
+            self.__highlight_node(node, False, "", "")
+
+    def __highlight_node(self, node_name, highlight, shape_colour, text_colour):
+        id = self.__canvas.find_withtag(f"nodelabel_{node_name}")
+        if id is None or len(id) == 0:
+            id = self.__canvas.find_withtag(f"nodename_{node_name}")
+
+        associated = self.__find_associated_ids(id)
+        for aid in associated:
+            tags = self.__canvas.gettags(aid)
+            # print(aid, self.__canvas.type(aid), "->", tags)
+            for tag in tags:
+                if tag.startswith("node_"):
+                    if highlight:
+                        # print("setting", aid, "fill red")
+                        self.__canvas.itemconfig(aid, fill=shape_colour)
+                    else:
+                        self.__canvas.itemconfig(aid, fill="black")
+                elif tag.startswith("nodename_") or tag.startswith("nodelabel_"):
+                    if highlight:
+                        # print("setting", aid, "fill", text_colour)
+                        self.__canvas.itemconfig(aid, fill=text_colour)
+                    else:
+                        self.__canvas.itemconfig(aid, fill="white")
 
     def __click(self, event):
         """
@@ -580,7 +664,7 @@ class CanvasFrame(ctk.CTkFrame):
                         )
 
                     elif tag.startswith("nodename_"):
-                        node = tag[8:]
+                        node = tag[9:]
                         associated = associated.union(
                             self.__canvas.find_withtag(f"node_{node}")
                         )

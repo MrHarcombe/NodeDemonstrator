@@ -111,3 +111,6 @@ class StateModel:
 
     def breadth_first(self, start_node, end_node=None):
         yield from self.__graph.breadth_first(start_node, end_node)
+
+    def depth_first(self, start_node, end_node=None):
+        yield from self.__graph.depth_first(start_node, end_node)
