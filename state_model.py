@@ -114,3 +114,18 @@ class StateModel:
 
     def depth_first(self, start_node, end_node=None):
         yield from self.__graph.depth_first(start_node, end_node)
+
+    def dijkstra(self, start_node, end_node=None):
+        if isinstance(self.__graph, AnimatedWeightedMatrixGraph):
+            yield from self.__graph.dijkstra(start_node, end_node)
+
+    def ascii_heuristic(a, b):
+        return abs(ord(b) - ord(a))
+
+    def a_star(self, start_node, end_node):
+        if isinstance(self.__graph, AnimatedWeightedMatrixGraph):
+            yield from self.__graph.astar(
+                start_node,
+                end_node,
+                StateModel.ascii_heuristic,
+            )

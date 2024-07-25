@@ -1,6 +1,7 @@
 import customtkinter as ctk
 
 from traversal_frames import BreadthFirstFrame, DepthFirstFrame
+from optimisation_frames import DijkstraShortestPathFrame, AStarShortestPathFrame
 
 
 class UsageControlsFrame(ctk.CTkFrame):
@@ -127,11 +128,31 @@ class UsageControlsFrame(ctk.CTkFrame):
         match self.__algochoice.get():
             case "Breadth First":
                 self.__trace_frame = BreadthFirstFrame(
-                    self, self.__canvas_frame, self.__from.get(), self.__to.get()
+                    self,
+                    self.__canvas_frame,
+                    self.__from.get(),
+                    self.__to.get(),
                 )
             case "Depth First":
                 self.__trace_frame = DepthFirstFrame(
-                    self, self.__canvas_frame, self.__from.get(), self.__to.get()
+                    self,
+                    self.__canvas_frame,
+                    self.__from.get(),
+                    self.__to.get(),
+                )
+            case "Dijkstra's Shortest Path":
+                self.__trace_frame = DijkstraShortestPathFrame(
+                    self,
+                    self.__canvas_frame,
+                    self.__from.get(),
+                    self.__to.get(),
+                )
+            case "A* Shortest Path":
+                self.__trace_frame = AStarShortestPathFrame(
+                    self,
+                    self.__canvas_frame,
+                    self.__from.get(),
+                    self.__to.get(),
                 )
 
         self.__action_button.configure(text="Step")

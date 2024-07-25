@@ -111,28 +111,30 @@ class AnimatedWeightedMatrixGraph(AnimatedMatrixGraph):
         while len(queue) > 0:
             current_cost, current_node = heappop(queue)
 
-            yield current_node, data, queue
-
             if current_node == end_node:
                 break
 
-            for neighbour, cost in self.get_connections(current_node):
-                previous_cost, _ = data[neighbour]
-                if current_cost + cost < previous_cost:
-                    data[neighbour][0] = current_cost + cost
-                    data[neighbour][1] = current_node
-                    heappush(queue, (data[neighbour][0], neighbour))
+            else:
+                yield current_node, data, queue
+
+                for neighbour, cost in self.get_connections(current_node):
+                    previous_cost, _ = data[neighbour]
+                    if current_cost + cost < previous_cost:
+                        data[neighbour][0] = current_cost + cost
+                        data[neighbour][1] = current_node
+                        heappush(queue, (data[neighbour][0], neighbour))
 
         if end_node is None:
-            yield list(data.items())
+            yield "", data, []
 
-        path = []
-        current = end_node
-        while current != start_node:
+        else:
+            path = []
+            current = end_node
+            while current != start_node:
+                path.append(current)
+                current = data[current][1]
             path.append(current)
-            current = data[current][1]
-        path.append(current)
-        yield path[::-1]
+            yield "", data, path[::-1]
 
     def astar_manhattan_distance(node_from, node_to):
         return sum(abs(val1 - val2) for val1, val2 in zip(node_from, node_to))
@@ -177,20 +179,27 @@ class AnimatedWeightedMatrixGraph(AnimatedMatrixGraph):
         while len(open_set) > 0:
             _, current = heappop(open_set)
 
-            yield current, came_from, open_set
-
             if current == end_node:
-                yield came_from
+                yield (
+                    "",
+                    (f_score, g_score, came_from),
+                    self.reconstruct_astar_path(came_from, current),
+                )
 
-            for friend, cost in self.get_connections(current):
-                tentative_g_score = g_score[current] + cost
-                if tentative_g_score < g_score[friend]:
-                    came_from[friend] = current
-                    g_score[friend] = tentative_g_score
-                    friend_f_score = tentative_g_score + func(friend, end_node)
-                    f_score[friend] = friend_f_score
-                    if friend not in open_set:
-                        heappush(open_set, (friend_f_score, friend))
+            else:
+                yield current, (f_score, g_score, came_from), open_set
+
+                for neighbour, cost in self.get_connections(current):
+                    tentative_g_score = g_score[current] + cost
+                    if tentative_g_score < g_score[neighbour]:
+                        came_from[neighbour] = current
+                        g_score[neighbour] = tentative_g_score
+                        neighbour_f_score = tentative_g_score + func(
+                            neighbour, end_node
+                        )
+                        f_score[neighbour] = neighbour_f_score
+                        if neighbour not in open_set:
+                            heappush(open_set, (neighbour_f_score, neighbour))
 
 
 if __name__ == "__main__":
@@ -247,4 +256,39 @@ if __name__ == "__main__":
                 print("breadth first from A:", ",".join(step))
         print("...done")
 
-    test_animated_matrix_graph()
+    def test_animated_weighted_matrix_graph():
+        print("Testing animated weighted adjacency matrix...")
+        g = AnimatedWeightedMatrixGraph(True)
+        g.add_node("A")
+        g.add_node("B")
+        g.add_node("C")
+        g.add_node("D")
+        g.add_edge("A", "B")
+        g.add_edge("A", "C")
+        g.add_edge("B", "D")
+        g.add_edge("C", "D")
+        g.add_node("E")
+        g.add_node("F")
+        g.add_node("G")
+        g.add_node("H")
+        g.add_edge("B", "E")
+        g.add_edge("D", "F")
+        g.add_edge("D", "G")
+        g.add_edge("C", "G")
+        g.add_edge("E", "F")
+        g.add_edge("F", "H")
+        g.add_edge("G", "H")
+
+        for step in g.dijkstra("A"):
+            if isinstance(step, tuple):
+                current, data, queue = step
+                print(
+                    "currently at:",
+                    current,
+                    "; processed:",
+                    " / ".join(f"{k}: {v}" for k, v in data.items()),
+                    "; waiting:",
+                    " / ".join(f"{c}: {n}" for c, n, in queue),
+                )
+
+    test_animated_weighted_matrix_graph()

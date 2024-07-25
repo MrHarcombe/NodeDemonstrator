@@ -1,88 +1,21 @@
 import customtkinter as ctk
 
 from state_model import StateModel
-from trace_frame import TraceFrame
-
-
-class ProcessedScrollableFrame(ctk.CTkScrollableFrame):
-    def __init__(self, master):
-        super().__init__(master, label_text="Processed Nodes", label_anchor=ctk.CENTER)
-        self._scrollbar.configure(height=0)
-
-
-class PendingQueueScrollableFrame(ctk.CTkScrollableFrame):
-    def __init__(self, master):
-        super().__init__(master, label_text="Pending Queue", label_anchor=ctk.CENTER)
-        self._scrollbar.configure(height=0)
-
-
-class PendingStackScrollableFrame(ctk.CTkScrollableFrame):
-    def __init__(self, master):
-        super().__init__(master, label_text="Pending Stack", label_anchor=ctk.CENTER)
-        self._scrollbar.configure(height=0)
+from trace_frame import TraceFrame, CustomScrollableFrame
 
 
 class TraversalFrame(TraceFrame):
     def __init__(self, master, canvas_frame, title, from_node, to_node):
         super().__init__(master, canvas_frame, title, from_node, to_node)
 
-    def initial_setup(self, upper, lower):
-        self._processed = upper(self)
-        self._processed.grid(sticky=ctk.NSEW, pady=(0, 15))
-        self._processed.columnconfigure(0, weight=1)
-
-        empty_frame = ctk.CTkFrame(
-            self._processed,
-            border_width=2,
-            border_color="black",
-        )
-        empty_frame.grid(
-            sticky=ctk.NSEW,
-        )
-        empty_frame.columnconfigure(0, weight=1)
-
-        ctk.CTkLabel(
-            empty_frame,
-            text="Empty",
-            anchor=ctk.CENTER,
-        ).grid(
-            sticky=ctk.NSEW,
-            padx=8,
-            pady=3,
-        )
-
-        self._other = lower(self)
-        self._other.grid(sticky=ctk.NSEW)
-        self._other.columnconfigure(0, weight=1)
-
-        empty_frame = ctk.CTkFrame(
-            self._other,
-            border_width=2,
-            border_color="black",
-        )
-        empty_frame.grid(
-            sticky=ctk.NSEW,
-        )
-        empty_frame.columnconfigure(0, weight=1)
-
-        ctk.CTkLabel(
-            empty_frame,
-            text="Empty",
-            anchor=ctk.CENTER,
-        ).grid(
-            sticky=ctk.NSEW,
-            padx=8,
-            pady=3,
-        )
-
-        self.rowconfigure((1, 2), weight=1)
-        self.columnconfigure(0, weight=1)
-
     def display_processed(self, processed):
         for child in self._processed.winfo_children():
             child.grid_remove()
 
         if len(processed) == 0:
+            self._processed.columnconfigure(0, weight=1)
+            self._processed.columnconfigure((1, 2), weight=1)
+
             sub = ctk.CTkFrame(
                 self._processed,
                 border_width=2,
@@ -91,6 +24,7 @@ class TraversalFrame(TraceFrame):
             sub.grid(
                 sticky=ctk.NSEW,
             )
+            sub.columnconfigure(0, weight=1)
 
             ctk.CTkLabel(
                 sub,
@@ -101,9 +35,6 @@ class TraversalFrame(TraceFrame):
                 padx=8,
                 pady=3,
             )
-
-            sub.columnconfigure(0, weight=1)
-            self._processed.columnconfigure(0, weight=1)
 
         else:
             row = 0
@@ -145,6 +76,9 @@ class TraversalFrame(TraceFrame):
             child.grid_remove()
 
         if len(other) == 0:
+            self._other.columnconfigure(0, weight=1)
+            self._other.columnconfigure((1, 2), weight=0)
+
             sub = ctk.CTkFrame(
                 self._other,
                 border_width=2,
@@ -153,6 +87,7 @@ class TraversalFrame(TraceFrame):
             sub.grid(
                 sticky=ctk.NSEW,
             )
+            sub.columnconfigure(0, weight=1)
 
             ctk.CTkLabel(
                 sub,
@@ -163,9 +98,6 @@ class TraversalFrame(TraceFrame):
                 padx=8,
                 pady=3,
             )
-
-            sub.columnconfigure(0, weight=1)
-            self._other.columnconfigure(0, weight=1)
 
         else:
             row = 0
@@ -185,6 +117,7 @@ class TraversalFrame(TraceFrame):
                     row=row,
                     column=column,
                 )
+                sub.columnconfigure(0, weight=1)
 
                 ctk.CTkLabel(
                     sub,
@@ -211,7 +144,10 @@ class BreadthFirstFrame(TraversalFrame):
 
         super().__init__(master, canvas_frame, title, from_node, to_node)
         self._iterator = iter(StateModel().breadth_first(self._from, self._to))
-        self.initial_setup(ProcessedScrollableFrame, PendingQueueScrollableFrame)
+        self.initial_setup(
+            lambda master: CustomScrollableFrame(master, "Processed Nodes"),
+            lambda master: CustomScrollableFrame(master, "Pending Queue"),
+        )
 
 
 class DepthFirstFrame(TraversalFrame):
@@ -223,4 +159,7 @@ class DepthFirstFrame(TraversalFrame):
 
         super().__init__(master, canvas_frame, title, from_node, to_node)
         self._iterator = iter(StateModel().depth_first(self._from, self._to))
-        self.initial_setup(ProcessedScrollableFrame, PendingStackScrollableFrame)
+        self.initial_setup(
+            lambda master: CustomScrollableFrame(master, "Processed Nodes"),
+            lambda master: CustomScrollableFrame(master, "Pending Stack"),
+        )

@@ -3,6 +3,12 @@ import customtkinter as ctk
 from abc import ABCMeta, abstractmethod
 
 
+class CustomScrollableFrame(ctk.CTkScrollableFrame):
+    def __init__(self, master, title):
+        super().__init__(master, label_text=title, label_anchor=ctk.CENTER)
+        self._scrollbar.configure(height=0)
+
+
 class TraceFrame(ctk.CTkFrame, metaclass=ABCMeta):
     def __init__(self, master, canvas_frame, title, from_node, to_node):
         super().__init__(master, fg_color="transparent", bg_color="transparent")
@@ -22,6 +28,58 @@ class TraceFrame(ctk.CTkFrame, metaclass=ABCMeta):
 
         self.highlight_anchor_points()
 
+    def initial_setup(self, upper_class, lower_class):
+        self._processed = upper_class(self)
+        self._processed.grid(sticky=ctk.NSEW, pady=(0, 15))
+        self._processed.columnconfigure(0, weight=1)
+
+        empty_frame = ctk.CTkFrame(
+            self._processed,
+            border_width=2,
+            border_color="black",
+        )
+        empty_frame.grid(
+            sticky=ctk.NSEW,
+        )
+        empty_frame.columnconfigure(0, weight=1)
+
+        ctk.CTkLabel(
+            empty_frame,
+            text="Empty",
+            anchor=ctk.CENTER,
+        ).grid(
+            sticky=ctk.NSEW,
+            padx=8,
+            pady=3,
+        )
+
+        self._other = lower_class(self)
+        self._other.grid(sticky=ctk.NSEW)
+        self._other.columnconfigure(0, weight=1)
+
+        empty_frame = ctk.CTkFrame(
+            self._other,
+            border_width=2,
+            border_color="black",
+        )
+        empty_frame.grid(
+            sticky=ctk.NSEW,
+        )
+        empty_frame.columnconfigure(0, weight=1)
+
+        ctk.CTkLabel(
+            empty_frame,
+            text="Empty",
+            anchor=ctk.CENTER,
+        ).grid(
+            sticky=ctk.NSEW,
+            padx=8,
+            pady=3,
+        )
+
+        self.rowconfigure((1, 2), weight=1)
+        self.columnconfigure(0, weight=1)
+
     def highlight_anchor_points(self):
         self._canvas_frame.highlight_start_node(self._from)
         if self._to is not None:
@@ -36,7 +94,6 @@ class TraceFrame(ctk.CTkFrame, metaclass=ABCMeta):
             self.display_other(other)
             self.highlight_anchor_points()
         except StopIteration:
-            # print("Algorithm complete")
             self.master.end_trace()
 
     def display_current(self):

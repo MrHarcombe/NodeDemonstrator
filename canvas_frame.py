@@ -404,7 +404,12 @@ class CanvasFrame(ctk.CTkFrame):
                             to_node = tag[5:]
                             # print("to:", to_id, to_node)
 
-                StateModel().add_edge(from_node, to_node, not directed, weight)
+                StateModel().add_edge(
+                    from_node,
+                    to_node,
+                    not directed,
+                    int(weight) if weight != "None" else None,
+                )
                 if from_node != to_node:
                     fx1, fy1, fx2, fy2 = self.__canvas.bbox(from_id)
                     fcx, fcy = (fx1 + fx2) / 2, (fy1 + fy2) / 2
@@ -551,7 +556,7 @@ class CanvasFrame(ctk.CTkFrame):
                         if values:
                             if values[0] != "None":
                                 StateModel().add_edge(
-                                    from_node, to_node, True, values[0]
+                                    from_node, to_node, True, int(values[0])
                                 )
                     else:
                         values = amend_edge_dialog(
@@ -565,11 +570,11 @@ class CanvasFrame(ctk.CTkFrame):
                         if values:
                             if values[0] != "None":
                                 StateModel().add_edge(
-                                    from_node, to_node, False, values[0]
+                                    from_node, to_node, False, int(values[0])
                                 )
                             if values[1] != "None":
                                 StateModel().add_edge(
-                                    to_node, from_node, False, values[1]
+                                    to_node, from_node, False, int(values[1])
                                 )
 
     def __double_right_click(self, event):
