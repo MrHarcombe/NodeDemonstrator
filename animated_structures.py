@@ -13,22 +13,23 @@ class AnimatedMatrixGraph(MatrixGraph):
             visited = []
             stack = [start_node]
 
+            yield (start_node, visited, stack)
+
             while len(stack) > 0:
                 current = stack.pop()
                 visited.append(current)
 
                 if current == end_node:
+                    yield ("", visited, stack)
                     break
 
                 else:
-                    yield (current, visited, stack)
-
                     for node, weight in self.get_connections(current):
                         if node not in discovered:
                             discovered.add(node)
                             stack.append(node)
 
-            yield ("", visited, stack)
+                    yield (current, visited, stack)
 
         return None
 
@@ -38,22 +39,23 @@ class AnimatedMatrixGraph(MatrixGraph):
             visited = []
             queue = [start_node]
 
+            yield (start_node, visited, queue)
+
             while len(queue) > 0:
                 current = queue.pop(0)
                 visited.append(current)
 
                 if current == end_node:
+                    yield ("", visited, queue)
                     break
 
                 else:
-                    yield (current, visited, queue)
-
                     for node, weight in self.get_connections(current):
                         if node not in discovered:
                             discovered.add(node)
                             queue.append(node)
 
-            yield ("", visited, queue)
+                    yield (current, visited, queue)
 
         return None
 
@@ -107,6 +109,7 @@ class AnimatedWeightedMatrixGraph(AnimatedMatrixGraph):
         data[start_node] = [0, None]
 
         heappush(queue, (0, start_node))
+        yield start_node, data, queue
 
         while len(queue) > 0:
             current_cost, current_node = heappop(queue)
@@ -115,14 +118,14 @@ class AnimatedWeightedMatrixGraph(AnimatedMatrixGraph):
                 break
 
             else:
-                yield current_node, data, queue
-
                 for neighbour, cost in self.get_connections(current_node):
                     previous_cost, _ = data[neighbour]
                     if current_cost + cost < previous_cost:
                         data[neighbour][0] = current_cost + cost
                         data[neighbour][1] = current_node
                         heappush(queue, (data[neighbour][0], neighbour))
+
+                yield current_node, data, queue
 
         if end_node is None:
             yield "", data, []
@@ -175,6 +178,7 @@ class AnimatedWeightedMatrixGraph(AnimatedMatrixGraph):
         f_score[start_node] = func(start_node, end_node)
 
         heappush(open_set, (f_score[start_node], start_node))
+        yield start_node, (f_score, g_score, came_from), open_set
 
         while len(open_set) > 0:
             _, current = heappop(open_set)
@@ -185,10 +189,9 @@ class AnimatedWeightedMatrixGraph(AnimatedMatrixGraph):
                     (f_score, g_score, came_from),
                     self.reconstruct_astar_path(came_from, current),
                 )
+                break
 
             else:
-                yield current, (f_score, g_score, came_from), open_set
-
                 for neighbour, cost in self.get_connections(current):
                     tentative_g_score = g_score[current] + cost
                     if tentative_g_score < g_score[neighbour]:
@@ -200,6 +203,8 @@ class AnimatedWeightedMatrixGraph(AnimatedMatrixGraph):
                         f_score[neighbour] = neighbour_f_score
                         if neighbour not in open_set:
                             heappush(open_set, (neighbour_f_score, neighbour))
+
+                yield current, (f_score, g_score, came_from), open_set
 
 
 if __name__ == "__main__":

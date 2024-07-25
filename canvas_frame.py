@@ -75,7 +75,8 @@ class CanvasFrame(ctk.CTkFrame):
 
     def set_canvas_from_dict(self, saved_canvas):
         self.empty()
-        for id in sorted(saved_canvas.keys()):
+        # Order really matters - so need to sort as integer, but then key back into dict as string
+        for id in list(map(str, sorted(map(int, saved_canvas.keys())))):
             type, coords, tags = saved_canvas[id]
             # print(type, tags)
 
@@ -94,24 +95,43 @@ class CanvasFrame(ctk.CTkFrame):
                 )
 
             elif type == "text":
-                node_name = None
-                node_label = None
-                for tag in tags:
-                    if tag.startswith("nodename_"):
-                        node_name = tag[9:]
+                if "node" in tags:
+                    node_name = None
+                    node_label = None
+                    for tag in tags:
+                        if tag.startswith("nodename_"):
+                            node_name = tag[9:]
 
-                    if tag.startswith("nodelabel_"):
-                        node_label = tag[10:]
+                        if tag.startswith("nodelabel_"):
+                            node_label = tag[10:]
 
-                self.__canvas.tag_raise(
-                    self.__canvas.create_text(
-                        *coords,
-                        fill="white",
-                        text=node_name if node_label is None else node_label,
-                        tags=tags,
-                    ),
-                    "node",
-                )
+                    # print(
+                    #     f"Creating text for node {node_name if node_label is None else node_label} at coords {coords}"
+                    # )
+                    self.__canvas.tag_raise(
+                        self.__canvas.create_text(
+                            *coords,
+                            fill="white",
+                            text=node_name if node_label is None else node_label,
+                            tags=tags,
+                        ),
+                        "node",
+                    )
+
+                elif "cost" in tags:
+                    weight = 1
+                    for tag in tags:
+                        if tag.startswith("costvalue_"):
+                            weight = tag[10:]
+
+                    self.__canvas.tag_lower(
+                        self.__canvas.create_text(
+                            *coords,
+                            fill="black",
+                            text=weight,
+                            tags=tags,
+                        )
+                    )
 
             elif type == "line":
                 self.__canvas.tag_lower(
@@ -232,10 +252,10 @@ class CanvasFrame(ctk.CTkFrame):
         operation = StateModel().get_operation()
         if operation == "Nodes":
             possible = self.__canvas.find_overlapping(
-                canvas_xy.x - NODE_RADIUS // 2,
-                canvas_xy.y - NODE_RADIUS // 2,
-                canvas_xy.x + NODE_RADIUS // 2,
-                canvas_xy.y + NODE_RADIUS // 2,
+                canvas_xy.x - NODE_RADIUS // 4,
+                canvas_xy.y - NODE_RADIUS // 4,
+                canvas_xy.x + NODE_RADIUS // 4,
+                canvas_xy.y + NODE_RADIUS // 4,
             )
 
             if len(possible) != 0:
@@ -264,10 +284,10 @@ class CanvasFrame(ctk.CTkFrame):
 
         elif operation == "Edges":
             possible = self.__canvas.find_overlapping(
-                canvas_xy.x - NODE_RADIUS // 2,
-                canvas_xy.y - NODE_RADIUS // 2,
-                canvas_xy.x + NODE_RADIUS // 2,
-                canvas_xy.y + NODE_RADIUS // 2,
+                canvas_xy.x - NODE_RADIUS // 4,
+                canvas_xy.y - NODE_RADIUS // 4,
+                canvas_xy.x + NODE_RADIUS // 4,
+                canvas_xy.y + NODE_RADIUS // 4,
             )
 
             if len(possible) != 0:
@@ -280,7 +300,9 @@ class CanvasFrame(ctk.CTkFrame):
                 self.__selected = list(
                     filter(
                         lambda tagOrId: any(
-                            "node" == tag or "edge_loopback" == tag
+                            "node" == tag
+                            or "edge_loopback" == tag
+                            or "cost_loopback" == tag
                             for tag in self.__canvas.gettags(tagOrId)
                         ),
                         self.__selected,
@@ -308,7 +330,11 @@ class CanvasFrame(ctk.CTkFrame):
             if operation == "Nodes":
                 for id in self.__selected:
                     tags = self.__canvas.gettags(id)
-                    if "node" in tags or "edge_loopback" in tags:
+                    if (
+                        "node" in tags
+                        or "edge_loopback" in tags
+                        or "cost_loopback" in tags
+                    ):
                         self.__canvas.move(
                             id,
                             canvas_xy.x - self.__current[0],
@@ -319,10 +345,8 @@ class CanvasFrame(ctk.CTkFrame):
                     tags = self.__canvas.gettags(id)
                     if "edge" in tags and "edge_loopback" not in tags:
                         for tag in tags:
-                            if tag.startswith("edge_from_"):
-                                from_node = tag[10:]
-                            if tag.startswith("edge_to_"):
-                                to_node = tag[8:]
+                            if tag.startswith("edge_fromto_"):
+                                _, _, from_node, to_node = tag.split("_")
 
                         fx1, fy1, fx2, fy2 = self.__canvas.bbox(f"node_{from_node}")
                         fcx, fcy = (fx1 + fx2) / 2, (fy1 + fy2) / 2
@@ -331,9 +355,29 @@ class CanvasFrame(ctk.CTkFrame):
                         self.__canvas.coords(id, fcx, fcy, tcx, tcy)
                         self.__canvas.tag_lower(id, "node")
 
+                    elif "cost" in tags and "cost_loopback" not in tags:
+                        for tag in tags:
+                            if tag.startswith("cost_fromto_"):
+                                _, _, from_node, to_node = tag.split("_")
+
+                        ex1, ey1, ex2, ey2 = self.__canvas.bbox(
+                            f"edge_fromto_{from_node}_{to_node}"
+                        )
+                        lcx = ((ex1 + ex2) / 2) + 10
+                        lcy = ((ey1 + ey2) / 2) - 10
+                        self.__canvas.coords(id, lcx, lcy)
+                        self.__canvas.tag_lower(id, "edge")
+
                 self.__current = (canvas_xy.x, canvas_xy.y)
 
             elif operation == "Edges":
+                # for sel in self.__selected:
+                #   print(sel, self.__canvas.gettags(sel))
+
+                loopback = -1
+                cost_loopback = -1
+                node = -1
+
                 try:
                     loopback = next(
                         tagOrId
@@ -342,6 +386,17 @@ class CanvasFrame(ctk.CTkFrame):
                         if tag == "edge_loopback"
                     )
 
+                    try:
+                        cost_loopback = next(
+                            tagOrId
+                            for tagOrId in self.__selected
+                            for tag in self.__canvas.gettags(tagOrId)
+                            if tag == "cost_loopback"
+                        )
+                    except StopIteration:
+                        # may not have a weighting
+                        pass
+
                     node = next(
                         tagOrId
                         for tagOrId in self.__selected
@@ -349,11 +404,15 @@ class CanvasFrame(ctk.CTkFrame):
                         if tag == "node"
                     )
 
+                    # print(loopback, cost_loopback, node)
+
                     nx1, ny1, nx2, ny2 = self.__canvas.bbox(node)
                     ncx, ncy = (nx1 + nx2) / 2, (ny1 + ny2) / 2
 
                     rotation = canvas_xy.x - self.__current[0]
                     self.__rotate_object(loopback, (ncx, ncy), -rotation)
+                    if cost_loopback != -1:
+                        self.__rotate_object(cost_loopback, (ncx, ncy), -rotation)
                     self.__current = (canvas_xy.x, canvas_xy.y)
 
                 except StopIteration:
@@ -378,10 +437,10 @@ class CanvasFrame(ctk.CTkFrame):
 
         if operation == "Edges":
             possible = self.__canvas.find_overlapping(
-                canvas_xy.x - NODE_RADIUS // 2,
-                canvas_xy.y - NODE_RADIUS // 2,
-                canvas_xy.x + NODE_RADIUS // 2,
-                canvas_xy.y + NODE_RADIUS // 2,
+                canvas_xy.x - NODE_RADIUS // 4,
+                canvas_xy.y - NODE_RADIUS // 4,
+                canvas_xy.x + NODE_RADIUS // 4,
+                canvas_xy.y + NODE_RADIUS // 4,
             )
 
             if len(possible) != 0:
@@ -415,6 +474,7 @@ class CanvasFrame(ctk.CTkFrame):
                     fcx, fcy = (fx1 + fx2) / 2, (fy1 + fy2) / 2
                     tx1, ty1, tx2, ty2 = self.__canvas.bbox(to_id)
                     tcx, tcy = (tx1 + tx2) / 2, (ty1 + ty2) / 2
+                    lcx, lcy = ((fcx + tcx) / 2) + 10, ((fcy + tcy) / 2) - 10
 
                     if directed:
                         self.__canvas.tag_lower(
@@ -429,13 +489,28 @@ class CanvasFrame(ctk.CTkFrame):
                                     "edge",
                                     f"edge_{from_node}",
                                     f"edge_{to_node}",
-                                    f"edge_from_{from_node}",
-                                    f"edge_to_{to_node}",
                                     f"edge_fromto_{from_node}_{to_node}",
                                 ),
                             ),
                             "node",
                         )
+                        if weight != "None":
+                            self.__canvas.tag_lower(
+                                self.__canvas.create_text(
+                                    lcx,
+                                    lcy,
+                                    fill="black",
+                                    text=weight,
+                                    tags=(
+                                        "cost",
+                                        f"cost_{from_node}",
+                                        f"cost_{to_node}",
+                                        f"cost_fromto_{from_node}_{to_node}",
+                                        f"costvalue_{weight}",
+                                    ),
+                                ),
+                                "edge",
+                            )
 
                     else:
                         self.__canvas.tag_lower(
@@ -449,13 +524,30 @@ class CanvasFrame(ctk.CTkFrame):
                                     "edge",
                                     f"edge_{from_node}",
                                     f"edge_{to_node}",
-                                    f"edge_from_{from_node}",
-                                    f"edge_to_{to_node}",
                                     f"edge_fromto_{from_node}_{to_node}",
+                                    f"edge_fromto_{to_node}_{from_node}",
                                 ),
                             ),
                             "node",
                         )
+                        if weight != "None":
+                            self.__canvas.tag_lower(
+                                self.__canvas.create_text(
+                                    lcx,
+                                    lcy,
+                                    fill="black",
+                                    text=weight,
+                                    tags=(
+                                        "cost",
+                                        f"cost_{from_node}",
+                                        f"cost_{to_node}",
+                                        f"cost_fromto_{from_node}_{to_node}",
+                                        f"cost_fromto_{to_node}_{from_node}",
+                                        f"costvalue_{weight}",
+                                    ),
+                                ),
+                                "edge",
+                            )
 
                 else:
                     existing = self.__canvas.find_withtag(f"edge_loopback_{from_node}")
@@ -477,6 +569,24 @@ class CanvasFrame(ctk.CTkFrame):
                             ),
                             "node",
                         )
+                        if weight != "None":
+                            self.__canvas.tag_lower(
+                                self.__canvas.create_text(
+                                    lcx + NODE_RADIUS * 2,
+                                    lcy + NODE_RADIUS * 2,
+                                    fill="black",
+                                    text=weight,
+                                    tags=(
+                                        "cost",
+                                        "cost_loopback",
+                                        f"cost_loopback_{from_node}",
+                                        f"cost_{from_node}",
+                                        f"cost_fromto_{from_node}_{to_node}",
+                                        f"costvalue_{weight}",
+                                    ),
+                                ),
+                                "edge",
+                            )
 
     def __double_click(self, event):
         """
@@ -492,10 +602,10 @@ class CanvasFrame(ctk.CTkFrame):
 
         if operation == "Nodes":
             possible = self.__canvas.find_overlapping(
-                canvas_xy.x - NODE_RADIUS // 2,
-                canvas_xy.y - NODE_RADIUS // 2,
-                canvas_xy.x + NODE_RADIUS // 2,
-                canvas_xy.y + NODE_RADIUS // 2,
+                canvas_xy.x - NODE_RADIUS // 4,
+                canvas_xy.y - NODE_RADIUS // 4,
+                canvas_xy.x + NODE_RADIUS // 4,
+                canvas_xy.y + NODE_RADIUS // 4,
             )
 
             if len(possible) != 0:
@@ -524,10 +634,10 @@ class CanvasFrame(ctk.CTkFrame):
             # editing the cost of travelling the path
             if StateModel().is_weighted():
                 possible = self.__canvas.find_overlapping(
-                    canvas_xy.x - NODE_RADIUS // 2,
-                    canvas_xy.y - NODE_RADIUS // 2,
-                    canvas_xy.x + NODE_RADIUS // 2,
-                    canvas_xy.y + NODE_RADIUS // 2,
+                    canvas_xy.x - NODE_RADIUS // 4,
+                    canvas_xy.y - NODE_RADIUS // 4,
+                    canvas_xy.x + NODE_RADIUS // 4,
+                    canvas_xy.y + NODE_RADIUS // 4,
                 )
 
                 if len(possible) != 0:
@@ -536,10 +646,8 @@ class CanvasFrame(ctk.CTkFrame):
                     from_node = None
                     to_node = None
                     for tag in tags:
-                        if tag.startswith("edge_from_"):
-                            from_node = tag[10:]
-                        if tag.startswith("edge_to_"):
-                            to_node = tag[8:]
+                        if tag.startswith("edge_fromto_"):
+                            _, _, from_node, to_node = tag.split("_")
 
                     fromto = StateModel().has_edge(from_node, to_node)
                     tofrom = StateModel().has_edge(to_node, from_node)
@@ -591,10 +699,10 @@ class CanvasFrame(ctk.CTkFrame):
 
         if operation == "Nodes":
             possible = self.__canvas.find_overlapping(
-                canvas_xy.x - NODE_RADIUS // 2,
-                canvas_xy.y - NODE_RADIUS // 2,
-                canvas_xy.x + NODE_RADIUS // 2,
-                canvas_xy.y + NODE_RADIUS // 2,
+                canvas_xy.x - NODE_RADIUS // 4,
+                canvas_xy.y - NODE_RADIUS // 4,
+                canvas_xy.x + NODE_RADIUS // 4,
+                canvas_xy.y + NODE_RADIUS // 4,
             )
 
             if len(possible) != 0:
@@ -624,10 +732,10 @@ class CanvasFrame(ctk.CTkFrame):
 
         elif operation == "Edges":
             possible = self.__canvas.find_overlapping(
-                canvas_xy.x - NODE_RADIUS // 2,
-                canvas_xy.y - NODE_RADIUS // 2,
-                canvas_xy.x + NODE_RADIUS // 2,
-                canvas_xy.y + NODE_RADIUS // 2,
+                canvas_xy.x - NODE_RADIUS // 4,
+                canvas_xy.y - NODE_RADIUS // 4,
+                canvas_xy.x + NODE_RADIUS // 4,
+                canvas_xy.y + NODE_RADIUS // 4,
             )
 
             if len(possible) != 0:
@@ -637,8 +745,7 @@ class CanvasFrame(ctk.CTkFrame):
                         # there may be multiple hits, but the one we want to use has multiple tags, one is the generic
                         # "edge", one of the others contains the text we need...
                         if tag.startswith("edge_fromto_"):
-                            suffix = tag[12:]
-                            node_from, node_to = suffix.split("_")
+                            _, _, node_from, node_to = tag.split("_")
                             if messagebox.askyesno(
                                 message=f"Are you sure you want to delete the edge from '{node_from}' to '{node_to}'?"
                             ):
@@ -677,6 +784,9 @@ class CanvasFrame(ctk.CTkFrame):
                 associated = associated.union(
                     self.__canvas.find_withtag(f"edge_{node}")
                 )
+                associated = associated.union(
+                    self.__canvas.find_withtag(f"cost_{node}")
+                )
 
             elif "edge_loopback" in tags:
                 associated = associated.union([tagOrId])
@@ -690,13 +800,17 @@ class CanvasFrame(ctk.CTkFrame):
                         associated = associated.union(
                             self.__canvas.find_withtag(f"nodename_{node}")
                         )
+                        associated = associated.union(
+                            self.__canvas.find_withtag(f"cost_loopback_{node}")
+                        )
 
-            elif "edge" in tags:
+            elif "edge" in tags or "cost" in tags:
                 pass
 
             else:
                 raise ValueError(f"Unknown object on canvas with tags {tags}")
 
+        # print(associated)
         return list(associated)
 
     ###

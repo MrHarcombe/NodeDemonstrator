@@ -48,7 +48,7 @@ class DijkstraShortestPathFrame(TraceFrame):
         else:
             self._processed.columnconfigure(0, weight=1)
 
-            for row, node in enumerate(processed):
+            for row, node in enumerate(sorted(processed)):
                 cost, previous = processed[node]
                 self._canvas_frame.highlight_processed_node(node)
 
@@ -127,11 +127,11 @@ class DijkstraShortestPathFrame(TraceFrame):
 
         else:
             self._other.columnconfigure(0, weight=1)
-            print(type(other), other, type(other[0]))
+            # print(type(other), other, type(other[0]))
 
             # incoming tuples mean algorithm is still on-going
             if type(other[0]) is tuple:
-                for row, (cost, node) in enumerate(other):
+                for row, (cost, node) in enumerate(sorted(other)):
                     self._canvas_frame.highlight_pending_node(node)
                     sub = ctk.CTkFrame(
                         self._other,
@@ -345,7 +345,7 @@ class AStarShortestPathFrame(TraceFrame):
 
             # incoming tuples mean algorithm is still on-going
             if type(other[0]) is tuple:
-                for row, (cost, node) in enumerate(other):
+                for row, (cost, node) in enumerate(sorted(other)):
                     self._canvas_frame.highlight_pending_node(node)
                     sub = ctk.CTkFrame(
                         self._other,
