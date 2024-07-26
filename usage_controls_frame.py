@@ -1,5 +1,6 @@
 import customtkinter as ctk
 
+from state_model import StateModel
 from traversal_frames import BreadthFirstFrame, DepthFirstFrame
 from optimisation_frames import DijkstraShortestPathFrame, AStarShortestPathFrame
 
@@ -19,6 +20,11 @@ class UsageControlsFrame(ctk.CTkFrame):
 
     def __init__(self, parent, canvas_frame):
         super().__init__(parent)
+        self.bind(
+            "<Expose>",
+            lambda event: StateModel().set_current_tab(self.__class__.__name__),
+        )
+
         self.__canvas_frame = canvas_frame
         self.__algochoice = ctk.StringVar(value=UsageControlsFrame.ALGOCHOICES[0])
         self.__from = ctk.StringVar()

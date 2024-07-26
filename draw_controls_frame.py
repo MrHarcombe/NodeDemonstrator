@@ -13,6 +13,12 @@ class DrawControlsFrame(ctk.CTkFrame):
 
     def __init__(self, parent, canvas_frame):
         super().__init__(parent)
+
+        self.bind(
+            "<Expose>",
+            lambda event: StateModel().set_current_tab(self.__class__.__name__),
+        )
+
         self.__canvas_frame = canvas_frame
         self.__operation = ctk.StringVar(value="Nodes")
         self.__directed = ctk.BooleanVar(value=False)

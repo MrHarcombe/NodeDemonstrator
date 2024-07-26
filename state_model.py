@@ -18,6 +18,7 @@ class StateModel:
             # Put any initialization here.
             cls.__instance.__graph = AnimatedWeightedMatrixGraph()
             cls.__instance.__filename = None
+            cls.__instance.__tab_name = "DrawControlsFrame"
             cls.__instance.__operation = "Nodes"
             cls.__instance.__directed = False
             cls.__instance.__weight = 1
@@ -74,6 +75,12 @@ class StateModel:
         self.__operation = mode
         self.__directed = directed
         self.__weight = cost
+
+    def set_current_tab(self, tab_name):
+        self.__tab_name = tab_name
+
+    def get_current_tab(self):
+        return self.__tab_name
 
     def get_operation(self):
         return self.__operation

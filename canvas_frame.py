@@ -1,7 +1,7 @@
 import customtkinter as ctk
 from tkinter import messagebox
 from collections import namedtuple
-from math import radians, sin, cos
+from math import radians, sin, cos, atan2
 
 from rename_dialog import rename_dialog
 from amend_dialog import amend_edge_dialog
@@ -12,6 +12,7 @@ Canvas_XY = namedtuple("Canvas_XY", "x,y")
 
 # drawing dimensions
 NODE_RADIUS = 50
+ARC_BULGE = 40
 
 
 class CanvasFrame(ctk.CTkFrame):
@@ -134,14 +135,21 @@ class CanvasFrame(ctk.CTkFrame):
                     )
 
             elif type == "line":
-                self.__canvas.tag_lower(
-                    self.__canvas.create_line(
-                        *coords,
-                        width=2,
-                        tags=tags,
-                    ),
-                    "node",
-                )
+                # True (ie non-zero) if there is a tag containing "tofrom" thus the edge was undirected
+                if len([tag for tag in tags if "tofrom" in tag]):
+                    self.__canvas.tag_lower(
+                        self.__canvas.create_line(
+                            *coords,
+                            width=2,
+                            tags=tags,
+                        ),
+                        "node",
+                    )
+                else:
+                    self.__canvas.tag_raise(
+                        self.__create_arc_with_arrow(*(coords[:2] + coords[-2:]), tags),
+                        "node",
+                    )
 
             elif type == "polygon":
                 self.__canvas.create_polygon(
@@ -247,6 +255,11 @@ class CanvasFrame(ctk.CTkFrame):
 
         If creating, always create a circle and text node with associated tags.
         """
+
+        # can only make changes if the DrawControlsFrame is showing
+        if StateModel().get_current_tab() != "DrawControlsFrame":
+            return
+
         canvas_xy = self.__event_to_canvas(event)
 
         operation = StateModel().get_operation()
@@ -323,6 +336,11 @@ class CanvasFrame(ctk.CTkFrame):
         But if the operation is "Edges", and something is selected, then the user must be rotating a loopback around...
         so behave accordingly.
         """
+
+        # can only make changes if the DrawControlsFrame is showing
+        if StateModel().get_current_tab() != "DrawControlsFrame":
+            return
+
         if self.__selected is not None:
             canvas_xy = self.__event_to_canvas(event)
             operation = StateModel().get_operation()
@@ -352,8 +370,14 @@ class CanvasFrame(ctk.CTkFrame):
                         fcx, fcy = (fx1 + fx2) / 2, (fy1 + fy2) / 2
                         tx1, ty1, tx2, ty2 = self.__canvas.bbox(f"node_{to_node}")
                         tcx, tcy = (tx1 + tx2) / 2, (ty1 + ty2) / 2
-                        self.__canvas.coords(id, fcx, fcy, tcx, tcy)
-                        self.__canvas.tag_lower(id, "node")
+
+                        if f"edge_tofrom_{from_node}_{to_node}" in tags:
+                            self.__canvas.coords(id, fcx, fcy, tcx, tcy)
+                            # self.__canvas.tag_lower(id, "node")
+
+                        else:
+                            self.__redraw_arc_with_arrow(id, fcx, fcy, tcx, tcy)
+                            # self.__canvas.tag_lower(id, "node")
 
                     elif "cost" in tags and "cost_loopback" not in tags:
                         for tag in tags:
@@ -366,7 +390,7 @@ class CanvasFrame(ctk.CTkFrame):
                         lcx = ((ex1 + ex2) / 2) + 10
                         lcy = ((ey1 + ey2) / 2) - 10
                         self.__canvas.coords(id, lcx, lcy)
-                        self.__canvas.tag_lower(id, "edge")
+                        # self.__canvas.tag_lower(id, "edge")
 
                 self.__current = (canvas_xy.x, canvas_xy.y)
 
@@ -426,6 +450,10 @@ class CanvasFrame(ctk.CTkFrame):
         (note: loopbacks are allowed).
         """
 
+        # can only make changes if the DrawControlsFrame is showing
+        if StateModel().get_current_tab() != "DrawControlsFrame":
+            return
+
         # don't try and do anything if there's nothing selected
         if self.__selected is None:
             return
@@ -477,14 +505,12 @@ class CanvasFrame(ctk.CTkFrame):
                     lcx, lcy = ((fcx + tcx) / 2) + 10, ((fcy + tcy) / 2) - 10
 
                     if directed:
-                        self.__canvas.tag_lower(
-                            self.__canvas.create_line(
+                        self.__canvas.tag_raise(
+                            self.__create_arc_with_arrow(
                                 fcx,
                                 fcy,
                                 tcx,
                                 tcy,
-                                arrow=ctk.LAST,
-                                width=2,
                                 tags=(
                                     "edge",
                                     f"edge_{from_node}",
@@ -525,7 +551,7 @@ class CanvasFrame(ctk.CTkFrame):
                                     f"edge_{from_node}",
                                     f"edge_{to_node}",
                                     f"edge_fromto_{from_node}_{to_node}",
-                                    f"edge_fromto_{to_node}_{from_node}",
+                                    f"edge_tofrom_{from_node}_{to_node}",
                                 ),
                             ),
                             "node",
@@ -542,7 +568,7 @@ class CanvasFrame(ctk.CTkFrame):
                                         f"cost_{from_node}",
                                         f"cost_{to_node}",
                                         f"cost_fromto_{from_node}_{to_node}",
-                                        f"cost_fromto_{to_node}_{from_node}",
+                                        f"cost_tofrom_{from_node}_{to_node}",
                                         f"costvalue_{weight}",
                                     ),
                                 ),
@@ -597,6 +623,11 @@ class CanvasFrame(ctk.CTkFrame):
 
         If editing "Edges" then there should only be one id returned.
         """
+
+        # can only make changes if the DrawControlsFrame is showing
+        if StateModel().get_current_tab() != "DrawControlsFrame":
+            return
+
         canvas_xy = self.__event_to_canvas(event)
         operation = StateModel().get_operation()
 
@@ -694,6 +725,11 @@ class CanvasFrame(ctk.CTkFrame):
 
         If deleting "Edges" then there should only be one id returned - just remove that one.
         """
+
+        # can only make changes if the DrawControlsFrame is showing
+        if StateModel().get_current_tab() != "DrawControlsFrame":
+            return
+
         canvas_xy = self.__event_to_canvas(event)
         operation = StateModel().get_operation()
 
@@ -836,22 +872,47 @@ class CanvasFrame(ctk.CTkFrame):
         )
 
     def __create_arc_with_arrow(self, from_cx, from_cy, to_cx, to_cy, tags):
-        radius = 250
-        coords = []
+        """
+        Code taken from the author's own answer at
+        https://stackoverflow.com/questions/36958438/draw-an-arc-between-two-points-on-a-tkinter-canvas
+        """
 
-        for t in range(270, 360, 4):
-            x = radius * cos(radians(t))
-            y = radius * sin(radians(t))
-            coords += (x, y)
+        t = atan2(to_cy - from_cy, to_cx - from_cx)
+        mid_x = (from_cx + to_cx) / 2 + ARC_BULGE * sin(t)
+        mid_y = (from_cy + to_cy) / 2 - ARC_BULGE * cos(t)
 
-        id = self.__canvas.create_line(
-            coords,
-            arrow="last",
-            smooth=1,
+        return self.__canvas.create_line(
+            from_cx,
+            from_cy,
+            mid_x,
+            mid_y,
+            to_cx,
+            to_cy,
+            fill="blue",
+            width=2,
+            arrow=ctk.LAST,
+            smooth=True,
             tags=tags,
         )
-        self.__canvas.coords(id, from_cx, from_cy, to_cx, to_cy)
-        return id
+
+    def __redraw_arc_with_arrow(self, tagOrId, from_cx, from_cy, to_cx, to_cy):
+        """
+        Adapted from above
+        """
+
+        t = atan2(to_cy - from_cy, to_cx - from_cx)
+        mid_x = (from_cx + to_cx) / 2 + ARC_BULGE * sin(t)
+        mid_y = (from_cy + to_cy) / 2 - ARC_BULGE * cos(t)
+
+        return self.__canvas.coords(
+            tagOrId,
+            from_cx,
+            from_cy,
+            mid_x,
+            mid_y,
+            to_cx,
+            to_cy,
+        )
 
     def __rotate_object(self, tagOrId, origin, angle):
         """
