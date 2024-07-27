@@ -17,7 +17,7 @@ class StateModel:
 
             # Put any initialization here.
             cls.__instance.__graph = AnimatedWeightedMatrixGraph()
-            cls.__instance.__filename = None
+            cls.__instance.__filename = ""
             cls.__instance.__tab_name = "DrawControlsFrame"
             cls.__instance.__operation = "Nodes"
             cls.__instance.__directed = False
@@ -37,11 +37,7 @@ class StateModel:
         yield from chain(*[product(ascii_uppercase, repeat=i) for i in range(1, 1_000)])
 
     def create_new(self, weighted=True):
-        # need to check if changed, and if so save the current
-        if self.__changed:
-            pass
-
-        # ask if the graph is to be weighted
+        # check which type of graph to create
         if weighted:
             self.__graph = AnimatedWeightedMatrixGraph()
             self.__weight = 1
@@ -58,7 +54,12 @@ class StateModel:
     def get_graph_matrix(self):
         return self.__graph.matrix
 
-    def set_graph_matrix(self, saved_matrix):
+    def set_graph_matrix(self, saved_matrix, is_weighted):
+        if is_weighted:
+            self.__graph = AnimatedWeightedMatrixGraph()
+        else:
+            self.__graph = AnimatedMatrixGraph()
+
         self.__graph.matrix = saved_matrix
         last_node = max(self.__graph.matrix[0])
 
@@ -67,6 +68,18 @@ class StateModel:
 
         while self.get_next_node_name() < last_node:
             pass
+
+    def is_changed(self):
+        return self.__changed
+
+    def set_changed(self, changed=True):
+        self.__changed = changed
+
+    def get_filename(self):
+        return self.__filename
+
+    def set_filename(self, filename):
+        self.__filename = filename
 
     def is_weighted(self):
         return isinstance(self.__graph, AnimatedWeightedMatrixGraph)

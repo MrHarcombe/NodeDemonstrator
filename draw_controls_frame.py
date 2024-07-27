@@ -1,7 +1,9 @@
 import customtkinter as ctk
+import tkinter.messagebox as messagebox
 
 # from pickle import dump, load, HIGHEST_PROTOCOL
 from json import dump, load
+from os.path import basename, dirname
 from state_model import StateModel
 
 
@@ -180,9 +182,16 @@ class DrawControlsFrame(ctk.CTkFrame):
         )
 
     def __create_new(self):
-        weighted = (
-            ctk.messagebox.askyesno(message="Will the graph be weighted?") == ctk.YES
-        )
+        if StateModel().is_changed():
+            if (
+                messagebox.askyesno(
+                    message="Graph has changes. Do you wish to save, before starting over?"
+                )
+                == ctk.YES
+            ):
+                self.__save_file()
+
+        weighted = messagebox.askyesno(message="Will the graph be weighted?") == ctk.YES
         StateModel().create_new(weighted)
         self.__canvas_frame.empty()
         self.__operation.set("Nodes")
@@ -193,12 +202,22 @@ class DrawControlsFrame(ctk.CTkFrame):
         file_contents = {
             "canvas": self.__canvas_frame.get_canvas_as_dict(),
             "graph": StateModel().get_graph_matrix(),
+            "weighted": StateModel().is_weighted(),
         }
+
+        filename, directory = "", "."
+
+        current_filename = StateModel().get_filename()
+        if current_filename is not None and len(current_filename) > 0:
+            filename = basename(current_filename)
+            directory = dirname(current_filename)
 
         filename = ctk.filedialog.asksaveasfilename(
             parent=self,
             title="Save Graph",
             defaultextension=".nd",
+            initialdir=directory,
+            initialfile=filename,
             filetypes=[("Node Demonstrator", ".nd")],
             confirmoverwrite=True,
         )
@@ -214,7 +233,13 @@ class DrawControlsFrame(ctk.CTkFrame):
             filetypes=[("Node Demonstrator", ".nd")],
         )
         if filename is not None:
+            StateModel().set_filename(filename)
             with open(filename, "r") as file:
                 file_contents = load(file)
                 self.__canvas_frame.set_canvas_from_dict(file_contents["canvas"])
-                StateModel().set_graph_matrix(file_contents["graph"])
+                StateModel().set_graph_matrix(
+                    file_contents["graph"],
+                    file_contents["weighted"],
+                )
+        self.__weight.set("1" if StateModel().is_weighted() else "None")
+        self.__toggle_mode_switch()

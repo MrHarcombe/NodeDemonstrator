@@ -261,8 +261,9 @@ class CanvasFrame(ctk.CTkFrame):
             return
 
         canvas_xy = self.__event_to_canvas(event)
-
         operation = StateModel().get_operation()
+        StateModel().set_changed()
+
         if operation == "Nodes":
             possible = self.__canvas.find_overlapping(
                 canvas_xy.x - NODE_RADIUS // 4,
@@ -341,107 +342,106 @@ class CanvasFrame(ctk.CTkFrame):
         if StateModel().get_current_tab() != "DrawControlsFrame":
             return
 
-        if self.__selected is not None:
-            canvas_xy = self.__event_to_canvas(event)
-            operation = StateModel().get_operation()
+        if self.__selected is None:
+            return
 
-            if operation == "Nodes":
-                for id in self.__selected:
-                    tags = self.__canvas.gettags(id)
-                    if (
-                        "node" in tags
-                        or "edge_loopback" in tags
-                        or "cost_loopback" in tags
-                    ):
-                        self.__canvas.move(
-                            id,
-                            canvas_xy.x - self.__current[0],
-                            canvas_xy.y - self.__current[1],
-                        )
+        canvas_xy = self.__event_to_canvas(event)
+        operation = StateModel().get_operation()
+        StateModel().set_changed()
 
-                for id in self.__selected:
-                    tags = self.__canvas.gettags(id)
-                    if "edge" in tags and "edge_loopback" not in tags:
-                        for tag in tags:
-                            if tag.startswith("edge_fromto_"):
-                                _, _, from_node, to_node = tag.split("_")
+        if operation == "Nodes":
+            for id in self.__selected:
+                tags = self.__canvas.gettags(id)
+                if "node" in tags or "edge_loopback" in tags or "cost_loopback" in tags:
+                    self.__canvas.move(
+                        id,
+                        canvas_xy.x - self.__current[0],
+                        canvas_xy.y - self.__current[1],
+                    )
 
-                        fx1, fy1, fx2, fy2 = self.__canvas.bbox(f"node_{from_node}")
-                        fcx, fcy = (fx1 + fx2) / 2, (fy1 + fy2) / 2
-                        tx1, ty1, tx2, ty2 = self.__canvas.bbox(f"node_{to_node}")
-                        tcx, tcy = (tx1 + tx2) / 2, (ty1 + ty2) / 2
+            for id in self.__selected:
+                tags = self.__canvas.gettags(id)
+                if "edge" in tags and "edge_loopback" not in tags:
+                    for tag in tags:
+                        if tag.startswith("edge_fromto_"):
+                            _, _, from_node, to_node = tag.split("_")
 
-                        if f"edge_tofrom_{from_node}_{to_node}" in tags:
-                            self.__canvas.coords(id, fcx, fcy, tcx, tcy)
-                            # self.__canvas.tag_lower(id, "node")
+                    fx1, fy1, fx2, fy2 = self.__canvas.bbox(f"node_{from_node}")
+                    fcx, fcy = (fx1 + fx2) / 2, (fy1 + fy2) / 2
+                    tx1, ty1, tx2, ty2 = self.__canvas.bbox(f"node_{to_node}")
+                    tcx, tcy = (tx1 + tx2) / 2, (ty1 + ty2) / 2
 
-                        else:
-                            self.__redraw_arc_with_arrow(id, fcx, fcy, tcx, tcy)
-                            # self.__canvas.tag_lower(id, "node")
+                    if f"edge_tofrom_{from_node}_{to_node}" in tags:
+                        self.__canvas.coords(id, fcx, fcy, tcx, tcy)
+                        # self.__canvas.tag_lower(id, "node")
 
-                    elif "cost" in tags and "cost_loopback" not in tags:
-                        for tag in tags:
-                            if tag.startswith("cost_fromto_"):
-                                _, _, from_node, to_node = tag.split("_")
+                    else:
+                        self.__redraw_arc_with_arrow(id, fcx, fcy, tcx, tcy)
+                        # self.__canvas.tag_lower(id, "node")
 
-                        ex1, ey1, ex2, ey2 = self.__canvas.bbox(
-                            f"edge_fromto_{from_node}_{to_node}"
-                        )
-                        lcx = ((ex1 + ex2) / 2) + 10
-                        lcy = ((ey1 + ey2) / 2) - 10
-                        self.__canvas.coords(id, lcx, lcy)
-                        # self.__canvas.tag_lower(id, "edge")
+                elif "cost" in tags and "cost_loopback" not in tags:
+                    for tag in tags:
+                        if tag.startswith("cost_fromto_"):
+                            _, _, from_node, to_node = tag.split("_")
 
-                self.__current = (canvas_xy.x, canvas_xy.y)
+                    ex1, ey1, ex2, ey2 = self.__canvas.bbox(
+                        f"edge_fromto_{from_node}_{to_node}"
+                    )
+                    lcx = ((ex1 + ex2) / 2) + 10
+                    lcy = ((ey1 + ey2) / 2) - 10
+                    self.__canvas.coords(id, lcx, lcy)
+                    # self.__canvas.tag_lower(id, "edge")
 
-            elif operation == "Edges":
-                # for sel in self.__selected:
-                #   print(sel, self.__canvas.gettags(sel))
+            self.__current = (canvas_xy.x, canvas_xy.y)
 
-                loopback = -1
-                cost_loopback = -1
-                node = -1
+        elif operation == "Edges":
+            # for sel in self.__selected:
+            #   print(sel, self.__canvas.gettags(sel))
+
+            loopback = -1
+            cost_loopback = -1
+            node = -1
+
+            try:
+                loopback = next(
+                    tagOrId
+                    for tagOrId in self.__selected
+                    for tag in self.__canvas.gettags(tagOrId)
+                    if tag == "edge_loopback"
+                )
 
                 try:
-                    loopback = next(
+                    cost_loopback = next(
                         tagOrId
                         for tagOrId in self.__selected
                         for tag in self.__canvas.gettags(tagOrId)
-                        if tag == "edge_loopback"
+                        if tag == "cost_loopback"
                     )
-
-                    try:
-                        cost_loopback = next(
-                            tagOrId
-                            for tagOrId in self.__selected
-                            for tag in self.__canvas.gettags(tagOrId)
-                            if tag == "cost_loopback"
-                        )
-                    except StopIteration:
-                        # may not have a weighting
-                        pass
-
-                    node = next(
-                        tagOrId
-                        for tagOrId in self.__selected
-                        for tag in self.__canvas.gettags(tagOrId)
-                        if tag == "node"
-                    )
-
-                    # print(loopback, cost_loopback, node)
-
-                    nx1, ny1, nx2, ny2 = self.__canvas.bbox(node)
-                    ncx, ncy = (nx1 + nx2) / 2, (ny1 + ny2) / 2
-
-                    rotation = canvas_xy.x - self.__current[0]
-                    self.__rotate_object(loopback, (ncx, ncy), -rotation)
-                    if cost_loopback != -1:
-                        self.__rotate_object(cost_loopback, (ncx, ncy), -rotation)
-                    self.__current = (canvas_xy.x, canvas_xy.y)
-
                 except StopIteration:
-                    # almost certainly means user is not dragging a loopback
+                    # may not have a weighting
                     pass
+
+                node = next(
+                    tagOrId
+                    for tagOrId in self.__selected
+                    for tag in self.__canvas.gettags(tagOrId)
+                    if tag == "node"
+                )
+
+                # print(loopback, cost_loopback, node)
+
+                nx1, ny1, nx2, ny2 = self.__canvas.bbox(node)
+                ncx, ncy = (nx1 + nx2) / 2, (ny1 + ny2) / 2
+
+                rotation = canvas_xy.x - self.__current[0]
+                self.__rotate_object(loopback, (ncx, ncy), -rotation)
+                if cost_loopback != -1:
+                    self.__rotate_object(cost_loopback, (ncx, ncy), -rotation)
+                self.__current = (canvas_xy.x, canvas_xy.y)
+
+            except StopIteration:
+                # almost certainly means user is not dragging a loopback
+                pass
 
     def __release(self, event):
         """
@@ -462,6 +462,7 @@ class CanvasFrame(ctk.CTkFrame):
         operation = StateModel().get_operation()
         directed = StateModel().get_directed()
         weight = StateModel().get_weight()
+        StateModel().set_changed()
 
         if operation == "Edges":
             possible = self.__canvas.find_overlapping(
@@ -630,6 +631,7 @@ class CanvasFrame(ctk.CTkFrame):
 
         canvas_xy = self.__event_to_canvas(event)
         operation = StateModel().get_operation()
+        StateModel().set_changed()
 
         if operation == "Nodes":
             possible = self.__canvas.find_overlapping(
@@ -732,6 +734,7 @@ class CanvasFrame(ctk.CTkFrame):
 
         canvas_xy = self.__event_to_canvas(event)
         operation = StateModel().get_operation()
+        StateModel().set_changed()
 
         if operation == "Nodes":
             possible = self.__canvas.find_overlapping(
