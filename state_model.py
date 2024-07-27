@@ -17,7 +17,7 @@ class StateModel:
 
             # Put any initialization here.
             cls.__instance.__graph = AnimatedWeightedMatrixGraph()
-            cls.__instance.__filename = ""
+            cls.__instance.__filename = None
             cls.__instance.__tab_name = "DrawControlsFrame"
             cls.__instance.__operation = "Nodes"
             cls.__instance.__directed = False
@@ -50,6 +50,7 @@ class StateModel:
 
         # whatever was created, nothing has yet been changed (but will need this to think about saving later)
         self.__changed = False
+        self.__filename = None
 
     def get_graph_matrix(self):
         return self.__graph.matrix

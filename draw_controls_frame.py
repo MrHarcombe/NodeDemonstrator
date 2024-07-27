@@ -205,23 +205,31 @@ class DrawControlsFrame(ctk.CTkFrame):
             "weighted": StateModel().is_weighted(),
         }
 
-        filename, directory = "", "."
-
         current_filename = StateModel().get_filename()
         if current_filename is not None and len(current_filename) > 0:
             filename = basename(current_filename)
             directory = dirname(current_filename)
 
-        filename = ctk.filedialog.asksaveasfilename(
-            parent=self,
-            title="Save Graph",
-            defaultextension=".nd",
-            initialdir=directory,
-            initialfile=filename,
-            filetypes=[("Node Demonstrator", ".nd")],
-            confirmoverwrite=True,
-        )
-        if filename is not None:
+            filename = ctk.filedialog.asksaveasfilename(
+                parent=self,
+                title="Save Graph",
+                defaultextension=".nd",
+                initialdir=directory,
+                initialfile=filename,
+                filetypes=[("Node Demonstrator", ".nd")],
+                confirmoverwrite=True,
+            )
+
+        else:
+            filename = ctk.filedialog.asksaveasfilename(
+                parent=self,
+                title="Save Graph",
+                defaultextension=".nd",
+                filetypes=[("Node Demonstrator", ".nd")],
+                confirmoverwrite=True,
+            )
+
+        if filename is not None and len(filename) > 0:
             with open(filename, "w") as file:
                 dump(file_contents, file)  # , protocol=HIGHEST_PROTOCOL)
 
