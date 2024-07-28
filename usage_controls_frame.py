@@ -244,14 +244,15 @@ class UsageControlsFrame(ctk.CTkFrame):
                         message='Both "From" and "To" nodes are required to trace A* shortest path',
                     )
 
-        self.__action_button.configure(text="Step")
-        self.__action_button.configure(command=self.__trace_frame.step)
+        if self.__trace_frame is not None:
+            self.__action_button.configure(text="Step")
+            self.__action_button.configure(command=self.__trace_frame.step)
 
-        self.__trace_frame.grid(
-            sticky=ctk.NSEW,
-            pady=(15, 0),
-        )
-        self.rowconfigure(3, weight=1)
+            self.__trace_frame.grid(
+                sticky=ctk.NSEW,
+                pady=(15, 0),
+            )
+            self.rowconfigure(3, weight=1)
 
     def __capitalise_combo(self, variable, index, mode):
         if variable == "FROM_VAR":
