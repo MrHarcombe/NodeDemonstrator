@@ -1,4 +1,5 @@
 import customtkinter as ctk
+from tkinter import messagebox
 
 from state_model import StateModel
 from traversal_frames import BreadthFirstFrame, DepthFirstFrame
@@ -11,9 +12,12 @@ class UsageControlsFrame(ctk.CTkFrame):
     path-finding using Dijkstra or A*, and other algorithms will be triggered (and the results displayed) here.
     """
 
-    ALGOCHOICES = [
+    UNWEIGHTED_ALGOCHOICES = [
         "Breadth First",
         "Depth First",
+    ]
+
+    WEIGHTED_ALGOCHOICES = UNWEIGHTED_ALGOCHOICES + [
         "Dijkstra's Shortest Path",
         "A* Shortest Path",
     ]
@@ -26,20 +30,40 @@ class UsageControlsFrame(ctk.CTkFrame):
         )
 
         self.__canvas_frame = canvas_frame
-        self.__algochoice = ctk.StringVar(value=UsageControlsFrame.ALGOCHOICES[0])
-        self.__from = ctk.StringVar()
-        self.__to = ctk.StringVar()
+        self.__algochoice = ctk.StringVar(
+            value=UsageControlsFrame.UNWEIGHTED_ALGOCHOICES[0]
+        )
+        self.__from = ctk.StringVar(name="FROM_VAR")
+        self.__to = ctk.StringVar(name="TO_VAR")
         self.__speed = ctk.IntVar()
         self.__trace_frame = None
 
-        ctk.CTkComboBox(
+        self.__from.trace_add("write", self.__capitalise_combo)
+        self.__to.trace_add("write", self.__capitalise_combo)
+
+        algo_combo = ctk.CTkComboBox(
             self,
-            values=UsageControlsFrame.ALGOCHOICES,
+            values=(
+                UsageControlsFrame.WEIGHTED_ALGOCHOICES
+                if StateModel().is_weighted()
+                else UsageControlsFrame.UNWEIGHTED_ALGOCHOICES
+            ),
             variable=self.__algochoice,
             state="readonly",
-        ).grid(
+        )
+        algo_combo.grid(
             sticky=ctk.NSEW,
             pady=(0, 15),
+        )
+        algo_combo.bind(
+            "<Expose>",
+            lambda event: algo_combo.configure(
+                values=(
+                    UsageControlsFrame.WEIGHTED_ALGOCHOICES
+                    if StateModel().is_weighted()
+                    else UsageControlsFrame.UNWEIGHTED_ALGOCHOICES
+                )
+            ),
         )
 
         nodes_frame = ctk.CTkFrame(
@@ -131,35 +155,94 @@ class UsageControlsFrame(ctk.CTkFrame):
         self.__action_button.configure(command=self.__trace_step)
 
     def __trace_step(self):
+        graph_nodes = self.__canvas_frame.get_node_labels()
+        from_node = self.__from.get().strip()
+        to_node = self.__to.get().strip()
+
+        from_given = from_node is not None and len(from_node) > 0
+        from_good = from_given and from_node in graph_nodes
+        to_given = to_node is not None and len(to_node) > 0
+        to_good = to_given and to_node in graph_nodes
+
+        if not all((from_good, to_good)):
+            message = None
+
+            if from_given and not from_good and to_given and not to_good:
+                message = (
+                    '"From" and "To" nodes not taken from the graph drawn on screen'
+                )
+
+            elif from_given and not from_good:
+                message = '"From" node not taken from the graph drawn on screen'
+
+            elif to_given and not to_good:
+                message = '"To" node not taken from the graph drawn on screen'
+
+            if message is not None:
+                messagebox.showerror(
+                    title="Unknown Node",
+                    message=message,
+                )
+                return
+
         match self.__algochoice.get():
             case "Breadth First":
-                self.__trace_frame = BreadthFirstFrame(
-                    self,
-                    self.__canvas_frame,
-                    self.__from.get(),
-                    self.__to.get(),
-                )
+                if from_given:
+                    self.__trace_frame = BreadthFirstFrame(
+                        self,
+                        self.__canvas_frame,
+                        from_node,
+                        to_node,
+                    )
+                else:
+                    messagebox.showerror(
+                        title="Required Node",
+                        message=f'At least the "From" node is required to trace breadth first '
+                        f'{"search" if to_given else "traversal"}',
+                    )
+
             case "Depth First":
-                self.__trace_frame = DepthFirstFrame(
-                    self,
-                    self.__canvas_frame,
-                    self.__from.get(),
-                    self.__to.get(),
-                )
+                if from_given:
+                    self.__trace_frame = DepthFirstFrame(
+                        self,
+                        self.__canvas_frame,
+                        from_node,
+                        to_node,
+                    )
+                else:
+                    messagebox.showerror(
+                        title="Required Node",
+                        message=f'At least the "From" node is required to trace depth first '
+                        f'{"search" if to_given else "traversal"}',
+                    )
+
             case "Dijkstra's Shortest Path":
-                self.__trace_frame = DijkstraShortestPathFrame(
-                    self,
-                    self.__canvas_frame,
-                    self.__from.get(),
-                    self.__to.get(),
-                )
+                if from_given:
+                    self.__trace_frame = DijkstraShortestPathFrame(
+                        self,
+                        self.__canvas_frame,
+                        from_node,
+                        to_node,
+                    )
+                else:
+                    messagebox.showerror(
+                        title="Required Node",
+                        message='At least the "From" node is required to trace Dijkstra\'s shortest path',
+                    )
+
             case "A* Shortest Path":
-                self.__trace_frame = AStarShortestPathFrame(
-                    self,
-                    self.__canvas_frame,
-                    self.__from.get(),
-                    self.__to.get(),
-                )
+                if from_given and to_given:
+                    self.__trace_frame = AStarShortestPathFrame(
+                        self,
+                        self.__canvas_frame,
+                        from_node,
+                        to_node,
+                    )
+                else:
+                    messagebox.showerror(
+                        title="Required Nodes",
+                        message='Both "From" and "To" nodes are required to trace A* shortest path',
+                    )
 
         self.__action_button.configure(text="Step")
         self.__action_button.configure(command=self.__trace_frame.step)
@@ -169,3 +252,9 @@ class UsageControlsFrame(ctk.CTkFrame):
             pady=(15, 0),
         )
         self.rowconfigure(3, weight=1)
+
+    def __capitalise_combo(self, variable, index, mode):
+        if variable == "FROM_VAR":
+            self.__from.set(self.__from.get().upper())
+        elif variable == "TO_VAR":
+            self.__to.set(self.__to.get().upper())
