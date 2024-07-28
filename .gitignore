@@ -397,6 +397,10 @@ FodyWeavers.xsd
 # JetBrains Rider
 *.sln.iml
 
+# Pyinstaller output
+build/
+dist/
+
 # locally running libraries
 customtkinter/
 xcanvas/
