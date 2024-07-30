@@ -1,1 +1,1 @@
-pyinstaller -D --exclude-module playground --windowed --add-data "C:\Users\ianha\AppData\Local\Programs\Python\Python311\Lib\site-packages\customtkinter;customtkinter" .\nodemon.py
+pyinstaller --onedir --noconfirm --exclude-module playground --windowed --add-data "C:\Users\ianha\AppData\Local\Programs\Python\Python311\Lib\site-packages\customtkinter;customtkinter" .\src\nodemon.py

@@ -398,6 +398,7 @@ FodyWeavers.xsd
 *.sln.iml
 
 # Pyinstaller output
+nodemon.spec
 build/
 dist/
 
