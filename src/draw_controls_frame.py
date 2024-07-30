@@ -189,7 +189,8 @@ class DrawControlsFrame(ctk.CTkFrame):
                 )
                 == ctk.YES
             ):
-                self.__save_file()
+                if not self.__save_file():
+                    return False
 
         weighted = messagebox.askyesno(message="Will the graph be weighted?") == ctk.YES
         StateModel().create_new(weighted)
@@ -232,8 +233,21 @@ class DrawControlsFrame(ctk.CTkFrame):
         if filename is not None and len(filename) > 0:
             with open(filename, "w") as file:
                 dump(file_contents, file)  # , protocol=HIGHEST_PROTOCOL)
+            return True
+
+        return False
 
     def __load_file(self):
+        if StateModel().is_changed():
+            if (
+                messagebox.askyesno(
+                    message="Graph has changes. Do you wish to save, before starting over?"
+                )
+                == ctk.YES
+            ):
+                if not self.__save_file():
+                    return False
+
         filename = ctk.filedialog.askopenfilename(
             parent=self,
             title="Load Graph",
