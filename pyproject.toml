@@ -1,0 +1,36 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/nodemon"]
+
+# [tool.hatch.metadata]
+# allow-direct-references = true
+
+[project]
+name = "nodemon"
+version = "0.0.1"
+authors = [
+    { name="Ian Harcombe", email="ian.harcombe@gmail.com" },
+]
+description = "A simple drag and drop application to help visualise various graph algorithms"
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+    # "customtkinter@git+https://github.com/DerSchinken/CustomTkinter.git@fix-1419"
+    "customtkinter>=5.2.2"
+]
+license = { file = "LICENSE" }
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Education",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Topic :: Education",
+]
+
+[project.urls]
+Homepage = "https://github.com/pypa/sampleproject"
+Issues = "https://github.com/pypa/sampleproject/issues"
