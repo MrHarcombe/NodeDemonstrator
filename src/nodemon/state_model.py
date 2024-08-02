@@ -1,6 +1,7 @@
 from itertools import chain, product
 from string import ascii_uppercase
-from animated_structures import AnimatedMatrixGraph, AnimatedWeightedMatrixGraph
+
+from .animated_structures import AnimatedMatrixGraph, AnimatedWeightedMatrixGraph
 
 
 class StateModel:

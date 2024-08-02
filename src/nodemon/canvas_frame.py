@@ -3,9 +3,9 @@ from tkinter import messagebox
 from collections import namedtuple
 from math import radians, sin, cos, atan2
 
-from rename_dialog import rename_dialog
-from amend_dialog import amend_edge_dialog
-from state_model import StateModel
+from .rename_dialog import rename_dialog
+from .amend_dialog import amend_edge_dialog
+from .state_model import StateModel
 
 # Standard conversion type
 Canvas_XY = namedtuple("Canvas_XY", "x,y")

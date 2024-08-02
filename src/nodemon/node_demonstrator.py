@@ -1,7 +1,7 @@
 import customtkinter as ctk
 
-from canvas_frame import CanvasFrame
-from tool_frame import ToolFrame
+from .canvas_frame import CanvasFrame
+from .tool_frame import ToolFrame
 
 # screen dimensions
 WIDTH = 1280
@@ -30,6 +30,10 @@ class NodeApplication(ctk.CTk):
         self.rowconfigure(0, weight=1)
 
 
-if __name__ == "__main__":
+def main():
     app = NodeApplication()
     app.mainloop()
+
+
+if __name__ == "__main__":
+    main()

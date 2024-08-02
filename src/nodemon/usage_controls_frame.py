@@ -1,9 +1,9 @@
 import customtkinter as ctk
 from tkinter import messagebox
 
-from state_model import StateModel
-from traversal_frames import BreadthFirstFrame, DepthFirstFrame
-from optimisation_frames import DijkstraShortestPathFrame, AStarShortestPathFrame
+from .state_model import StateModel
+from .traversal_frames import BreadthFirstFrame, DepthFirstFrame
+from .optimisation_frames import DijkstraShortestPathFrame, AStarShortestPathFrame
 
 
 class UsageControlsFrame(ctk.CTkFrame):

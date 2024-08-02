@@ -1,7 +1,7 @@
 import customtkinter as ctk
 
-from state_model import StateModel
-from trace_frame import TraceFrame, CustomScrollableFrame
+from .state_model import StateModel
+from .trace_frame import TraceFrame, CustomScrollableFrame
 
 
 class DijkstraShortestPathFrame(TraceFrame):

@@ -10,7 +10,7 @@ packages = ["src/nodemon"]
 
 [project]
 name = "nodemon"
-version = "0.0.1"
+version = "0.0.5"
 authors = [
     { name="Ian Harcombe", email="ian.harcombe@gmail.com" },
 ]

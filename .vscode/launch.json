@@ -8,7 +8,7 @@
             "name": "Python Launch: Current Project",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}\\src\\nodemon.py",
+            "program": "${workspaceFolder}\\src\\nodemon\\__main__.py",
             "console": "integratedTerminal"
         }
     ]

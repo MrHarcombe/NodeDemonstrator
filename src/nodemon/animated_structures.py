@@ -1,7 +1,7 @@
 from collections import defaultdict
 from heapq import heappush, heappop
 
-from structures import MatrixGraph
+from .structures import MatrixGraph
 
 
 class AnimatedMatrixGraph(MatrixGraph):

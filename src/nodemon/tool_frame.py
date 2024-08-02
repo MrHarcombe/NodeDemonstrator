@@ -1,7 +1,7 @@
 import customtkinter as ctk
 
-from draw_controls_frame import DrawControlsFrame
-from usage_controls_frame import UsageControlsFrame
+from .draw_controls_frame import DrawControlsFrame
+from .usage_controls_frame import UsageControlsFrame
 
 
 class ToolFrame(ctk.CTkTabview):

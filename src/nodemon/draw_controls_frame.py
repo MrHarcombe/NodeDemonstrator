@@ -4,7 +4,8 @@ import tkinter.messagebox as messagebox
 # from pickle import dump, load, HIGHEST_PROTOCOL
 from json import dump, load
 from os.path import basename, dirname
-from state_model import StateModel
+
+from .state_model import StateModel
 
 
 class DrawControlsFrame(ctk.CTkFrame):
