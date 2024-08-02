@@ -14,7 +14,7 @@ class TraversalFrame(TraceFrame):
 
         if len(processed) == 0:
             self._processed.columnconfigure(0, weight=1)
-            self._processed.columnconfigure((1, 2), weight=1)
+            self._processed.columnconfigure((1, 2), weight=0)
 
             sub = ctk.CTkFrame(
                 self._processed,
