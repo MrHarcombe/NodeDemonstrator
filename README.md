@@ -21,6 +21,7 @@ Building a drag and drop desktop (Tkinter) application to help visualise various
 
 ## Usage
 
+Currently, this project depends on a tweaked version of CustomTkinter that needs to be obtained directly from (here)[https://github.com/DerSchinken/CustomTkinter/tree/fix-1419] until the (PR submitted here)[https://github.com/TomSchimansky/CustomTkinter/pull/2240] is approved into the main project.
 To run, install package then launch with "python -m nodemon"
 
 ## Future algorithm support
