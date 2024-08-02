@@ -35,11 +35,12 @@ class UsageControlsFrame(ctk.CTkFrame):
         )
         self.__from = ctk.StringVar(name="FROM_VAR")
         self.__to = ctk.StringVar(name="TO_VAR")
-        self.__speed = ctk.IntVar()
+        self.__speed = ctk.IntVar(value=5)
+        self.__timer_token = None
         self.__trace_frame = None
 
-        self.__from.trace_add("write", self.__capitalise_combo)
-        self.__to.trace_add("write", self.__capitalise_combo)
+        # self.__from.trace_add("write", self.__capitalise_combo)
+        # self.__to.trace_add("write", self.__capitalise_combo)
 
         algo_combo = ctk.CTkComboBox(
             self,
@@ -126,35 +127,33 @@ class UsageControlsFrame(ctk.CTkFrame):
             ),
         )
 
-        self.__action_button = ctk.CTkButton(
+        self.__step_button = ctk.CTkButton(
             self,
-            text="Start",
+            text="Step Trace",
             bg_color=self.cget("bg_color"),
             command=self.__trace_step,
         )
-        self.__action_button.grid(sticky=ctk.NSEW, pady=(15, 15))
-        # ctk.CTkSlider(
-        #     self,
-        #     from_=1,
-        #     to=5,
-        #     number_of_steps=4,
-        #     bg_color=self.cget("bg_color"),
-        #     variable=self.__speed,
-        # ).grid(sticky=ctk.NSEW, pady=(0, 15))
+        self.__step_button.grid(sticky=ctk.NSEW, pady=(15, 3))
+        self.__timed_button = ctk.CTkButton(
+            self,
+            text="Timed Trace",
+            bg_color=self.cget("bg_color"),
+            command=self.__trace_timed,
+        )
+        self.__timed_button.grid(sticky=ctk.NSEW, pady=(3, 3))
+        self.__timed_speed = ctk.CTkSlider(
+            self,
+            from_=1,
+            to=5,
+            number_of_steps=4,
+            bg_color=self.cget("bg_color"),
+            variable=self.__speed,
+        )
+        self.__timed_speed.grid(sticky=ctk.NSEW, pady=(3, 15))
 
         self.columnconfigure(0, weight=1)
 
-    def end_trace(self):
-        self.__action_button.configure(text="Stop")
-        self.__action_button.configure(command=self.__reset_trace)
-
-    def __reset_trace(self):
-        self.__canvas_frame.unhighlight_all_nodes()
-        self.__trace_frame.grid_remove()
-        self.__action_button.configure(text="Start")
-        self.__action_button.configure(command=self.__trace_step)
-
-    def __trace_step(self):
+    def __create_trace_frame(self):
         graph_nodes = self.__canvas_frame.get_node_labels()
         from_node = self.__from.get().strip()
         to_node = self.__to.get().strip()
@@ -245,17 +244,73 @@ class UsageControlsFrame(ctk.CTkFrame):
                     )
 
         if self.__trace_frame is not None:
-            self.__action_button.configure(text="Step")
-            self.__action_button.configure(command=self.__trace_frame.step)
-
             self.__trace_frame.grid(
                 sticky=ctk.NSEW,
                 pady=(15, 0),
             )
-            self.rowconfigure(3, weight=1)
+            self.rowconfigure(5, weight=1)
+            return True
 
-    def __capitalise_combo(self, variable, index, mode):
-        if variable == "FROM_VAR":
-            self.__from.set(self.__from.get().upper())
-        elif variable == "TO_VAR":
-            self.__to.set(self.__to.get().upper())
+        return False
+
+    def __trace_step(self):
+        if self.__create_trace_frame():
+            self.__step_button.configure(text="Step")
+            self.__step_button.configure(command=self.__trace_frame.step)
+            self.__timed_button.configure(state=ctk.DISABLED)
+            self.__timed_speed.configure(state=ctk.DISABLED)
+
+    def __trace_timed(self):
+        def pause_step():
+            if self.__timer_token is not None:
+                self.__timed_button.after_cancel(self.__timer_token)
+                self.__timed_button.configure(text="Resume")
+                self.__timed_button.configure(command=resume_step)
+
+        def resume_step():
+            interval = self.__speed.get() * 0.5  # half a second per blip
+            self.__timer_token = self.__timed_button.after(
+                int(interval * 1000), setup_next_step
+            )
+            self.__timed_button.configure(text="Pause")
+            self.__timed_button.configure(command=pause_step)
+
+        def setup_next_step():
+            if self.__trace_frame.step():
+                interval = self.__speed.get() * 0.5  # half a second per blip
+                self.__timer_token = self.__timed_button.after(
+                    int(interval * 1000), setup_next_step
+                )
+
+        if self.__create_trace_frame():
+            self.__step_button.configure(state=ctk.DISABLED)
+            self.__timed_button.configure(text="Pause")
+            self.__timed_button.configure(command=pause_step)
+            interval = self.__speed.get() * 0.5  # half a second per blip
+            self.__timed_button.after(int(interval * 1000), setup_next_step)
+
+    def end_trace(self):
+        if self.__step_button.cget("text") == "Step":
+            self.__step_button.configure(text="Reset")
+            self.__step_button.configure(command=self.__reset_trace)
+        else:
+            self.__timed_button.configure(state=ctk.NORMAL)
+            self.__timed_button.configure(text="Reset")
+            self.__timed_button.configure(command=self.__reset_trace)
+
+    def __reset_trace(self):
+        self.__canvas_frame.unhighlight_all_nodes()
+        self.__trace_frame.grid_remove()
+        self.__step_button.configure(state=ctk.NORMAL)
+        self.__step_button.configure(text="Step Trace")
+        self.__step_button.configure(command=self.__trace_step)
+        self.__timed_button.configure(state=ctk.NORMAL)
+        self.__timed_button.configure(text="Timed Trace")
+        self.__timed_button.configure(command=self.__trace_timed)
+        self.__timed_speed.configure(state=ctk.NORMAL)
+
+    # def __capitalise_combo(self, variable, index, mode):
+    #     if variable == "FROM_VAR":
+    #         self.__from.set(self.__from.get().upper())
+    #     elif variable == "TO_VAR":
+    #         self.__to.set(self.__to.get().upper())

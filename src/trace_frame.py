@@ -93,8 +93,10 @@ class TraceFrame(ctk.CTkFrame, metaclass=ABCMeta):
             self.display_processed(processed)
             self.display_other(other)
             self.highlight_anchor_points()
+            return True
         except StopIteration:
             self.master.end_trace()
+            return False
 
     def display_current(self):
         """
