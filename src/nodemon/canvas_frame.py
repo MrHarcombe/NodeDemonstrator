@@ -591,7 +591,7 @@ class CanvasFrame(ctk.CTkFrame):
                                     "edge_loopback",
                                     f"edge_loopback_{from_node}",
                                     f"edge_{from_node}",
-                                    f"edge_{from_node}_{to_node}",
+                                    f"edge_fromto_{from_node}_{to_node}",
                                 ),
                             ),
                             "node",
@@ -640,7 +640,6 @@ class CanvasFrame(ctk.CTkFrame):
                 canvas_xy.x + NODE_RADIUS // 4,
                 canvas_xy.y + NODE_RADIUS // 4,
             )
-
             if len(possible) != 0:
                 selected = self.__find_associated_ids(possible)
 
@@ -673,50 +672,106 @@ class CanvasFrame(ctk.CTkFrame):
                     canvas_xy.y + NODE_RADIUS // 4,
                 )
 
+                print("found possibles near edge...")
+                for p in possible:
+                    print(p, "->", self.__canvas.gettags(p))
+
                 if len(possible) != 0:
-                    # print(id, self.__canvas.gettags(id))
-                    tags = self.__canvas.gettags(possible[0])
-                    from_node = None
-                    to_node = None
-                    for tag in tags:
-                        if tag.startswith("edge_fromto_"):
-                            _, _, from_node, to_node = tag.split("_")
+                    for p in possible:
+                        tags = self.__canvas.gettags(p)
+                        # don't try and process the "cost" text
+                        if "edge" in tags:
+                            from_node = None
+                            to_node = None
+                            for tag in tags:
+                                if tag.startswith("edge_fromto_"):
+                                    _, _, from_node, to_node = tag.split("_")
 
-                    fromto = StateModel().has_edge(from_node, to_node)
-                    tofrom = StateModel().has_edge(to_node, from_node)
+                            fromto = StateModel().has_edge(from_node, to_node)
+                            tofrom = StateModel().has_edge(to_node, from_node)
 
-                    if fromto == tofrom:
-                        values = amend_edge_dialog(
-                            self,
-                            "Amend edge weight",
-                            from_node,
-                            to_node,
-                            [fromto],
-                        )
-                        # print(values)
-                        if values:
-                            if values[0] != "None":
-                                StateModel().add_edge(
-                                    from_node, to_node, True, int(values[0])
+                            print(type(fromto), fromto, type(tofrom), tofrom)
+
+                            if (
+                                not isinstance(fromto, bool)
+                                and not isinstance(tofrom, bool)
+                                and fromto != tofrom
+                            ):
+                                values = amend_edge_dialog(
+                                    self,
+                                    "Amend edge weights",
+                                    from_node,
+                                    to_node,
+                                    [fromto, tofrom],
                                 )
-                    else:
-                        values = amend_edge_dialog(
-                            self,
-                            "Amend edge weights",
-                            from_node,
-                            to_node,
-                            [fromto, tofrom],
-                        )
-                        # print(values)
-                        if values:
-                            if values[0] != "None":
-                                StateModel().add_edge(
-                                    from_node, to_node, False, int(values[0])
+                                if values:
+                                    if values[0] != "None":
+                                        StateModel().add_edge(
+                                            from_node, to_node, False, int(values[0])
+                                        )
+                                        # also need to update the from cost text and tag
+                                        cost_id = self.__canvas.find_withtag(
+                                            f"cost_fromto_{from_node}_{to_node}"
+                                        )
+                                        self.__canvas.dchars(cost_id, 0, "end")
+                                        self.__canvas.insert(
+                                            cost_id, ctk.INSERT, values[0]
+                                        )
+                                        self.__canvas.dtag(
+                                            cost_id, f"costvalue_{fromto}"
+                                        )
+                                        self.__canvas.addtag_withtag(
+                                            f"costvalue_{values[0]}",
+                                            cost_id,
+                                        )
+                                    if values[1] != "None":
+                                        StateModel().add_edge(
+                                            to_node, from_node, False, int(values[1])
+                                        )
+                                        # also need to update the to cost text and tag
+                                        cost_id = self.__canvas.find_withtag(
+                                            f"cost_tofrom_{to_node}_{from_node}"
+                                        )
+                                        self.__canvas.dchars(cost_id, 0, "end")
+                                        self.__canvas.insert(
+                                            cost_id, ctk.INSERT, values[1]
+                                        )
+                                        self.__canvas.dtag(
+                                            cost_id, f"costvalue_{tofrom}"
+                                        )
+                                        self.__canvas.addtag_withtag(
+                                            f"costvalue_{values[1]}",
+                                            cost_id,
+                                        )
+                            else:
+                                # found the edge as "_fromto_" (or "_loopback_") so use that value
+                                values = amend_edge_dialog(
+                                    self,
+                                    "Amend edge weight",
+                                    from_node,
+                                    to_node,
+                                    [fromto],
                                 )
-                            if values[1] != "None":
-                                StateModel().add_edge(
-                                    to_node, from_node, False, int(values[1])
-                                )
+                                if values:
+                                    if values[0] != "None":
+                                        StateModel().add_edge(
+                                            from_node, to_node, True, int(values[0])
+                                        )
+                                        # also need to update the cost text and tag
+                                        cost_id = self.__canvas.find_withtag(
+                                            f"cost_fromto_{from_node}_{to_node}"
+                                        )
+                                        self.__canvas.dchars(cost_id, 0, "end")
+                                        self.__canvas.insert(
+                                            cost_id, ctk.INSERT, values[0]
+                                        )
+                                        self.__canvas.dtag(
+                                            cost_id, f"costvalue_{fromto}"
+                                        )
+                                        self.__canvas.addtag_withtag(
+                                            f"costvalue_{values[0]}",
+                                            cost_id,
+                                        )
 
     def __double_right_click(self, event):
         """

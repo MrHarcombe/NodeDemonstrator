@@ -10,7 +10,7 @@ class AmendEdgeDialog(ctk.CTkToplevel):
 
         ctk.CTkLabel(
             self,
-            text=f"Enter the new weights for edge between '{from_node}' and '{to_node}: ",
+            text=f"Enter the new weights for edge between '{from_node}' and '{to_node}': ",
         ).grid(row=0, column=0, columnspan=2, sticky=ctk.EW)
 
         if len(values) == 1:
