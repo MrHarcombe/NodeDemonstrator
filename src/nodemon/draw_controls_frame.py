@@ -234,6 +234,7 @@ class DrawControlsFrame(ctk.CTkFrame):
         if filename is not None and len(filename) > 0:
             with open(filename, "w") as file:
                 dump(file_contents, file)  # , protocol=HIGHEST_PROTOCOL)
+            StateModel().set_changed(False)
             return True
 
         return False
