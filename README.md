@@ -21,11 +21,11 @@ Building a drag and drop desktop (Tkinter) application to help visualise various
 
 ## Usage
 
-Currently, this project depends on a tweaked version of CustomTkinter that needs to be obtained directly from (here)[https://github.com/DerSchinken/CustomTkinter/tree/fix-1419] until the (submitted PR)[https://github.com/TomSchimansky/CustomTkinter/pull/2240] is approved into the main project.
-To run, install package then launch with "python -m nodemon"
+- Currently, this project uses the tweaked version of CustomTkinter that needs to be obtained directly from [here](https://github.com/DerSchinken/CustomTkinter/tree/fix-1419) until the [submitted PR](https://github.com/TomSchimansky/CustomTkinter/pull/2240) is approved into the main project.
+- To run, install package then launch with "python -m nodemon"
 
 ## Future algorithm support
 
-  - Kruskal's and Prim's minimum spanning trees
-  - Other algorithms from [here](https://memgraph.com/blog/graph-algorithms-applications), or [here](https://memgraph.com/blog/graph-algorithms-list) or [here](https://towardsdatascience.com/10-graph-algorithms-visually-explained-e57faa1336f3)?
-  - Any other suggestions?
+- Kruskal's and Prim's minimum spanning trees
+- Other algorithms from [here](https://memgraph.com/blog/graph-algorithms-applications), or [here](https://memgraph.com/blog/graph-algorithms-list) or [here](https://towardsdatascience.com/10-graph-algorithms-visually-explained-e57faa1336f3)?
+- Any other suggestions?
