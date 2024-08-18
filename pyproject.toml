@@ -10,7 +10,7 @@ packages = ["src/nodemon"]
 
 [project]
 name = "nodemon"
-version = "0.0.6"
+version = "0.0.9"
 authors = [
     { name="Ian Harcombe", email="ian.harcombe@gmail.com" },
 ]
@@ -32,5 +32,5 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/pypa/sampleproject"
-Issues = "https://github.com/pypa/sampleproject/issues"
+Homepage = "https://github.com/MrHarcombe/NodeDemonstrator"
+Issues = "https://github.com/MrHarcombe/NodeDemonstrator/issues"

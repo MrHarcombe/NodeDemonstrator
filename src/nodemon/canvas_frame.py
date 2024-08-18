@@ -1,7 +1,7 @@
 import customtkinter as ctk
 from tkinter import messagebox
 from collections import namedtuple
-from math import radians, sin, cos, atan2
+from math import radians, sin, cos, atan2, sqrt
 
 from .rename_dialog import rename_dialog
 from .amend_dialog import amend_edge_dialog
@@ -146,8 +146,11 @@ class CanvasFrame(ctk.CTkFrame):
                         "node",
                     )
                 else:
-                    self.__canvas.tag_raise(
-                        self.__create_arc_with_arrow(*(coords[:2] + coords[-2:]), tags),
+                    fcx, fcy, tcx, tcy = self.__calculate_edge_boundaries(
+                        *(coords[:2] + coords[-2:])
+                    )
+                    self.__canvas.tag_lower(
+                        self.__create_arc_with_arrow(fcx, fcy, tcx, tcy, tags),
                         "node",
                     )
 
@@ -376,6 +379,9 @@ class CanvasFrame(ctk.CTkFrame):
                         # self.__canvas.tag_lower(id, "node")
 
                     else:
+                        fcx, fcy, tcx, tcy = self.__calculate_edge_boundaries(
+                            fcx, fcy, tcx, tcy
+                        )
                         self.__redraw_arc_with_arrow(id, fcx, fcy, tcx, tcy)
                         # self.__canvas.tag_lower(id, "node")
 
@@ -503,10 +509,12 @@ class CanvasFrame(ctk.CTkFrame):
                     fcx, fcy = (fx1 + fx2) / 2, (fy1 + fy2) / 2
                     tx1, ty1, tx2, ty2 = self.__canvas.bbox(to_id)
                     tcx, tcy = (tx1 + tx2) / 2, (ty1 + ty2) / 2
-                    lcx, lcy = ((fcx + tcx) / 2) + 10, ((fcy + tcy) / 2) - 10
 
                     if directed:
-                        self.__canvas.tag_raise(
+                        fcx, fcy, tcx, tcy = self.__calculate_edge_boundaries(
+                            fcx, fcy, tcx, tcy
+                        )
+                        self.__canvas.tag_lower(
                             self.__create_arc_with_arrow(
                                 fcx,
                                 fcy,
@@ -522,6 +530,7 @@ class CanvasFrame(ctk.CTkFrame):
                             "node",
                         )
                         if weight != "None":
+                            lcx, lcy = ((fcx + tcx) / 2) + 10, ((fcy + tcy) / 2) - 10
                             self.__canvas.tag_lower(
                                 self.__canvas.create_text(
                                     lcx,
@@ -558,6 +567,7 @@ class CanvasFrame(ctk.CTkFrame):
                             "node",
                         )
                         if weight != "None":
+                            lcx, lcy = ((fcx + tcx) / 2) + 10, ((fcy + tcy) / 2) - 10
                             self.__canvas.tag_lower(
                                 self.__canvas.create_text(
                                     lcx,
@@ -801,7 +811,7 @@ class CanvasFrame(ctk.CTkFrame):
 
             if len(possible) != 0:
                 selected = self.__find_associated_ids(possible)
-                node = None
+                node_loopback = None
                 node_label = None
 
                 for id in selected:
@@ -809,18 +819,18 @@ class CanvasFrame(ctk.CTkFrame):
                         # there may be multiple hits, but the one we want to use has multiple tags, one is the generic
                         # "node", the others contain the values we need...
                         if tag.startswith("node_"):
-                            node = tag[5:]
+                            node_loopback = tag[5:]
 
                         if tag.startswith("nodelabel_"):
                             node_label = tag[10:]
 
                 if node_label is None:
-                    node_label = node
+                    node_label = node_loopback
 
                 if messagebox.askyesno(
                     message=f"Are you sure you want to delete '{node_label}'?"
                 ):
-                    StateModel().delete_node(node)
+                    StateModel().delete_node(node_loopback)
                     for id in selected:
                         self.__canvas.delete(id)
 
@@ -833,26 +843,35 @@ class CanvasFrame(ctk.CTkFrame):
             )
 
             if len(possible) != 0:
-                # selected = self.__find_associated_ids(possible)
+                node_loopback = None
+                node_from = None
+                node_to = None
+
                 for id in possible:
                     for tag in self.__canvas.gettags(id):
                         # there may be multiple hits, but the one we want to use has multiple tags, one is the generic
                         # "edge", one of the others contains the text we need...
                         if tag.startswith("edge_fromto_"):
                             _, _, node_from, node_to = tag.split("_")
-                            if messagebox.askyesno(
-                                message=f"Are you sure you want to delete the edge from '{node_from}' to '{node_to}'?"
-                            ):
-                                StateModel().delete_edge(node_from, node_to)
-                                self.__canvas.delete(id)
 
                         elif tag.startswith("edge_loopback_"):
-                            node = tag[14:]
-                            if messagebox.askyesno(
-                                message=f"Are you sure you want to delete the loopback edge on '{node}'?"
-                            ):
-                                StateModel().delete_edge(node, node)
-                                self.__canvas.delete(id)
+                            node_loopback = tag[14:]
+
+            if node_loopback is not None:
+                if messagebox.askyesno(
+                    message=f"Are you sure you want to delete the loopback edge on '{node_loopback}'?"
+                ):
+                    StateModel().delete_edge(node_loopback, node_loopback)
+                    self.__canvas.delete(id)
+                    self.__canvas.delete(f"cost_loopback_{node_loopback}")
+
+            else:
+                if messagebox.askyesno(
+                    message=f"Are you sure you want to delete the edge from '{node_from}' to '{node_to}'?"
+                ):
+                    StateModel().delete_edge(node_from, node_to)
+                    self.__canvas.delete(id)
+                    self.__canvas.delete(f"cost_fromto_{node_from}_{node_to}")
 
     def __find_associated_ids(self, possible):
         associated = set()
@@ -928,6 +947,60 @@ class CanvasFrame(ctk.CTkFrame):
             smooth=True,
             tags=tags,
         )
+
+    def __calculate_edge_boundaries(self, from_cx, from_cy, to_cx, to_cy):
+        # what to do with an infinite gradient? simply subtract from the y-values and leave the x alone,
+        # according to which node is the uppermost
+        if from_cx == to_cx:
+            if from_cy < to_cy:
+                from_cy += 50
+                to_cy -= 50
+            else:
+                from_cy -= 50
+                to_cy += 50
+
+        # find the correct combination of plus/minus x/y to ensure the correct orientation to the other
+        else:
+            gradient = (to_cy - from_cy) / (to_cx - from_cx)
+
+            # same gradient (on the same y-axis), so just adjust according to which node is leftmost
+            if gradient == 0:
+                if from_cx < to_cx:
+                    from_cx += 50
+                    to_cx -= 50
+                else:
+                    from_cx -= 50
+                    to_cx += 50
+
+            # adjust, by using an equivalent triangle, to calculate the proportions for a hypoteneuse of
+            # 50 ensuring the correct difference is used for a positive or negative gradient
+            else:
+                hypoteneuse = sqrt((from_cy - to_cy) ** 2 + (from_cx - to_cx) ** 2)
+                proportion = 50 / hypoteneuse
+
+                # negative gradient, so the line goes down-right of the "from" and up-left of the "to"
+                if gradient < 0:
+                    dx = proportion * (to_cx - from_cx)
+                    dy = proportion * (from_cy - to_cy)
+                    # print("negative", gradient, dx, dy)
+
+                    from_cx -= dx
+                    from_cy -= dy
+                    to_cx -= dx
+                    from_cx += dy
+
+                # positive gradient, so the line goes up-right of the "from" and down-left of the "to"
+                else:
+                    dx = proportion * (to_cx - from_cx)
+                    dy = proportion * (to_cy - from_cy)
+                    # print("positive", gradient, dx, dy)
+
+                    from_cx += dx
+                    from_cy += dy
+                    to_cx -= dx
+                    to_cy -= dy
+
+        return from_cx, from_cy, to_cx, to_cy
 
     def __create_arc_with_arrow(self, from_cx, from_cy, to_cx, to_cy, tags):
         """
