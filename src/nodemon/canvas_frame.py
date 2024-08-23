@@ -959,46 +959,64 @@ class CanvasFrame(ctk.CTkFrame):
                 from_cy -= 50
                 to_cy += 50
 
+        # same gradient (on the same y-axis), so just adjust according to which node is leftmost
+        elif from_cy == to_cy:
+            if from_cx < to_cx:
+                from_cx += 50
+                to_cx -= 50
+            else:
+                from_cx -= 50
+                to_cx += 50
+
         # find the correct combination of plus/minus x/y to ensure the correct orientation to the other
+        # but bear in mind that (0,0) is top-left and y is +ve going downwards...
         else:
             gradient = (to_cy - from_cy) / (to_cx - from_cx)
 
-            # same gradient (on the same y-axis), so just adjust according to which node is leftmost
-            if gradient == 0:
-                if from_cx < to_cx:
-                    from_cx += 50
-                    to_cx -= 50
-                else:
-                    from_cx -= 50
-                    to_cx += 50
-
-            # adjust, by using an equivalent triangle, to calculate the proportions for a hypoteneuse of
+            # adjust, by using a similar triangle, to calculate the proportions for a hypoteneuse of
             # 50 ensuring the correct difference is used for a positive or negative gradient
-            else:
-                hypoteneuse = sqrt((from_cy - to_cy) ** 2 + (from_cx - to_cx) ** 2)
-                proportion = 50 / hypoteneuse
+            hypoteneuse = sqrt((from_cy - to_cy) ** 2 + (from_cx - to_cx) ** 2)
+            proportion = 50 / hypoteneuse
 
-                # negative gradient, so the line goes down-right of the "from" and up-left of the "to"
-                if gradient < 0:
-                    dx = proportion * (to_cx - from_cx)
-                    dy = proportion * (from_cy - to_cy)
-                    # print("negative", gradient, dx, dy)
+            # "negative" gradient...
+            if gradient < 0:
+                dx = proportion * abs(from_cx - to_cx)
+                dy = proportion * abs(from_cy - to_cy)
+                # print("negative", gradient, dx, dy)
 
-                    from_cx -= dx
+                # if "from" is bigger, then the line goes up-right of the "from" and down-left of the "to"
+                if from_cy > to_cy:
+                    from_cx += dx
                     from_cy -= dy
                     to_cx -= dx
-                    from_cx += dy
+                    to_cy += dy
 
-                # positive gradient, so the line goes up-right of the "from" and down-left of the "to"
+                # otherwise, the line goes down-left of "from" and up-right of "to"
                 else:
-                    dx = proportion * (to_cx - from_cx)
-                    dy = proportion * (to_cy - from_cy)
-                    # print("positive", gradient, dx, dy)
+                    from_cx -= dx
+                    from_cy += dy
+                    to_cx += dx
+                    to_cy -= dy
 
+            # "positive" gradient
+            else:
+                dx = proportion * abs(from_cx - to_cx)
+                dy = proportion * abs(from_cy - to_cy)
+                # print("positive", gradient, dx, dy)
+
+                # if "from" is smaller, then the line goes down-right of the "from" and up-left of the "to"
+                if from_cy < to_cy:
                     from_cx += dx
                     from_cy += dy
                     to_cx -= dx
                     to_cy -= dy
+
+                # otherwise, the line goes up-left of "from" and down-right of "to"
+                else:
+                    from_cx -= dx
+                    from_cy -= dy
+                    to_cx += dx
+                    to_cy += dy
 
         return from_cx, from_cy, to_cx, to_cy
 
