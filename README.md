@@ -4,18 +4,18 @@ Building a drag and drop desktop (Tkinter) application to help visualise various
 
 ## Current progress
 
-- drag and drop interface to build a graph
+- drag and drop interface to build a graph 
   - can be weighted or unweighted
-  - in "node" mode...
+  - in "node" mode... 
     - drag to move a node and associated edges
     - double-click to rename nodes, if the default names aren't sufficient
     - double-right click to delete a node
-  - in "edge" mode...
+  - in "edge" mode... 
     - drag to rotate a loopback edge out of the way
     - double-click to change the weight of an edge
     - double-right click to delete an edge
 - choice of stepped or timed trace of supported algorithms
-- available algorithms
+- available algorithms 
   - breadth-first / depth-first from a given start point (with or without end point, ie traversal and/or search)
   - Dijkstra and A* shortest path
 

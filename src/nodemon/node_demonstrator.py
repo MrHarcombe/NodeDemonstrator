@@ -1,7 +1,9 @@
 import customtkinter as ctk
+import tkinter.messagebox as messagebox
 
 from .canvas_frame import CanvasFrame
 from .tool_frame import ToolFrame
+from .state_model import StateModel
 
 # screen dimensions
 WIDTH = 1280
@@ -28,6 +30,18 @@ class NodeApplication(ctk.CTk):
         self.columnconfigure(0, weight=1)
         # self.columnconfigure(1, weight=0)
         self.rowconfigure(0, weight=1)
+
+    def destroy(self):
+        if (
+            StateModel().is_changed()
+            and messagebox.askyesno(
+                message="Graph has changes. Continue and lose all changes?"
+            )
+            != ctk.YES
+        ):
+            return False
+
+        self.quit()
 
 
 def main():
