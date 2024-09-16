@@ -269,10 +269,10 @@ class CanvasFrame(ctk.CTkFrame):
 
         if operation == "Nodes":
             possible = self.__canvas.find_overlapping(
-                canvas_xy.x - NODE_RADIUS // 4,
-                canvas_xy.y - NODE_RADIUS // 4,
-                canvas_xy.x + NODE_RADIUS // 4,
-                canvas_xy.y + NODE_RADIUS // 4,
+                canvas_xy.x - NODE_RADIUS // 8,
+                canvas_xy.y - NODE_RADIUS // 8,
+                canvas_xy.x + NODE_RADIUS // 8,
+                canvas_xy.y + NODE_RADIUS // 8,
             )
 
             if len(possible) != 0:
@@ -280,6 +280,9 @@ class CanvasFrame(ctk.CTkFrame):
                 self.__current = (canvas_xy.x, canvas_xy.y)
 
             else:
+                self.__selected = None
+                self.__current = None
+                
                 node_name = StateModel().get_next_node_name()
                 StateModel().add_node(node_name)
                 self.__canvas.create_oval(
@@ -301,10 +304,10 @@ class CanvasFrame(ctk.CTkFrame):
 
         elif operation == "Edges":
             possible = self.__canvas.find_overlapping(
-                canvas_xy.x - NODE_RADIUS // 4,
-                canvas_xy.y - NODE_RADIUS // 4,
-                canvas_xy.x + NODE_RADIUS // 4,
-                canvas_xy.y + NODE_RADIUS // 4,
+                canvas_xy.x - NODE_RADIUS // 8,
+                canvas_xy.y - NODE_RADIUS // 8,
+                canvas_xy.x + NODE_RADIUS // 8,
+                canvas_xy.y + NODE_RADIUS // 8,
             )
 
             if len(possible) != 0:
@@ -472,10 +475,10 @@ class CanvasFrame(ctk.CTkFrame):
 
         if operation == "Edges":
             possible = self.__canvas.find_overlapping(
-                canvas_xy.x - NODE_RADIUS // 4,
-                canvas_xy.y - NODE_RADIUS // 4,
-                canvas_xy.x + NODE_RADIUS // 4,
-                canvas_xy.y + NODE_RADIUS // 4,
+                canvas_xy.x - NODE_RADIUS // 8,
+                canvas_xy.y - NODE_RADIUS // 8,
+                canvas_xy.x + NODE_RADIUS // 8,
+                canvas_xy.y + NODE_RADIUS // 8,
             )
 
             if len(possible) != 0:
@@ -645,10 +648,10 @@ class CanvasFrame(ctk.CTkFrame):
 
         if operation == "Nodes":
             possible = self.__canvas.find_overlapping(
-                canvas_xy.x - NODE_RADIUS // 4,
-                canvas_xy.y - NODE_RADIUS // 4,
-                canvas_xy.x + NODE_RADIUS // 4,
-                canvas_xy.y + NODE_RADIUS // 4,
+                canvas_xy.x - NODE_RADIUS // 8,
+                canvas_xy.y - NODE_RADIUS // 8,
+                canvas_xy.x + NODE_RADIUS // 8,
+                canvas_xy.y + NODE_RADIUS // 8,
             )
             if len(possible) != 0:
                 selected = self.__find_associated_ids(possible)
@@ -676,10 +679,10 @@ class CanvasFrame(ctk.CTkFrame):
             # editing the cost of travelling the path
             if StateModel().is_weighted():
                 possible = self.__canvas.find_overlapping(
-                    canvas_xy.x - NODE_RADIUS // 4,
-                    canvas_xy.y - NODE_RADIUS // 4,
-                    canvas_xy.x + NODE_RADIUS // 4,
-                    canvas_xy.y + NODE_RADIUS // 4,
+                    canvas_xy.x - NODE_RADIUS // 8,
+                    canvas_xy.y - NODE_RADIUS // 8,
+                    canvas_xy.x + NODE_RADIUS // 8,
+                    canvas_xy.y + NODE_RADIUS // 8,
                 )
 
                 print("found possibles near edge...")
@@ -803,10 +806,10 @@ class CanvasFrame(ctk.CTkFrame):
 
         if operation == "Nodes":
             possible = self.__canvas.find_overlapping(
-                canvas_xy.x - NODE_RADIUS // 4,
-                canvas_xy.y - NODE_RADIUS // 4,
-                canvas_xy.x + NODE_RADIUS // 4,
-                canvas_xy.y + NODE_RADIUS // 4,
+                canvas_xy.x - NODE_RADIUS // 8,
+                canvas_xy.y - NODE_RADIUS // 8,
+                canvas_xy.x + NODE_RADIUS // 8,
+                canvas_xy.y + NODE_RADIUS // 8,
             )
 
             if len(possible) != 0:
@@ -836,10 +839,10 @@ class CanvasFrame(ctk.CTkFrame):
 
         elif operation == "Edges":
             possible = self.__canvas.find_overlapping(
-                canvas_xy.x - NODE_RADIUS // 4,
-                canvas_xy.y - NODE_RADIUS // 4,
-                canvas_xy.x + NODE_RADIUS // 4,
-                canvas_xy.y + NODE_RADIUS // 4,
+                canvas_xy.x - NODE_RADIUS // 8,
+                canvas_xy.y - NODE_RADIUS // 8,
+                canvas_xy.x + NODE_RADIUS // 8,
+                canvas_xy.y + NODE_RADIUS // 8,
             )
 
             if len(possible) != 0:
