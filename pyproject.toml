@@ -10,7 +10,7 @@ packages = ["src/nodemon"]
 
 [project]
 name = "nodemon"
-version = "0.0.12"
+version = "0.0.13"
 authors = [
     { name="Ian Harcombe", email="ian.harcombe@gmail.com" },
 ]
@@ -23,7 +23,7 @@ dependencies = [
 ]
 license = { file = "LICENSE" }
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 4 - Beta",
     "Intended Audience :: Education",
     "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
     "Operating System :: OS Independent",
