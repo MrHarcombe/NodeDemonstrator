@@ -22,6 +22,12 @@ class UsageControlsFrame(ctk.CTkFrame):
         "A* Shortest Path",
     ]
 
+    TREE_ALGOCHOICES = UNWEIGHTED_ALGOCHOICES + [
+        "Pre Order Traversal",
+        "In Order Traversal",
+        "Post Order Traversal"
+    ]
+
     def __init__(self, parent, canvas_frame):
         super().__init__(parent)
         self.bind(
@@ -44,11 +50,7 @@ class UsageControlsFrame(ctk.CTkFrame):
 
         algo_combo = ctk.CTkComboBox(
             self,
-            values=(
-                UsageControlsFrame.WEIGHTED_ALGOCHOICES
-                if StateModel().is_weighted()
-                else UsageControlsFrame.UNWEIGHTED_ALGOCHOICES
-            ),
+            values=[],
             variable=self.__algochoice,
             state="readonly",
         )
@@ -60,7 +62,9 @@ class UsageControlsFrame(ctk.CTkFrame):
             "<Expose>",
             lambda event: algo_combo.configure(
                 values=(
-                    UsageControlsFrame.WEIGHTED_ALGOCHOICES
+                    UsageControlsFrame.TREE_ALGOCHOICES
+                    if StateModel().is_tree()
+                    else UsageControlsFrame.WEIGHTED_ALGOCHOICES
                     if StateModel().is_weighted()
                     else UsageControlsFrame.UNWEIGHTED_ALGOCHOICES
                 )

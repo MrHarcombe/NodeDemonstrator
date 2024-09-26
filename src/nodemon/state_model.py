@@ -17,7 +17,7 @@ class StateModel:
             cls.__instance = super(StateModel, cls).__new__(cls)
 
             # Put any initialization here.
-            cls.__instance.__graph = AnimatedWeightedMatrixGraph()
+            cls.__instance.__graph = AnimatedWeightedMatrixGraph(True)
             cls.__instance.__filename = None
             cls.__instance.__tab_name = "DrawControlsFrame"
             cls.__instance.__operation = "Nodes"
@@ -40,10 +40,10 @@ class StateModel:
     def create_new(self, weighted=True):
         # check which type of graph to create
         if weighted:
-            self.__graph = AnimatedWeightedMatrixGraph()
+            self.__graph = AnimatedWeightedMatrixGraph(True)
             self.__weight = 1
         else:
-            self.__graph = AnimatedMatrixGraph()
+            self.__graph = AnimatedMatrixGraph(True)
             self.__weight = None
 
         # restart the node name generator
@@ -82,6 +82,10 @@ class StateModel:
 
     def set_filename(self, filename):
         self.__filename = filename
+
+    def is_tree(self):
+        print("Checking if tree...")
+        return self.__graph.is_tree()
 
     def is_weighted(self):
         return isinstance(self.__graph, AnimatedWeightedMatrixGraph)

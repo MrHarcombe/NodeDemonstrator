@@ -5,7 +5,41 @@ from .structures import MatrixGraph
 
 
 class AnimatedMatrixGraph(MatrixGraph):
-    """provides overrides of traversal methods that can be used to pause and/or step through the methods as required"""
+    """provides overrides of traversal methods that can be used to pause and/or step through the methods as required, as well as methods to detect whether this graph qualifies as a tree, to provide those algorithms for display"""
+
+    def is_tree(self):
+        return self.undirected and self.is_fully_connected() and not self.is_cyclic()
+
+    def is_fully_connected(self):
+        connected = True
+
+        if len(self) > 0:
+            nodes = sum([1 for node in self.breadth_first(self.matrix[0][0])]) - 1
+            print(nodes, "vs", len(self))
+            connected = len(self) == nodes
+
+        return connected
+
+    def is_cyclic(self):
+        cyclic = False
+
+        if len(self) > 0:
+            start_node = self.matrix[0][0]
+
+            visited = []
+            queue = [(start_node, None)]
+
+            while len(queue) > 0 and not cyclic:
+                current, previous = queue.pop(0)
+                visited.append(current)
+
+                for node, weight in self.get_connections(current):
+                    if node not in visited:
+                        queue.append((node, current))
+                    elif node != previous:
+                        cyclic = True
+
+        return cyclic
 
     def depth_first(self, start_node, end_node=None):
         if start_node in self.matrix[0]:
@@ -296,4 +330,18 @@ if __name__ == "__main__":
                     " / ".join(f"{c}: {n}" for c, n, in queue),
                 )
 
-    test_animated_weighted_matrix_graph()
+    def test_tree_detection():
+        print("Testing animated weighted adjacency matrix tree detection...")
+        g = AnimatedWeightedMatrixGraph(True)
+        g.add_node("A")
+        g.add_node("B")
+        g.add_node("C")
+        g.add_node("D")
+        g.add_edge("A", "B")
+        g.add_edge("A", "C")
+        g.add_edge("B", "D")
+        print("Cyclic:", g.is_cyclic())
+        print("Tree:", g.is_tree())
+
+    # test_animated_weighted_matrix_graph()
+    test_tree_detection()
