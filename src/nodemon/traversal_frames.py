@@ -163,3 +163,24 @@ class DepthFirstFrame(TraversalFrame):
             lambda master: CustomScrollableFrame(master, "Processed Nodes"),
             lambda master: CustomScrollableFrame(master, "Pending Stack"),
         )
+
+class TreeTraversalFrame(TraversalFrame):
+    def __init__(self, master, canvas_frame, traversal, from_node, to_node):
+        if to_node is None or len(to_node.strip()) == 0:
+            title = f"{traversal}-Order Tree Traversal from {from_node}"
+        else:
+            title = f"{traversal}-Order Tree Search from {from_node} to {to_node}"
+
+        super().__init__(master, canvas_frame, title, from_node, to_node)
+        match traversal:
+            case "Pre":
+                self._iterator = iter(StateModel().pre_order(self._from, self._to))
+            case "In":
+                self._iterator = iter(StateModel().in_order(self._from, self._to))
+            case "Post":
+                self._iterator = iter(StateModel().post_order(self._from, self._to))
+
+        self.initial_setup(
+            lambda master: CustomScrollableFrame(master, "Processed Nodes"),
+            lambda master: CustomScrollableFrame(master, "Pending Stack"),
+        )

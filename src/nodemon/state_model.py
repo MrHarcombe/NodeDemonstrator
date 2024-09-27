@@ -155,3 +155,12 @@ class StateModel:
                 end_node,
                 StateModel.ascii_heuristic,
             )
+
+    def pre_order(self, start_node, end_node):
+        yield from self.__graph.pre_order(start_node, end_node)
+
+    def in_order(self, start_node, end_node):
+        yield from self.__graph.in_order(start_node, end_node)
+
+    def post_order(self, start_node, end_node):
+        yield from self.__graph.post_order(start_node, end_node)

@@ -8,9 +8,9 @@ class AnimatedMatrixGraph(MatrixGraph):
     """provides overrides of traversal methods that can be used to pause and/or step through the methods as required, as well as methods to detect whether this graph qualifies as a tree, to provide those algorithms for display"""
 
     def is_tree(self):
-        return self.undirected and self.is_fully_connected() and not self.is_cyclic()
+        return self.undirected and self.__is_fully_connected() and not self.__is_cyclic()
 
-    def is_fully_connected(self):
+    def __is_fully_connected(self):
         connected = True
 
         if len(self) > 0:
@@ -20,7 +20,7 @@ class AnimatedMatrixGraph(MatrixGraph):
 
         return connected
 
-    def is_cyclic(self):
+    def __is_cyclic(self):
         cyclic = False
 
         if len(self) > 0:
@@ -92,6 +92,61 @@ class AnimatedMatrixGraph(MatrixGraph):
                     yield (current, visited, queue)
 
         return None
+
+    def pre_order(self, start_node, end_node=None):
+        if start_node in self.matrix[0]:
+            discovered = set([start_node])
+            visited = []
+            stack = [start_node]
+
+            yield (start_node, visited, [])
+
+            while len(stack) > 0:
+                current = stack.pop()
+                # pre-order so count this one as "processed" before considering children
+                visited.append(current)
+
+                if current == end_node:
+                    yield ("", visited, [])
+                    break
+
+                else:
+                    for node, weight in self.get_connections(current):
+                        if node not in discovered:
+                            discovered.add(node)
+                            stack.append(node)
+
+                    yield (current, visited, [])
+
+        return None
+
+    def post_order(self, start_node, end_node=None):
+        if start_node in self.matrix[0]:
+            discovered = set([start_node])
+            visited = []
+            stack = [start_node]
+
+            yield (start_node, visited, [])
+
+            while len(stack) > 0:
+                current = stack.pop()
+                # pre-order so count this one as "processed" before considering children
+                visited.append(current)
+
+                if current == end_node:
+                    yield ("", visited, [])
+                    break
+
+                else:
+                    for node, weight in self.get_connections(current):
+                        if node not in discovered:
+                            discovered.add(node)
+                            stack.append(node)
+
+                    yield (current, visited, [])
+
+        return None
+
 
 
 class AnimatedWeightedMatrixGraph(AnimatedMatrixGraph):
