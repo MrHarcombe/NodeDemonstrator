@@ -95,58 +95,70 @@ class AnimatedMatrixGraph(MatrixGraph):
 
     def pre_order(self, start_node, end_node=None):
         if start_node in self.matrix[0]:
-            discovered = set([start_node])
-            visited = []
-            stack = [start_node]
+            stack = []
+            processed = []
+            current = start_node
 
-            yield (start_node, visited, [])
+            yield (current, processed, [])
 
-            while len(stack) > 0:
-                current = stack.pop()
-                # pre-order so count this one as "processed" before considering children
-                visited.append(current)
-
+            while len(stack) > 0 or current is not None:
                 if current == end_node:
-                    yield ("", visited, [])
+                    yield (current, processed, [])
                     break
 
+                if current is not None:
+                    processed.append(current)
+
+                    children = [child for (child, _) in self.get_connections(current) if child not in processed]
+                    current = children.pop(0)
+                    stack += children[::-1]
+
+                    yield (current, processed, [])
+
                 else:
-                    for node, weight in self.get_connections(current):
-                        if node not in discovered:
-                            discovered.add(node)
-                            stack.append(node)
+                    current = stack.pop()
+                    yield (current, processed, [])
 
-                    yield (current, visited, [])
-
-        return None
-
-    def post_order(self, start_node, end_node=None):
+    def in_order(self, start_node, end_node=None):
         if start_node in self.matrix[0]:
-            discovered = set([start_node])
-            visited = []
-            stack = [start_node]
+            stack = []
+            processed = []
+            current = start_node
 
-            yield (start_node, visited, [])
+            yield (current, processed, [])
 
-            while len(stack) > 0:
-                current = stack.pop()
-                # pre-order so count this one as "processed" before considering children
-                visited.append(current)
-
+            while len(stack) > 0 or current is not None:
                 if current == end_node:
-                    yield ("", visited, [])
+                    yield (current, processed, [])
                     break
 
+                if current is not None:
+                    stack.append(current)
+                    current = [child for (child, _) in self.get_connections(current) if child not in processed][0]
+
+                    yield (current, processed, [])
+
                 else:
-                    for node, weight in self.get_connections(current):
-                        if node not in discovered:
-                            discovered.add(node)
-                            stack.append(node)
+                    current = stack.pop()
+                    processed.append(current)
 
-                    yield (current, visited, [])
+                    current = [child for (child, _) in self.get_connections(current) if child not in processed][-1]
+                    # what about the other children?
 
-        return None
+                    yield (current, processed, [])
 
+    # from https://www.enjoyalgorithms.com/blog/iterative-binary-tree-traversals-using-stack
+
+    def post_order(self, start_node, end_nodeNone):
+        if start_node in self.matrix[0]:
+            stack = []
+            processed = []
+            current = start_node
+
+            while len(stack) > 0 or current is not None:
+                if current is not None:
+                    if current in processed:
+                        process
 
 
 class AnimatedWeightedMatrixGraph(AnimatedMatrixGraph):
