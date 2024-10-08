@@ -3,12 +3,22 @@ from heapq import heappush, heappop
 
 from .structures import MatrixGraph
 
+###
+#
+# iterative tree traversal algorithms adapted from the work at
+# https://www.enjoyalgorithms.com/blog/iterative-binary-tree-traversals-using-stack
+#
+
 
 class AnimatedMatrixGraph(MatrixGraph):
-    """provides overrides of traversal methods that can be used to pause and/or step through the methods as required, as well as methods to detect whether this graph qualifies as a tree, to provide those algorithms for display"""
+    """provides overrides of traversal methods that can be used to pause and/or step through the methods as required,
+    as well as methods to detect whether this graph qualifies as a tree, to provide those algorithms for display
+    """
 
     def is_tree(self):
-        return self.undirected and self.__is_fully_connected() and not self.__is_cyclic()
+        return (
+            self.undirected and self.__is_fully_connected() and not self.__is_cyclic()
+        )
 
     def __is_fully_connected(self):
         connected = True
@@ -110,7 +120,11 @@ class AnimatedMatrixGraph(MatrixGraph):
                     processed.append(current)
 
                     # of any/all children, assume the first one is "left" and others are "right"
-                    children = [child for (child, _) in self.get_connections(current) if child not in processed]
+                    children = [
+                        child
+                        for (child, _) in self.get_connections(current)
+                        if child not in processed
+                    ]
                     if len(children) > 0:
                         current = children.pop(0)
                         stack += children[::-1]
@@ -142,12 +156,16 @@ class AnimatedMatrixGraph(MatrixGraph):
                     visited.append(current)
 
                     # of any/all children, assume the first one is "left" and others are "right"
-                    children = [child for (child, _) in self.get_connections(current) if child not in visited]
+                    children = [
+                        child
+                        for (child, _) in self.get_connections(current)
+                        if child not in visited
+                    ]
                     if len(children) > 0:
                         current = children.pop(0)
                     else:
                         current = None
-                    
+
                     yield (current, processed, [])
 
                 else:
@@ -155,7 +173,11 @@ class AnimatedMatrixGraph(MatrixGraph):
                     processed.append(current)
 
                     # of any/all children, assume the first one is "left" and others are "right"
-                    children = [child for (child, _) in self.get_connections(current) if child not in visited]
+                    children = [
+                        child
+                        for (child, _) in self.get_connections(current)
+                        if child not in visited
+                    ]
                     if len(children) > 0:
                         current = children.pop(0)
                         stack += children
@@ -177,7 +199,7 @@ class AnimatedMatrixGraph(MatrixGraph):
                 if current is not None and current == end_node:
                     yield (current, processed, [])
                     break
-                
+
                 if current is not None:
                     if current in visited:
                         processed.append(current)
@@ -190,7 +212,11 @@ class AnimatedMatrixGraph(MatrixGraph):
                         visited.append(current)
 
                         # of any/all children, assume the first one is "left" and others are "right"
-                        children = [child for (child, _) in self.get_connections(current) if child not in visited]
+                        children = [
+                            child
+                            for (child, _) in self.get_connections(current)
+                            if child not in visited
+                        ]
                         if len(children) > 0:
                             current = children.pop(0)
                             stack += children[::-1]

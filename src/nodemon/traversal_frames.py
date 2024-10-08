@@ -164,6 +164,7 @@ class DepthFirstFrame(TraversalFrame):
             lambda master: CustomScrollableFrame(master, "Pending Stack"),
         )
 
+
 class TreeTraversalFrame(TraversalFrame):
     def __init__(self, master, canvas_frame, traversal, from_node, to_node):
         if to_node is None or len(to_node.strip()) == 0:

@@ -282,7 +282,7 @@ class CanvasFrame(ctk.CTkFrame):
             else:
                 self.__selected = None
                 self.__current = None
-                
+
                 node_name = StateModel().get_next_node_name()
                 StateModel().add_node(node_name)
                 self.__canvas.create_oval(
