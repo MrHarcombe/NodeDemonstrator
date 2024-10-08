@@ -58,9 +58,9 @@ class StateModel:
 
     def set_graph_matrix(self, saved_matrix, is_weighted):
         if is_weighted:
-            self.__graph = AnimatedWeightedMatrixGraph()
+            self.__graph = AnimatedWeightedMatrixGraph(True)
         else:
-            self.__graph = AnimatedMatrixGraph()
+            self.__graph = AnimatedMatrixGraph(True)
 
         self.__graph.matrix = saved_matrix
         last_node = max(self.__graph.matrix[0])
