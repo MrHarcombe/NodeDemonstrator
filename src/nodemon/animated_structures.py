@@ -102,16 +102,20 @@ class AnimatedMatrixGraph(MatrixGraph):
             yield (current, processed, [])
 
             while len(stack) > 0 or current is not None:
-                if current == end_node:
+                if current is not None and current == end_node:
                     yield (current, processed, [])
                     break
 
                 if current is not None:
                     processed.append(current)
 
+                    # of any/all children, assume the first one is "left" and others are "right"
                     children = [child for (child, _) in self.get_connections(current) if child not in processed]
-                    current = children.pop(0)
-                    stack += children[::-1]
+                    if len(children) > 0:
+                        current = children.pop(0)
+                        stack += children[::-1]
+                    else:
+                        current = None
 
                     yield (current, processed, [])
 
@@ -123,42 +127,81 @@ class AnimatedMatrixGraph(MatrixGraph):
         if start_node in self.matrix[0]:
             stack = []
             processed = []
+            visited = []
             current = start_node
 
             yield (current, processed, [])
 
             while len(stack) > 0 or current is not None:
-                if current == end_node:
+                if current is not None and current == end_node:
                     yield (current, processed, [])
                     break
 
                 if current is not None:
                     stack.append(current)
-                    current = [child for (child, _) in self.get_connections(current) if child not in processed][0]
+                    visited.append(current)
 
+                    # of any/all children, assume the first one is "left" and others are "right"
+                    children = [child for (child, _) in self.get_connections(current) if child not in visited]
+                    if len(children) > 0:
+                        current = children.pop(0)
+                    else:
+                        current = None
+                    
                     yield (current, processed, [])
 
                 else:
                     current = stack.pop()
                     processed.append(current)
 
-                    current = [child for (child, _) in self.get_connections(current) if child not in processed][-1]
-                    # what about the other children?
+                    # of any/all children, assume the first one is "left" and others are "right"
+                    children = [child for (child, _) in self.get_connections(current) if child not in visited]
+                    if len(children) > 0:
+                        current = children.pop(0)
+                        stack += children
+                    else:
+                        current = None
 
                     yield (current, processed, [])
 
-    # from https://www.enjoyalgorithms.com/blog/iterative-binary-tree-traversals-using-stack
-
-    def post_order(self, start_node, end_nodeNone):
+    def post_order(self, start_node, end_node=None):
         if start_node in self.matrix[0]:
             stack = []
             processed = []
+            visited = []
             current = start_node
 
+            yield (current, processed, [])
+
             while len(stack) > 0 or current is not None:
+                if current is not None and current == end_node:
+                    yield (current, processed, [])
+                    break
+                
                 if current is not None:
-                    if current in processed:
-                        process
+                    if current in visited:
+                        processed.append(current)
+                        current = None
+
+                        yield (current, processed, [])
+
+                    else:
+                        stack.append(current)
+                        visited.append(current)
+
+                        # of any/all children, assume the first one is "left" and others are "right"
+                        children = [child for (child, _) in self.get_connections(current) if child not in visited]
+                        if len(children) > 0:
+                            current = children.pop(0)
+                            stack += children[::-1]
+                        else:
+                            current = None
+
+                        yield (current, processed, [])
+
+                else:
+                    current = stack.pop()
+                    yield (current, processed, [])
 
 
 class AnimatedWeightedMatrixGraph(AnimatedMatrixGraph):
