@@ -17,7 +17,8 @@ Building a drag and drop desktop (Tkinter) application to help visualise various
 - choice of stepped or timed trace of supported algorithms
 - available algorithms 
   - breadth-first / depth-first from a given start point (with or without end point, ie traversal and/or search)
-  - Dijkstra and A* shortest path
+  - (if weighted) Dijkstra and A* shortest path
+  - (if a "tree", ie undirected, fully connected and no cycles) pre-, in- and post-order traversal
 
 ## Usage
 
