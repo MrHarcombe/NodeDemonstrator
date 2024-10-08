@@ -7,10 +7,12 @@ Building a drag and drop desktop (Tkinter) application to help visualise various
 - drag and drop interface to build a graph 
   - can be weighted or unweighted
   - in "node" mode... 
+    - click to create a node
     - drag to move a node and associated edges
     - double-click to rename nodes, if the default names aren't sufficient
     - double-right click to delete a node
-  - in "edge" mode... 
+  - in "edge" mode...
+    - click and drag between nodes to create an edge
     - drag to rotate a loopback edge out of the way
     - double-click to change the weight of an edge
     - double-right click to delete an edge
