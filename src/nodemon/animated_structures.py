@@ -5,7 +5,41 @@ from .structures import MatrixGraph
 
 
 class AnimatedMatrixGraph(MatrixGraph):
-    """provides overrides of traversal methods that can be used to pause and/or step through the methods as required"""
+    """provides overrides of traversal methods that can be used to pause and/or step through the methods as required, as well as methods to detect whether this graph qualifies as a tree, to provide those algorithms for display"""
+
+    def is_tree(self):
+        return self.undirected and self.__is_fully_connected() and not self.__is_cyclic()
+
+    def __is_fully_connected(self):
+        connected = True
+
+        if len(self) > 0:
+            nodes = sum([1 for node in self.breadth_first(self.matrix[0][0])]) - 1
+            print(nodes, "vs", len(self))
+            connected = len(self) == nodes
+
+        return connected
+
+    def __is_cyclic(self):
+        cyclic = False
+
+        if len(self) > 0:
+            start_node = self.matrix[0][0]
+
+            visited = []
+            queue = [(start_node, None)]
+
+            while len(queue) > 0 and not cyclic:
+                current, previous = queue.pop(0)
+                visited.append(current)
+
+                for node, weight in self.get_connections(current):
+                    if node not in visited:
+                        queue.append((node, current))
+                    elif node != previous:
+                        cyclic = True
+
+        return cyclic
 
     def depth_first(self, start_node, end_node=None):
         if start_node in self.matrix[0]:
@@ -58,6 +92,116 @@ class AnimatedMatrixGraph(MatrixGraph):
                     yield (current, visited, queue)
 
         return None
+
+    def pre_order(self, start_node, end_node=None):
+        if start_node in self.matrix[0]:
+            stack = []
+            processed = []
+            current = start_node
+
+            yield (current, processed, [])
+
+            while len(stack) > 0 or current is not None:
+                if current is not None and current == end_node:
+                    yield (current, processed, [])
+                    break
+
+                if current is not None:
+                    processed.append(current)
+
+                    # of any/all children, assume the first one is "left" and others are "right"
+                    children = [child for (child, _) in self.get_connections(current) if child not in processed]
+                    if len(children) > 0:
+                        current = children.pop(0)
+                        stack += children[::-1]
+                    else:
+                        current = None
+
+                    yield (current, processed, [])
+
+                else:
+                    current = stack.pop()
+                    yield (current, processed, [])
+
+    def in_order(self, start_node, end_node=None):
+        if start_node in self.matrix[0]:
+            stack = []
+            processed = []
+            visited = []
+            current = start_node
+
+            yield (current, processed, [])
+
+            while len(stack) > 0 or current is not None:
+                if current is not None and current == end_node:
+                    yield (current, processed, [])
+                    break
+
+                if current is not None:
+                    stack.append(current)
+                    visited.append(current)
+
+                    # of any/all children, assume the first one is "left" and others are "right"
+                    children = [child for (child, _) in self.get_connections(current) if child not in visited]
+                    if len(children) > 0:
+                        current = children.pop(0)
+                    else:
+                        current = None
+                    
+                    yield (current, processed, [])
+
+                else:
+                    current = stack.pop()
+                    processed.append(current)
+
+                    # of any/all children, assume the first one is "left" and others are "right"
+                    children = [child for (child, _) in self.get_connections(current) if child not in visited]
+                    if len(children) > 0:
+                        current = children.pop(0)
+                        stack += children
+                    else:
+                        current = None
+
+                    yield (current, processed, [])
+
+    def post_order(self, start_node, end_node=None):
+        if start_node in self.matrix[0]:
+            stack = []
+            processed = []
+            visited = []
+            current = start_node
+
+            yield (current, processed, [])
+
+            while len(stack) > 0 or current is not None:
+                if current is not None and current == end_node:
+                    yield (current, processed, [])
+                    break
+                
+                if current is not None:
+                    if current in visited:
+                        processed.append(current)
+                        current = None
+
+                        yield (current, processed, [])
+
+                    else:
+                        stack.append(current)
+                        visited.append(current)
+
+                        # of any/all children, assume the first one is "left" and others are "right"
+                        children = [child for (child, _) in self.get_connections(current) if child not in visited]
+                        if len(children) > 0:
+                            current = children.pop(0)
+                            stack += children[::-1]
+                        else:
+                            current = None
+
+                        yield (current, processed, [])
+
+                else:
+                    current = stack.pop()
+                    yield (current, processed, [])
 
 
 class AnimatedWeightedMatrixGraph(AnimatedMatrixGraph):
@@ -296,4 +440,18 @@ if __name__ == "__main__":
                     " / ".join(f"{c}: {n}" for c, n, in queue),
                 )
 
-    test_animated_weighted_matrix_graph()
+    def test_tree_detection():
+        print("Testing animated weighted adjacency matrix tree detection...")
+        g = AnimatedWeightedMatrixGraph(True)
+        g.add_node("A")
+        g.add_node("B")
+        g.add_node("C")
+        g.add_node("D")
+        g.add_edge("A", "B")
+        g.add_edge("A", "C")
+        g.add_edge("B", "D")
+        print("Cyclic:", g.is_cyclic())
+        print("Tree:", g.is_tree())
+
+    # test_animated_weighted_matrix_graph()
+    test_tree_detection()

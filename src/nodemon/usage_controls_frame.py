@@ -2,7 +2,7 @@ import customtkinter as ctk
 from tkinter import messagebox
 
 from .state_model import StateModel
-from .traversal_frames import BreadthFirstFrame, DepthFirstFrame
+from .traversal_frames import BreadthFirstFrame, DepthFirstFrame, TreeTraversalFrame
 from .optimisation_frames import DijkstraShortestPathFrame, AStarShortestPathFrame
 
 
@@ -20,6 +20,12 @@ class UsageControlsFrame(ctk.CTkFrame):
     WEIGHTED_ALGOCHOICES = UNWEIGHTED_ALGOCHOICES + [
         "Dijkstra's Shortest Path",
         "A* Shortest Path",
+    ]
+
+    TREE_ALGOCHOICES = UNWEIGHTED_ALGOCHOICES + [
+        "Pre Order Traversal",
+        "In Order Traversal",
+        "Post Order Traversal"
     ]
 
     def __init__(self, parent, canvas_frame):
@@ -44,11 +50,7 @@ class UsageControlsFrame(ctk.CTkFrame):
 
         algo_combo = ctk.CTkComboBox(
             self,
-            values=(
-                UsageControlsFrame.WEIGHTED_ALGOCHOICES
-                if StateModel().is_weighted()
-                else UsageControlsFrame.UNWEIGHTED_ALGOCHOICES
-            ),
+            values=[],
             variable=self.__algochoice,
             state="readonly",
         )
@@ -60,7 +62,9 @@ class UsageControlsFrame(ctk.CTkFrame):
             "<Expose>",
             lambda event: algo_combo.configure(
                 values=(
-                    UsageControlsFrame.WEIGHTED_ALGOCHOICES
+                    UsageControlsFrame.TREE_ALGOCHOICES
+                    if StateModel().is_tree()
+                    else UsageControlsFrame.WEIGHTED_ALGOCHOICES
                     if StateModel().is_weighted()
                     else UsageControlsFrame.UNWEIGHTED_ALGOCHOICES
                 )
@@ -241,6 +245,33 @@ class UsageControlsFrame(ctk.CTkFrame):
                     messagebox.showerror(
                         title="Required Nodes",
                         message='Both "From" and "To" nodes are required to trace A* shortest path',
+                    )
+
+            case "Pre Order Traversal":
+                if from_given:
+                    self.__trace_frame = TreeTraversalFrame(self, self.__canvas_frame, "Pre", from_node, to_node)
+                else:
+                    messagebox.showerror(
+                        title="Required Node",
+                        message='At least the "From" node is required to trace a pre-order tree traversal',
+                    )
+
+            case "In Order Traversal":
+                if from_given:
+                    self.__trace_frame = TreeTraversalFrame(self, self.__canvas_frame, "In", from_node, to_node)
+                else:
+                    messagebox.showerror(
+                        title="Required Node",
+                        message='At least the "From" node is required to trace a in-order tree traversal',
+                    )
+
+            case "Post Order Traversal":
+                if from_given:
+                    self.__trace_frame = TreeTraversalFrame(self, self.__canvas_frame, "Post", from_node, to_node)
+                else:
+                    messagebox.showerror(
+                        title="Required Node",
+                        message='At least the "From" node is required to trace a post-order tree traversal',
                     )
 
         if self.__trace_frame is not None:
