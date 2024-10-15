@@ -15,8 +15,12 @@ class TraceFrame(ctk.CTkFrame, metaclass=ABCMeta):
         self._canvas_frame = canvas_frame
         self._iterator = None
 
-        self._from = from_node
-        self._to = to_node if to_node is not None and len(to_node.strip()) > 0 else None
+        self._from = canvas_frame.get_node_from_label(from_node)
+        self._to = (
+            canvas_frame.get_node_from_label(to_node)
+            if to_node is not None and len(to_node.strip()) > 0
+            else None
+        )
         self._current = None
 
         ctk.CTkLabel(

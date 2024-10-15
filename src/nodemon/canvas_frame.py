@@ -44,7 +44,7 @@ class CanvasFrame(ctk.CTkFrame):
         ###
         # Mouse wheel scrolling taken from the answer at
         # https://stackoverflow.com/questions/17355902/tkinter-binding-mousewheel-to-scrollbar
-        # w
+        #
         self.__canvas.bind(
             "<MouseWheel>",
             lambda event: self.__canvas.yview_scroll(-1 * event.delta // 120, "units"),
@@ -180,6 +180,30 @@ class CanvasFrame(ctk.CTkFrame):
             node_labels.append(node_label)
 
         return node_labels
+
+    def get_node_from_label(self, name_or_label):
+        id = self.__canvas.find_withtag(f"nodelabel_{name_or_label}")
+        if id is None or len(id) == 0:
+            id = self.__canvas.find_withtag(f"nodename_{name_or_label}")
+
+        for tag in self.__canvas.gettags(id):
+            if tag.startswith("nodename_"):
+                return tag[9:]
+
+    def get_label_from_node(self, name_or_label):
+        id = self.__canvas.find_withtag(f"nodelabel_{name_or_label}")
+        if id is None or len(id) == 0:
+            id = self.__canvas.find_withtag(f"nodename_{name_or_label}")
+
+        nodelabel = None
+        for tag in self.__canvas.gettags(id):
+            if tag.startswith("nodename_"):
+                if nodelabel is None:
+                    nodelabel = tag[9:]
+
+            if tag.startswith("nodelabel_"):
+                nodelabel = tag[10:]
+        return nodelabel
 
     def highlight_start_node(self, node_name):
         self.__highlight_node(

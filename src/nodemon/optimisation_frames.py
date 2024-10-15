@@ -64,7 +64,7 @@ class DijkstraShortestPathFrame(TraceFrame):
 
                 ctk.CTkLabel(
                     sub,
-                    text=node,
+                    text=self._canvas_frame.get_label_from_node(node),
                     anchor=ctk.CENTER,
                 ).grid(
                     sticky=ctk.NSEW,
@@ -88,7 +88,11 @@ class DijkstraShortestPathFrame(TraceFrame):
 
                 ctk.CTkLabel(
                     sub,
-                    text=previous if previous is not None else "-",
+                    text=(
+                        self._canvas_frame.get_label_from_node(previous)
+                        if previous is not None
+                        else "-"
+                    ),
                     anchor=ctk.CENTER,
                 ).grid(
                     sticky=ctk.NSEW,
@@ -127,7 +131,6 @@ class DijkstraShortestPathFrame(TraceFrame):
 
         else:
             self._other.columnconfigure(0, weight=1)
-            # print(type(other), other, type(other[0]))
 
             # incoming tuples mean algorithm is still on-going
             if type(other[0]) is tuple:
@@ -146,7 +149,7 @@ class DijkstraShortestPathFrame(TraceFrame):
 
                     ctk.CTkLabel(
                         sub,
-                        text=node,
+                        text=self._canvas_frame.get_label_from_node(node),
                         anchor=ctk.CENTER,
                     ).grid(
                         sticky=ctk.NSEW,
@@ -168,7 +171,7 @@ class DijkstraShortestPathFrame(TraceFrame):
                         column=1,
                     )
 
-            # if it's not a tuple, it should be a string, which we'd get for an end point if the
+            # if it's not a tuple, it should be a string, which we'd get for an end point
             else:
                 row = 0
                 column = 0
@@ -188,7 +191,7 @@ class DijkstraShortestPathFrame(TraceFrame):
 
                     ctk.CTkLabel(
                         sub,
-                        text=node,
+                        text=self._canvas_frame.get_label_from_node(node),
                         anchor=ctk.CENTER,
                     ).grid(
                         sticky=ctk.NSEW,
@@ -266,7 +269,7 @@ class AStarShortestPathFrame(TraceFrame):
 
                 ctk.CTkLabel(
                     sub,
-                    text=node,
+                    text=self._canvas_frame.get_label_from_node(node),
                     anchor=ctk.CENTER,
                 ).grid(
                     sticky=ctk.NSEW,
@@ -302,7 +305,7 @@ class AStarShortestPathFrame(TraceFrame):
 
                 ctk.CTkLabel(
                     sub,
-                    text=came_from[node],
+                    text=self._canvas_frame.get_label_from_node(came_from[node]),
                     anchor=ctk.CENTER,
                 ).grid(
                     sticky=ctk.NSEW,
@@ -341,7 +344,6 @@ class AStarShortestPathFrame(TraceFrame):
 
         else:
             self._other.columnconfigure(0, weight=1)
-            # print(type(other), other, type(other[0]))
 
             # incoming tuples mean algorithm is still on-going
             if type(other[0]) is tuple:
@@ -360,7 +362,7 @@ class AStarShortestPathFrame(TraceFrame):
 
                     ctk.CTkLabel(
                         sub,
-                        text=node,
+                        text=self._canvas_frame.get_label_from_node(node),
                         anchor=ctk.CENTER,
                     ).grid(
                         sticky=ctk.NSEW,
@@ -382,7 +384,7 @@ class AStarShortestPathFrame(TraceFrame):
                         column=1,
                     )
 
-            # if it's not a tuple, it should be a string, which we'd get for an end point if the
+            # if it's not a tuple, it should be a string, which we'd get for an end point
             else:
                 row = 0
                 column = 0
@@ -402,7 +404,7 @@ class AStarShortestPathFrame(TraceFrame):
 
                     ctk.CTkLabel(
                         sub,
-                        text=node,
+                        text=self._canvas_frame.get_label_from_node(node),
                         anchor=ctk.CENTER,
                     ).grid(
                         sticky=ctk.NSEW,

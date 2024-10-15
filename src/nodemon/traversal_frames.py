@@ -58,7 +58,7 @@ class TraversalFrame(TraceFrame):
 
                 ctk.CTkLabel(
                     sub,
-                    text=p,
+                    text=self._canvas_frame.get_label_from_node(p),
                     anchor=ctk.CENTER,
                 ).grid(
                     sticky=ctk.NSEW,
@@ -104,8 +104,8 @@ class TraversalFrame(TraceFrame):
             column = 0
             self._other.columnconfigure((0, 1, 2), weight=1)
 
-            for p in other:
-                self._canvas_frame.highlight_pending_node(p)
+            for o in other:
+                self._canvas_frame.highlight_pending_node(o)
 
                 sub = ctk.CTkFrame(
                     self._other,
@@ -121,7 +121,7 @@ class TraversalFrame(TraceFrame):
 
                 ctk.CTkLabel(
                     sub,
-                    text=p,
+                    text=self._canvas_frame.get_label_from_node(o),
                     anchor=ctk.CENTER,
                 ).grid(
                     sticky=ctk.NSEW,
