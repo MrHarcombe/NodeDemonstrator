@@ -48,7 +48,7 @@ class DijkstraShortestPathFrame(TraceFrame):
         else:
             self._processed.columnconfigure(0, weight=1)
 
-            for row, node in enumerate(sorted(processed)):
+            for row, node in enumerate(sorted(processed, key=lambda node: self._canvas_frame.get_label_from_node(node))):
                 cost, previous = processed[node]
                 self._canvas_frame.highlight_processed_node(node)
 
@@ -254,7 +254,7 @@ class AStarShortestPathFrame(TraceFrame):
             self._processed.columnconfigure(0, weight=1)
 
             f_scores, g_scores, came_from = processed
-            for row, node in enumerate(sorted(came_from.keys())):
+            for row, node in enumerate(sorted(came_from.keys(), key=lambda node: self._canvas_frame.get_label_from_node(node))):
                 self._canvas_frame.highlight_processed_node(node)
 
                 sub = ctk.CTkFrame(
