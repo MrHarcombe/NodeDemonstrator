@@ -84,7 +84,7 @@ class StateModel:
         self.__filename = filename
 
     def is_tree(self):
-        print("Checking if tree...")
+        # print("Checking if tree...")
         return self.__graph.is_tree()
 
     def is_weighted(self):
@@ -115,11 +115,11 @@ class StateModel:
 
     def add_node(self, node_name):
         self.__graph.add_node(node_name)
-        print(self.__graph.matrix)
+        # print(self.__graph.matrix)
 
     def delete_node(self, node_name):
         self.__graph.delete_node(node_name)
-        print(self.__graph.matrix)
+        # print(self.__graph.matrix)
 
     def has_edge(self, from_node, to_node):
         return self.__graph.is_connected(from_node, to_node)
@@ -129,11 +129,11 @@ class StateModel:
             self.__graph.add_edge(from_node, to_node, weight, undirected)
         else:
             self.__graph.add_edge(from_node, to_node, undirected)
-        print(self.__graph.matrix)
+        # print(self.__graph.matrix)
 
     def delete_edge(self, node_from, node_to):
         self.__graph.delete_edge(node_from, node_to)
-        print(self.__graph.matrix)
+        # print(self.__graph.matrix)
 
     def breadth_first(self, start_node, end_node=None):
         yield from self.__graph.breadth_first(start_node, end_node)

@@ -25,7 +25,7 @@ class AnimatedMatrixGraph(MatrixGraph):
 
         if len(self) > 0:
             nodes = sum([1 for node in self.breadth_first(self.matrix[0][0])]) - 1
-            print(nodes, "vs", len(self))
+            # print(nodes, "vs", len(self))
             connected = len(self) == nodes
 
         return connected
