@@ -362,7 +362,7 @@ class CanvasFrame(ctk.CTkFrame):
         applicable for moving a node.
 
         So if the operation is "Nodes", stage each part as moving the selected ids to the current position and then
-        storing the new current position.
+        storing the new current position. This needs to ensure that nodes are never allowed to overlap.
 
         But if the operation is "Edges", and something is selected, then the user must be rotating a loopback around...
         so behave accordingly.
@@ -380,52 +380,71 @@ class CanvasFrame(ctk.CTkFrame):
         StateModel().set_changed()
 
         if operation == "Nodes":
-            for id in self.__selected:
-                tags = self.__canvas.gettags(id)
-                if "node" in tags or "edge_loopback" in tags or "cost_loopback" in tags:
-                    self.__canvas.move(
-                        id,
-                        canvas_xy.x - self.__current[0],
-                        canvas_xy.y - self.__current[1],
-                    )
+            allowed = "node" not in [
+                tag
+                for id in self.__canvas.find_overlapping(
+                    canvas_xy.x - NODE_RADIUS,
+                    canvas_xy.y - NODE_RADIUS,
+                    canvas_xy.x + NODE_RADIUS,
+                    canvas_xy.y + NODE_RADIUS,
+                )
+                if id not in self.__selected
+                for tag in self.__canvas.gettags(id)
+            ]
 
-            for id in self.__selected:
-                tags = self.__canvas.gettags(id)
-                if "edge" in tags and "edge_loopback" not in tags:
-                    for tag in tags:
-                        if tag.startswith("edge_fromto_"):
-                            _, _, from_node, to_node = tag.split("_")
-
-                    fx1, fy1, fx2, fy2 = self.__canvas.bbox(f"node_{from_node}")
-                    fcx, fcy = (fx1 + fx2) / 2, (fy1 + fy2) / 2
-                    tx1, ty1, tx2, ty2 = self.__canvas.bbox(f"node_{to_node}")
-                    tcx, tcy = (tx1 + tx2) / 2, (ty1 + ty2) / 2
-
-                    if f"edge_tofrom_{from_node}_{to_node}" in tags:
-                        self.__canvas.coords(id, fcx, fcy, tcx, tcy)
-                        # self.__canvas.tag_lower(id, "node")
-
-                    else:
-                        fcx, fcy, tcx, tcy = self.__calculate_edge_boundaries(
-                            fcx, fcy, tcx, tcy
+            if allowed:
+                # if allowed drag the node, along with any loopback edge and cost
+                for id in self.__selected:
+                    tags = self.__canvas.gettags(id)
+                    if (
+                        "node" in tags
+                        or "edge_loopback" in tags
+                        or "cost_loopback" in tags
+                    ):
+                        self.__canvas.move(
+                            id,
+                            canvas_xy.x - self.__current[0],
+                            canvas_xy.y - self.__current[1],
                         )
-                        self.__redraw_arc_with_arrow(id, fcx, fcy, tcx, tcy)
-                        # self.__canvas.tag_lower(id, "node")
 
-                elif "cost" in tags and "cost_loopback" not in tags:
-                    for tag in tags:
-                        if tag.startswith("cost_fromto_"):
-                            _, _, from_node, to_node = tag.split("_")
+                # then drag any other connected edges
+                for id in self.__selected:
+                    tags = self.__canvas.gettags(id)
+                    if "edge" in tags and "edge_loopback" not in tags:
+                        for tag in tags:
+                            if tag.startswith("edge_fromto_"):
+                                _, _, from_node, to_node = tag.split("_")
 
-                    ex1, ey1, ex2, ey2 = self.__canvas.bbox(
-                        f"edge_fromto_{from_node}_{to_node}"
-                    )
-                    lcx = ((ex1 + ex2) / 2) + 10
-                    lcy = ((ey1 + ey2) / 2) - 10
-                    self.__canvas.coords(id, lcx, lcy)
-                    # self.__canvas.tag_lower(id, "edge")
+                        fx1, fy1, fx2, fy2 = self.__canvas.bbox(f"node_{from_node}")
+                        fcx, fcy = (fx1 + fx2) / 2, (fy1 + fy2) / 2
+                        tx1, ty1, tx2, ty2 = self.__canvas.bbox(f"node_{to_node}")
+                        tcx, tcy = (tx1 + tx2) / 2, (ty1 + ty2) / 2
 
-            self.__current = (canvas_xy.x, canvas_xy.y)
+                        if f"edge_tofrom_{from_node}_{to_node}" in tags:
+                            self.__canvas.coords(id, fcx, fcy, tcx, tcy)
+                            # self.__canvas.tag_lower(id, "node")
+
+                        else:
+                            fcx, fcy, tcx, tcy = self.__calculate_edge_boundaries(
+                                fcx, fcy, tcx, tcy
+                            )
+                            self.__redraw_arc_with_arrow(id, fcx, fcy, tcx, tcy)
+                            # self.__canvas.tag_lower(id, "node")
+
+                    elif "cost" in tags and "cost_loopback" not in tags:
+                        for tag in tags:
+                            if tag.startswith("cost_fromto_"):
+                                _, _, from_node, to_node = tag.split("_")
+
+                        ex1, ey1, ex2, ey2 = self.__canvas.bbox(
+                            f"edge_fromto_{from_node}_{to_node}"
+                        )
+                        lcx = ((ex1 + ex2) / 2) + 10
+                        lcy = ((ey1 + ey2) / 2) - 10
+                        self.__canvas.coords(id, lcx, lcy)
+                        # self.__canvas.tag_lower(id, "edge")
+
+                self.__current = (canvas_xy.x, canvas_xy.y)
 
         elif operation == "Edges":
             # for sel in self.__selected:
