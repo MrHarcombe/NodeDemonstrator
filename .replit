@@ -1,0 +1,16 @@
+modules = ["python-3.8"]
+
+[nix]
+channel = "stable-24_05"
+
+[workflows]
+runButton = "Run Node Demonstrator"
+
+[[workflows.workflow]]
+name = "Run Node Demonstrator"
+author = 159439
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python -m nodemon"
