@@ -16,7 +16,7 @@ authors = [
 ]
 description = "A simple drag and drop application to help visualise various graph algorithms"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 dependencies = [
     # "customtkinter@git+https://github.com/DerSchinken/CustomTkinter.git@fix-1419"
     "customtkinter>=5.2.2"

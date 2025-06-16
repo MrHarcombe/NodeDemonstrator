@@ -20,4 +20,8 @@ class ToolFrame(ctk.CTkTabview):
                 self.add("Algorithms"),
                 canvas_frame,
             ).pack(expand=True, fill=ctk.BOTH),
+            RepresentationFrame(
+                self.add("Representation"),
+                canvas_frame,
+            ).pack(expand=True, fill=ctk.BOTH),
         ]
