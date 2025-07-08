@@ -1,17 +1,19 @@
-import customtkinter as ctk
+import ttkbootstrap as ttk
+import ttkbootstrap.constants as tk
+from ttkbootstrap.scrolled import ScrolledFrame
 
 from abc import ABCMeta, abstractmethod
 
 
-class CustomScrollableFrame(ctk.CTkScrollableFrame):
+class CustomScrollableFrame(ScrolledFrame):
     def __init__(self, master, title):
-        super().__init__(master, label_text=title, label_anchor=ctk.CENTER)
-        self._scrollbar.configure(height=0)
+        super().__init__(master) #, label_text=title, label_anchor=tk.CENTER)
+        # self._scrollbar.configure(height=0)
 
 
-class TraceFrame(ctk.CTkFrame, metaclass=ABCMeta):
+class TraceFrame(ttk.Frame, metaclass=ABCMeta):
     def __init__(self, master, canvas_frame, title, from_node, to_node):
-        super().__init__(master, fg_color="transparent", bg_color="transparent")
+        super().__init__(master)
         self._canvas_frame = canvas_frame
         self._iterator = None
 
@@ -23,60 +25,39 @@ class TraceFrame(ctk.CTkFrame, metaclass=ABCMeta):
         )
         self._current = None
 
-        ctk.CTkLabel(
-            self, text=title, anchor=ctk.CENTER, fg_color="darkgrey", corner_radius=6
-        ).grid(
-            sticky=ctk.NSEW,
+        ttk.Label(self, text=title, anchor=tk.CENTER).grid(
+            sticky=tk.NSEW,
             pady=(5, 5),
         )
 
         self.highlight_anchor_points()
 
+    
     def initial_setup(self, upper_class, lower_class):
         self._processed = upper_class(self)
-        self._processed.grid(sticky=ctk.NSEW, pady=(0, 15))
+        self._processed.grid(sticky=tk.NSEW, pady=(0, 15))
         self._processed.columnconfigure(0, weight=1)
 
-        empty_frame = ctk.CTkFrame(
-            self._processed,
-            border_width=2,
-            border_color="black",
-        )
-        empty_frame.grid(
-            sticky=ctk.NSEW,
-        )
+        empty_frame = ttk.Frame(self._processed, borderwidth=2)
+        empty_frame.grid(sticky=tk.NSEW)
         empty_frame.columnconfigure(0, weight=1)
 
-        ctk.CTkLabel(
-            empty_frame,
-            text="Empty",
-            anchor=ctk.CENTER,
-        ).grid(
-            sticky=ctk.NSEW,
+        ttk.Label(empty_frame, text="Empty", anchor=tk.CENTER, bootstyle="inverse-info").grid(
+            sticky=tk.NSEW,
             padx=8,
             pady=3,
         )
 
         self._other = lower_class(self)
-        self._other.grid(sticky=ctk.NSEW)
+        self._other.grid(sticky=tk.NSEW)
         self._other.columnconfigure(0, weight=1)
 
-        empty_frame = ctk.CTkFrame(
-            self._other,
-            border_width=2,
-            border_color="black",
-        )
-        empty_frame.grid(
-            sticky=ctk.NSEW,
-        )
+        empty_frame = ttk.Frame(self._other, borderwidth=2)
+        empty_frame.grid(sticky=tk.NSEW)
         empty_frame.columnconfigure(0, weight=1)
 
-        ctk.CTkLabel(
-            empty_frame,
-            text="Empty",
-            anchor=ctk.CENTER,
-        ).grid(
-            sticky=ctk.NSEW,
+        ttk.Label(empty_frame, text="Empty", anchor=tk.CENTER, bootstyle="inverse-info").grid(
+            sticky=tk.NSEW,
             padx=8,
             pady=3,
         )

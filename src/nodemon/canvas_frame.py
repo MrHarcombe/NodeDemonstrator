@@ -1,5 +1,7 @@
-import customtkinter as ctk
-from tkinter import messagebox
+import ttkbootstrap as ttk
+import ttkbootstrap.constants as tk
+import ttkbootstrap.dialogs as dialogs
+
 from collections import namedtuple
 from math import radians, sin, cos, atan2, sqrt
 
@@ -15,7 +17,7 @@ NODE_RADIUS = 50
 ARC_BULGE = 40
 
 
-class CanvasFrame(ctk.CTkFrame):
+class CanvasFrame(ttk.Frame):
     """
     Class to be in charge of interacting with the Canvas - handles clicks, drags, etc and translates those into actions
     depending on the current toggles as set by the user.
@@ -23,17 +25,17 @@ class CanvasFrame(ctk.CTkFrame):
 
     def __init__(self, parent):
         super().__init__(parent)
-        self.__canvas = ctk.CTkCanvas(
+        self.__canvas = ttk.Canvas(
             self, width=100, height=100, scrollregion=(0, 0, 10000, 10000)
         )
-        hs = ctk.CTkScrollbar(self, orientation=ctk.HORIZONTAL)
-        hs.pack(side=ctk.BOTTOM, fill=ctk.X)
+        hs = ttk.Scrollbar(self, orient=tk.HORIZONTAL)
+        hs.pack(side=tk.BOTTOM, fill=tk.X)
         hs.configure(command=self.__canvas.xview)
-        vs = ctk.CTkScrollbar(self, orientation=ctk.VERTICAL)
-        vs.pack(side=ctk.RIGHT, fill=ctk.Y)
+        vs = ttk.Scrollbar(self, orient=tk.VERTICAL)
+        vs.pack(side=tk.RIGHT, fill=tk.Y)
         vs.configure(command=self.__canvas.yview)
         self.__canvas.configure(xscrollcommand=hs.set, yscrollcommand=vs.set)
-        self.__canvas.pack(side=ctk.LEFT, expand=True, fill=ctk.BOTH)
+        self.__canvas.pack(side=tk.LEFT, expand=True, fill=tk.BOTH)
 
         self.__canvas.bind("<Button-1>", self.__click)
         self.__canvas.bind("<ButtonRelease-1>", self.__release)
@@ -380,14 +382,77 @@ class CanvasFrame(ctk.CTkFrame):
         StateModel().set_changed()
 
         if operation == "Nodes":
+            all_selected_rects = list(
+                filter(
+                    lambda r: len(r) == 4,
+                    [
+                        self.__canvas.coords(id)
+                        for id in self.__selected
+                        if "node" in self.__canvas.gettags(id)
+                    ],
+                )
+            )
+            biggest_rect = (
+                min(r[0] for r in all_selected_rects),
+                min(r[1] for r in all_selected_rects),
+                max(r[2] for r in all_selected_rects),
+                max(r[3] for r in all_selected_rects),
+            )
+            # print(f"{biggest_rect=}")
+            centre = (
+                (biggest_rect[0] + biggest_rect[2]) // 2,
+                (biggest_rect[1] + biggest_rect[3]) // 2,
+            )
+            # print(f"{centre=}")
+
+            distance_to_centre = min(
+                NODE_RADIUS,
+                int(
+                    ((canvas_xy.x - centre[0]) ** 2 + (canvas_xy.y - centre[1]) ** 2)
+                    ** 0.5
+                ),
+            )
+            # print(f"{distance_to_centre=}")
+
+            overlap_rect = [
+                (
+                    canvas_xy.x
+                    - (
+                        NODE_RADIUS * 4 / 3 - distance_to_centre
+                        if canvas_xy.x < centre[0]
+                        else NODE_RADIUS * 4 / 3 + distance_to_centre
+                    )
+                ),
+                (
+                    canvas_xy.y
+                    - (
+                        NODE_RADIUS * 4 / 3 - distance_to_centre
+                        if canvas_xy.y < centre[1]
+                        else NODE_RADIUS * 4 / 3 + distance_to_centre
+                    )
+                ),
+                (
+                    canvas_xy.x
+                    + (
+                        NODE_RADIUS * 4 / 3 - distance_to_centre
+                        if canvas_xy.x > centre[0]
+                        else NODE_RADIUS * 4 / 3 + distance_to_centre
+                    )
+                ),
+                (
+                    canvas_xy.y
+                    + (
+                        NODE_RADIUS * 4 / 3 - distance_to_centre
+                        if canvas_xy.y > centre[1]
+                        else NODE_RADIUS * 4 / 3 + distance_to_centre
+                    )
+                ),
+            ]
+            # print(f"{overlap_rect=}")
+
             allowed = "node" not in [
                 tag
-                for id in self.__canvas.find_overlapping(
-                    canvas_xy.x - NODE_RADIUS,
-                    canvas_xy.y - NODE_RADIUS,
-                    canvas_xy.x + NODE_RADIUS,
-                    canvas_xy.y + NODE_RADIUS,
-                )
+                for id in self.__canvas.find_overlapping(*overlap_rect)
                 if id not in self.__selected
                 for tag in self.__canvas.gettags(id)
             ]
@@ -715,7 +780,7 @@ class CanvasFrame(ctk.CTkFrame):
                         new_name = rename_dialog(self, "Rename Node", nodelabel)
                         if new_name is not None:
                             self.__canvas.dchars(id, 0, "end")
-                            self.__canvas.insert(id, ctk.INSERT, new_name)
+                            self.__canvas.insert(id, tk.INSERT, new_name)
                             self.__canvas.addtag_withtag(f"nodelabel_{new_name}", id)
 
         elif operation == "Edges":
@@ -771,7 +836,7 @@ class CanvasFrame(ctk.CTkFrame):
                                         )
                                         self.__canvas.dchars(cost_id, 0, "end")
                                         self.__canvas.insert(
-                                            cost_id, ctk.INSERT, values[0]
+                                            cost_id, tk.INSERT, values[0]
                                         )
                                         self.__canvas.dtag(
                                             cost_id, f"costvalue_{fromto}"
@@ -790,7 +855,7 @@ class CanvasFrame(ctk.CTkFrame):
                                         )
                                         self.__canvas.dchars(cost_id, 0, "end")
                                         self.__canvas.insert(
-                                            cost_id, ctk.INSERT, values[1]
+                                            cost_id, tk.INSERT, values[1]
                                         )
                                         self.__canvas.dtag(
                                             cost_id, f"costvalue_{tofrom}"
@@ -819,7 +884,7 @@ class CanvasFrame(ctk.CTkFrame):
                                         )
                                         self.__canvas.dchars(cost_id, 0, "end")
                                         self.__canvas.insert(
-                                            cost_id, ctk.INSERT, values[0]
+                                            cost_id, tk.INSERT, values[0]
                                         )
                                         self.__canvas.dtag(
                                             cost_id, f"costvalue_{fromto}"
@@ -873,7 +938,7 @@ class CanvasFrame(ctk.CTkFrame):
                 if node_label is None:
                     node_label = node_loopback
 
-                if messagebox.askyesno(
+                if dialogs.yesno(
                     message=f"Are you sure you want to delete '{node_label}'?"
                 ):
                     StateModel().delete_node(node_loopback)
@@ -904,7 +969,7 @@ class CanvasFrame(ctk.CTkFrame):
                             node_loopback = tag[14:]
 
             if node_loopback is not None:
-                if messagebox.askyesno(
+                if dialogs.yesno(
                     message=f"Are you sure you want to delete the loopback edge on '{node_loopback}'?"
                 ):
                     StateModel().delete_edge(node_loopback, node_loopback)
@@ -912,7 +977,7 @@ class CanvasFrame(ctk.CTkFrame):
                     self.__canvas.delete(f"cost_loopback_{node_loopback}")
 
             else:
-                if messagebox.askyesno(
+                if dialogs.yesno(
                     message=f"Are you sure you want to delete the edge from '{node_from}' to '{node_to}'?"
                 ):
                     StateModel().delete_edge(node_from, node_to)
@@ -1085,7 +1150,7 @@ class CanvasFrame(ctk.CTkFrame):
             to_cy,
             fill="blue",
             width=2,
-            arrow=ctk.LAST,
+            arrow=tk.LAST,
             smooth=True,
             tags=tags,
         )

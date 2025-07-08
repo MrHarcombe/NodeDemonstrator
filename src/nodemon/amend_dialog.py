@@ -1,49 +1,36 @@
-import customtkinter as ctk
+import ttkbootstrap as ttk
+import ttkbootstrap.constants as tk
 
 
-class AmendEdgeDialog(ctk.CTkToplevel):
+class AmendEdgeDialog(ttk.Toplevel):
     def __init__(self, root, title, from_node, to_node, values):
         super().__init__(root)
         self.title(title)
         self.resizable(False, False)
         self.__response = False
 
-        ctk.CTkLabel(
+        ttk.Label(
             self,
             text=f"Enter the new weights for edge between '{from_node}' and '{to_node}': ",
-        ).grid(row=0, column=0, columnspan=2, sticky=ctk.EW)
+        ).grid(row=0, column=0, columnspan=2, sticky=tk.EW)
 
         if len(values) == 1:
-            self.__weight_var = ctk.StringVar(value=values[0])
+            self.__weight_var = ttk.StringVar(value=values[0])
 
-            ctk.CTkLabel(self, text="Edge weight").grid(row=1, column=0, sticky=ctk.EW)
-            ctk.CTkEntry(self, textvariable=self.__weight_var).grid(
-                row=1, column=1, sticky=ctk.NSEW
-            )
+            ttk.Label(self, text="Edge weight").grid(row=1, column=0, sticky=tk.EW)
+            ttk.Entry(self, textvariable=self.__weight_var).grid(row=1, column=1, sticky=tk.NSEW)
 
         else:
-            self.__from_to_var = ctk.StringVar(value=values[0])
-            self.__to_from_var = ctk.StringVar(value=values[1])
+            self.__from_to_var = ttk.StringVar(value=values[0])
+            self.__to_from_var = ttk.StringVar(value=values[1])
 
-            ctk.CTkLabel(self, text=f"From '{from_node}' to '{to_node}'").grid(
-                row=1, column=0, sticky=ctk.EW
-            )
-            ctk.CTkEntry(self, textvariable=self.__from_to_var).grid(
-                row=1, column=1, sticky=ctk.NSEW
-            )
-            ctk.CTkLabel(self, text=f"From '{to_node}' to '{from_node}'").grid(
-                row=2, column=0, sticky=ctk.EW
-            )
-            ctk.CTkEntry(self, textvariable=self.__to_from_var).grid(
-                row=2, column=1, sticky=ctk.NSEW
-            )
+            ttk.Label(self, text=f"From '{from_node}' to '{to_node}'").grid(row=1, column=0, sticky=tk.EW)
+            ttk.Entry(self, textvariable=self.__from_to_var).grid(row=1, column=1, sticky=tk.NSEW)
+            ttk.Label(self, text=f"From '{to_node}' to '{from_node}'").grid(row=2, column=0, sticky=tk.EW)
+            ttk.Entry(self, textvariable=self.__to_from_var).grid(row=2, column=1, sticky=tk.NSEW)
 
-        ctk.CTkButton(self, text="Cancel", command=self.cancel).grid(
-            row=3, column=0, sticky=ctk.EW
-        )
-        ctk.CTkButton(self, text="Ok", command=self.okay).grid(
-            row=3, column=1, sticky=ctk.EW
-        )
+        ttk.Button(self, text="Cancel", command=self.cancel).grid(row=3, column=0, sticky=tk.EW)
+        ttk.Button(self, text="Ok", command=self.okay).grid(row=3, column=1, sticky=tk.EW)
 
         self.rowconfigure((0, 1), weight=1)
         self.columnconfigure((0, 1), weight=1)
@@ -109,7 +96,7 @@ def amend_edge_dialog(root, title, from_node, to_node, weight_list):
 
 
 if __name__ == "__main__":
-    root = ctk.CTk()
+    root = ttk.Window()
     root.withdraw()
     new_weights = amend_edge_dialog(root, "Test Amend Edge Dialog", "A", "B", [1])
     if new_weights is not None:

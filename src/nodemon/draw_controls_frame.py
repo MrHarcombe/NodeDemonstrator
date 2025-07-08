@@ -1,5 +1,7 @@
-import customtkinter as ctk
-import tkinter.messagebox as messagebox
+import ttkbootstrap as ttk
+import ttkbootstrap.constants as tk
+import ttkbootstrap.dialogs as dialogs
+import tkinter.filedialog as filedialogs
 
 # from pickle import dump, load, HIGHEST_PROTOCOL
 from json import dump, load
@@ -8,7 +10,7 @@ from os.path import basename, dirname
 from .state_model import StateModel
 
 
-class DrawControlsFrame(ctk.CTkFrame):
+class DrawControlsFrame(ttk.Frame):
     """
     Class to control overall control of what is happening - provides load, save, etc as well as toggles for whether
     acting on nodes or edges.
@@ -23,43 +25,19 @@ class DrawControlsFrame(ctk.CTkFrame):
         )
 
         self.__canvas_frame = canvas_frame
-        self.__operation = ctk.StringVar(value="Nodes")
-        self.__directed = ctk.BooleanVar(value=False)
-        self.__weight = ctk.StringVar(
-            value=("1" if StateModel().is_weighted() else "None")
-        )
+        self.__operation = ttk.StringVar(value="Nodes")
+        self.__directed = ttk.BooleanVar(value=False)
+        self.__weight = ttk.StringVar(value=("1" if StateModel().is_weighted() else "None"))
 
         ###
         # upper frame just has the new / load / save buttons
         #
-        upper = ctk.CTkFrame(self)
-        ctk.CTkButton(
-            upper,
-            text="New",
-            command=self.__create_new,
-        ).grid(row=0, column=0, sticky=ctk.NSEW, pady=(0, 3))
-        ctk.CTkButton(
-            upper,
-            text="Load",
-            command=self.__load_file,
-        ).grid(
-            row=1,
-            column=0,
-            sticky=ctk.NSEW,
-            pady=(0, 3),
-        )
-        ctk.CTkButton(
-            upper,
-            text="Save",
-            command=self.__save_file,
-        ).grid(
-            row=2,
-            column=0,
-            sticky=ctk.NSEW,
-            pady=(0, 3),
-        )
-        upper.grid(sticky=ctk.NSEW, pady=(0, 15))
+        upper = ttk.Frame(self)
+        ttk.Button(upper, text="New", command=self.__create_new).grid(row=0, column=0, sticky=tk.NSEW, pady=(0, 3))
+        ttk.Button(upper, text="Load", command=self.__load_file).grid(row=1, column=0, sticky=tk.NSEW, pady=(0, 3))
+        ttk.Button(upper, text="Save", command=self.__save_file).grid(row=2, column=0, sticky=tk.NSEW, pady=(0, 3))
 
+        upper.grid(sticky=tk.NSEW, pady=(0, 15))
         upper.columnconfigure(0, weight=1)
         upper.rowconfigure((0, 1, 2), weight=1)
 
@@ -67,79 +45,21 @@ class DrawControlsFrame(ctk.CTkFrame):
         # lower frame has the actual drawing controls
         #
 
-        lower = ctk.CTkFrame(self, fg_color="transparent", bg_color="transparent")
-        ctk.CTkLabel(
-            lower,
-            text="Mode:",
-            anchor=ctk.E,
-            bg_color=self.cget("bg_color"),
-        ).grid(
-            row=0,
-            column=0,
-            sticky=ctk.NSEW,
-            padx=(0, 3),
-        )
-        ctk.CTkSwitch(
-            lower,
-            text=None,
-            variable=self.__operation,
-            onvalue="Nodes",
-            offvalue="Edges",
-            bg_color=self.cget("bg_color"),
-            command=self.__toggle_mode_switch,
-        ).grid(row=0, column=1, sticky=ctk.NSEW)
-        ctk.CTkEntry(
-            lower,
-            textvariable=self.__operation,
-            fg_color="lightgreen",
-            bg_color=self.cget("bg_color"),
-            justify=ctk.CENTER,
-            state=ctk.DISABLED,
-        ).grid(row=0, column=2, sticky=ctk.NSEW)
-        ctk.CTkLabel(
-            lower,
-            text="Directed:",
-            anchor=ctk.E,
-            bg_color=self.cget("bg_color"),
-        ).grid(
-            row=1,
-            column=0,
-            sticky=ctk.NSEW,
-            padx=(0, 3),
-        )
-        self.__directed_check = ctk.CTkCheckBox(
-            lower,
-            text=None,
-            variable=self.__directed,
-            command=self.__update_operation_parameters,
-            state=ctk.DISABLED,
-            bg_color=self.cget("bg_color"),
-        )
-        self.__directed_check.grid(row=1, column=1, columnspan=2, sticky=ctk.NSEW)
-        ctk.CTkLabel(
-            lower,
-            text="Weight:",
-            anchor=ctk.E,
-            bg_color=self.cget("bg_color"),
-        ).grid(
-            row=2,
-            column=0,
-            sticky=ctk.NSEW,
-            padx=(0, 3),
-        )
+        lower = ttk.Frame(self)
+        ttk.Label(lower, text="Mode:", anchor=tk.E).grid(row=0, column=0, sticky=tk.NSEW, padx=(0, 3))
+        # ttk.Checkbutton(lower, text=None, variable=self.__operation, onvalue="Nodes", offvalue="Edges", command=self.__toggle_mode_switch).grid(row=0, column=1, sticky=tk.NSEW)
+        # ttk.Entry(lower, textvariable=self.__operation, justify=tk.CENTER, state=tk.DISABLED).grid(row=0, column=2, sticky=tk.NSEW)
+        ttk.Radiobutton(lower, text="Nodes", variable=self.__operation, value="Nodes", bootstyle="toolbutton", command=self.__toggle_mode_switch).grid(row=0, column=1, sticky=tk.NSEW)
+        ttk.Radiobutton(lower, text="Edges", variable=self.__operation, value="Edges", bootstyle="toolbutton", command=self.__toggle_mode_switch).grid(row=0, column=2, sticky=tk.NSEW)
+        ttk.Label(lower, text="Directed:", anchor=tk.E).grid(row=1, column=0, sticky=tk.NSEW, padx=(0, 3))
+        self.__directed_check = ttk.Checkbutton(lower, text=None, variable=self.__directed, command=self.__update_operation_parameters, state=tk.DISABLED)
+        self.__directed_check.grid(row=1, column=1, columnspan=2, sticky=tk.NSEW)
+        ttk.Label(lower, text="Weight:", anchor=tk.E).grid(row=2, column=0, sticky=tk.NSEW, padx=(0, 3))
         validation_callback = self.register(self.__validation_wrapper)
-        self.__weight_entry = ctk.CTkEntry(
-            lower,
-            textvariable=self.__weight,
-            placeholder_text="1",
-            state=ctk.DISABLED,
-            bg_color=self.cget("bg_color"),
-            validate="key",
-            validatecommand=(validation_callback, "%P"),
-        )
-        self.__weight_entry.grid(row=2, column=1, columnspan=2, sticky=ctk.NSEW)
-        lower.grid(sticky=ctk.NSEW, pady=(0, 50))
+        self.__weight_entry = ttk.Entry(lower, textvariable=self.__weight, state=tk.DISABLED, validate="key", validatecommand=(validation_callback, "%P"))
+        self.__weight_entry.grid(row=2, column=1, columnspan=2, sticky=tk.NSEW)
 
+        lower.grid(sticky=tk.NSEW, pady=(0, 50))
         lower.rowconfigure((0, 1, 2), weight=1)
         lower.columnconfigure((0, 1, 2), weight=1)
 
@@ -152,12 +72,12 @@ class DrawControlsFrame(ctk.CTkFrame):
 
     def __toggle_mode_switch(self):
         if self.__operation.get() == "Nodes":
-            self.__directed_check.configure(state=ctk.DISABLED)
-            self.__weight_entry.configure(state=ctk.DISABLED)
+            self.__directed_check.configure(state=tk.DISABLED)
+            self.__weight_entry.configure(state=tk.DISABLED)
         else:
-            self.__directed_check.configure(state=ctk.NORMAL)
+            self.__directed_check.configure(state=tk.NORMAL)
             if StateModel().is_weighted():
-                self.__weight_entry.configure(state=ctk.NORMAL)
+                self.__weight_entry.configure(state=tk.NORMAL)
 
         self.__update_operation_parameters()
 
@@ -184,16 +104,11 @@ class DrawControlsFrame(ctk.CTkFrame):
 
     def __create_new(self):
         if StateModel().is_changed():
-            if (
-                messagebox.askyesno(
-                    message="Graph has changes. Do you wish to save, before starting over?"
-                )
-                == ctk.YES
-            ):
+            if (dialogs.Messagebox.yesno(message="Graph has changes. Do you wish to save, before starting over?") == tk.YES):
                 if not self.__save_file():
                     return False
 
-        weighted = messagebox.askyesno(message="Will the graph be weighted?") == ctk.YES
+        weighted = dialogs.Messagebox.yesno(message="Will the graph be weighted?") == tk.YES
         StateModel().create_new(weighted)
         self.__canvas_frame.empty()
         self.__operation.set("Nodes")
@@ -212,7 +127,7 @@ class DrawControlsFrame(ctk.CTkFrame):
             filename = basename(current_filename)
             directory = dirname(current_filename)
 
-            filename = ctk.filedialog.asksaveasfilename(
+            filename = filedialogs.asksaveasfilename(
                 parent=self,
                 title="Save Graph",
                 defaultextension=".nd",
@@ -223,7 +138,7 @@ class DrawControlsFrame(ctk.CTkFrame):
             )
 
         else:
-            filename = ctk.filedialog.asksaveasfilename(
+            filename = filedialogs.asksaveasfilename(
                 parent=self,
                 title="Save Graph",
                 defaultextension=".nd",
@@ -241,16 +156,11 @@ class DrawControlsFrame(ctk.CTkFrame):
 
     def __load_file(self):
         if StateModel().is_changed():
-            if (
-                messagebox.askyesno(
-                    message="Graph has changes. Do you wish to save, before starting over?"
-                )
-                == ctk.YES
-            ):
+            if (dialogs.Messagebox.yesno(message="Graph has changes. Do you wish to save, before starting over?") == tk.YES):
                 if not self.__save_file():
                     return False
 
-        filename = ctk.filedialog.askopenfilename(
+        filename = filedialogs.askopenfilename(
             parent=self,
             title="Load Graph",
             defaultextension=".nd",

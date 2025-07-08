@@ -1,4 +1,5 @@
-import customtkinter as ctk
+import ttkbootstrap as ttk
+import ttkbootstrap.constants as tk
 
 from .state_model import StateModel
 from .trace_frame import TraceFrame, CustomScrollableFrame
@@ -18,26 +19,17 @@ class DijkstraShortestPathFrame(TraceFrame):
             lambda master: CustomScrollableFrame(master, "Current Queue"),
         )
 
+    
     def display_processed(self, processed):
         for child in self._processed.winfo_children():
             child.grid_remove()
 
         if len(processed) == 0:
-            sub = ctk.CTkFrame(
-                self._processed,
-                border_width=2,
-                border_color="black",
-            )
-            sub.grid(
-                sticky=ctk.NSEW,
-            )
+            sub = ttk.Frame(self._processed, borderwidth=2)
+            sub.grid(sticky=tk.NSEW)
 
-            ctk.CTkLabel(
-                sub,
-                text="Empty",
-                anchor=ctk.CENTER,
-            ).grid(
-                sticky=ctk.NSEW,
+            ttk.Label(sub, text="Empty", anchor=tk.CENTER, bootstyle="inverse-info").grid(
+                sticky=tk.NSEW,
                 padx=8,
                 pady=3,
             )
@@ -52,76 +44,45 @@ class DijkstraShortestPathFrame(TraceFrame):
                 cost, previous = processed[node]
                 self._canvas_frame.highlight_processed_node(node)
 
-                sub = ctk.CTkFrame(
-                    self._processed,
-                    border_width=2,
-                    border_color="black",
-                )
-                sub.grid(
-                    sticky=ctk.NSEW,
-                )
+                sub = ttk.Frame(self._processed, borderwidth=2)
+                sub.grid(sticky=tk.NSEW)
                 sub.columnconfigure((0, 1, 2), weight=1)
 
-                ctk.CTkLabel(
-                    sub,
-                    text=self._canvas_frame.get_label_from_node(node),
-                    anchor=ctk.CENTER,
-                ).grid(
-                    sticky=ctk.NSEW,
+                ttk.Label(sub, text=self._canvas_frame.get_label_from_node(node), anchor=tk.CENTER, bootstyle="inverse-info").grid(
+                    sticky=tk.NSEW,
                     padx=(8, 2),
                     pady=3,
                     row=row,
                     column=0,
                 )
 
-                ctk.CTkLabel(
-                    sub,
-                    text=cost,
-                    anchor=ctk.CENTER,
-                ).grid(
-                    sticky=ctk.NSEW,
+                ttk.Label(sub, text=cost, anchor=tk.CENTER, bootstyle="inverse-info").grid(
+                    sticky=tk.NSEW,
                     padx=(2, 2),
                     pady=3,
                     row=row,
                     column=1,
                 )
 
-                ctk.CTkLabel(
-                    sub,
-                    text=(
-                        self._canvas_frame.get_label_from_node(previous)
-                        if previous is not None
-                        else "-"
-                    ),
-                    anchor=ctk.CENTER,
-                ).grid(
-                    sticky=ctk.NSEW,
+                ttk.Label(sub, text=(self._canvas_frame.get_label_from_node(previous) if previous is not None else "-"), anchor=tk.CENTER, bootstyle="inverse-info").grid(
+                    sticky=tk.NSEW,
                     padx=(2, 8),
                     pady=3,
                     row=row,
                     column=2,
                 )
 
+    
     def display_other(self, other):
         for child in self._other.winfo_children():
             child.grid_remove()
 
         if len(other) == 0:
-            sub = ctk.CTkFrame(
-                self._other,
-                border_width=2,
-                border_color="black",
-            )
-            sub.grid(
-                sticky=ctk.NSEW,
-            )
+            sub = ttk.Frame(self._other, borderwidth=2)
+            sub.grid(sticky=tk.NSEW)
 
-            ctk.CTkLabel(
-                sub,
-                text="Empty",
-                anchor=ctk.CENTER,
-            ).grid(
-                sticky=ctk.NSEW,
+            ttk.Label(sub, text="Empty", anchor=tk.CENTER, bootstyle="inverse-info").grid(
+                sticky=tk.NSEW,
                 padx=8,
                 pady=3,
             )
@@ -136,35 +97,20 @@ class DijkstraShortestPathFrame(TraceFrame):
             if type(other[0]) is tuple:
                 for row, (cost, node) in enumerate(sorted(other)):
                     self._canvas_frame.highlight_pending_node(node)
-                    sub = ctk.CTkFrame(
-                        self._other,
-                        border_width=2,
-                        border_color="black",
-                    )
-                    sub.grid(
-                        sticky=ctk.NSEW,
-                        row=row,
-                    )
+                    sub = ttk.Frame(self._other, borderwidth=2)
+                    sub.grid(sticky=tk.NSEW, row=row)
                     sub.columnconfigure((0, 1), weight=1)
 
-                    ctk.CTkLabel(
-                        sub,
-                        text=self._canvas_frame.get_label_from_node(node),
-                        anchor=ctk.CENTER,
-                    ).grid(
-                        sticky=ctk.NSEW,
+                    ttk.Label(sub, text=self._canvas_frame.get_label_from_node(node), anchor=tk.CENTER, bootstyle="inverse-info").grid(
+                        sticky=tk.NSEW,
                         padx=(8, 2),
                         pady=3,
                         row=row,
                         column=0,
                     )
 
-                    ctk.CTkLabel(
-                        sub,
-                        text=cost,
-                        anchor=ctk.CENTER,
-                    ).grid(
-                        sticky=ctk.NSEW,
+                    ttk.Label(sub, text=cost, anchor=tk.CENTER, bootstyle="inverse-info").grid(
+                        sticky=tk.NSEW,
                         padx=(2, 8),
                         pady=3,
                         row=row,
@@ -178,23 +124,12 @@ class DijkstraShortestPathFrame(TraceFrame):
                 self._other.columnconfigure((0, 1, 2), weight=1)
 
                 for node in other:
-                    sub = ctk.CTkFrame(
-                        self._other,
-                        border_width=2,
-                        border_color="black",
-                    )
-                    sub.grid(
-                        sticky=ctk.NSEW,
-                        row=row,
-                        column=column,
-                    )
+                    sub = ttk.Frame(self._other, borderwidth=2)
+                    sub.grid(sticky=tk.NSEW, row=row, column=column)
+                    sub.columnconfigure(0, weight=1)
 
-                    ctk.CTkLabel(
-                        sub,
-                        text=self._canvas_frame.get_label_from_node(node),
-                        anchor=ctk.CENTER,
-                    ).grid(
-                        sticky=ctk.NSEW,
+                    ttk.Label(sub, text=self._canvas_frame.get_label_from_node(node), anchor=tk.CENTER, bootstyle="inverse-info").grid(
+                        sticky=tk.NSEW,
                         padx=8,
                         pady=3,
                     )
@@ -216,6 +151,7 @@ class AStarShortestPathFrame(TraceFrame):
             lambda master: CustomScrollableFrame(master, "Current Queue"),
         )
 
+    
     def display_processed(self, processed):
         """
         Called to display the processing data of an in-process A* path-finding algorithm. This will consist of the
@@ -230,22 +166,12 @@ class AStarShortestPathFrame(TraceFrame):
         if len(processed) == 0:
             self._processed.columnconfigure(0, weight=1)
 
-            sub = ctk.CTkFrame(
-                self._processed,
-                border_width=2,
-                border_color="black",
-            )
-            sub.grid(
-                sticky=ctk.NSEW,
-            )
+            sub = ttk.Frame(self._processed, borderwidth=2)
+            sub.grid(sticky=tk.NSEW)
             sub.columnconfigure(0, weight=1)
 
-            ctk.CTkLabel(
-                sub,
-                text="Empty",
-                anchor=ctk.CENTER,
-            ).grid(
-                sticky=ctk.NSEW,
+            ttk.Label(sub, text="Empty", anchor=tk.CENTER, bootstyle="inverse-info").grid(
+                sticky=tk.NSEW,
                 padx=8,
                 pady=3,
             )
@@ -257,64 +183,43 @@ class AStarShortestPathFrame(TraceFrame):
             for row, node in enumerate(sorted(came_from.keys(), key=lambda node: self._canvas_frame.get_label_from_node(node))):
                 self._canvas_frame.highlight_processed_node(node)
 
-                sub = ctk.CTkFrame(
-                    self._processed,
-                    border_width=2,
-                    border_color="black",
-                )
-                sub.grid(
-                    sticky=ctk.NSEW,
-                )
+                sub = ttk.Frame(self._processed, borderwidth=2)
+                sub.grid(sticky=tk.NSEW)
                 sub.columnconfigure((0, 1, 2, 3), weight=1)
 
-                ctk.CTkLabel(
-                    sub,
-                    text=self._canvas_frame.get_label_from_node(node),
-                    anchor=ctk.CENTER,
-                ).grid(
-                    sticky=ctk.NSEW,
+                ttk.Label(sub, text=self._canvas_frame.get_label_from_node(node), anchor=tk.CENTER, bootstyle="inverse-info").grid(
+                    sticky=tk.NSEW,
                     padx=(8, 2),
                     pady=3,
                     row=row,
                     column=0,
                 )
 
-                ctk.CTkLabel(
-                    sub,
-                    text=f_scores[node] if node in f_scores else "-",
-                    anchor=ctk.CENTER,
-                ).grid(
-                    sticky=ctk.NSEW,
+                ttk.Label(sub, text=f_scores[node] if node in f_scores else "-", anchor=tk.CENTER, bootstyle="inverse-info").grid(
+                    sticky=tk.NSEW,
                     padx=(2, 2),
                     pady=3,
                     row=row,
                     column=1,
                 )
 
-                ctk.CTkLabel(
-                    sub,
-                    text=g_scores[node] if node in g_scores else "-",
-                    anchor=ctk.CENTER,
-                ).grid(
-                    sticky=ctk.NSEW,
+                ttk.Label(sub, text=g_scores[node] if node in g_scores else "-", anchor=tk.CENTER, bootstyle="inverse-info").grid(
+                    sticky=tk.NSEW,
                     padx=(2, 8),
                     pady=3,
                     row=row,
                     column=2,
                 )
 
-                ctk.CTkLabel(
-                    sub,
-                    text=self._canvas_frame.get_label_from_node(came_from[node]),
-                    anchor=ctk.CENTER,
-                ).grid(
-                    sticky=ctk.NSEW,
+                ttk.Label(sub, text=self._canvas_frame.get_label_from_node(came_from[node]), anchor=tk.CENTER, bootstyle="inverse-info").grid(
+                    sticky=tk.NSEW,
                     padx=(2, 8),
                     pady=3,
                     row=row,
                     column=3,
                 )
 
+    
     def display_other(self, other):
         for child in self._other.winfo_children():
             child.grid_remove()
@@ -322,22 +227,12 @@ class AStarShortestPathFrame(TraceFrame):
         if len(other) == 0:
             self._other.columnconfigure(0, weight=1)
 
-            sub = ctk.CTkFrame(
-                self._other,
-                border_width=2,
-                border_color="black",
-            )
-            sub.grid(
-                sticky=ctk.NSEW,
-            )
+            sub = ttk.Frame(self._other, borderwidth=2)
+            sub.grid(sticky=tk.NSEW)
             sub.columnconfigure(0, weight=1)
 
-            ctk.CTkLabel(
-                sub,
-                text="Empty",
-                anchor=ctk.CENTER,
-            ).grid(
-                sticky=ctk.NSEW,
+            ttk.Label(sub, text="Empty", anchor=tk.CENTER, bootstyle="inverse-info").grid(
+                sticky=tk.NSEW,
                 padx=8,
                 pady=3,
             )
@@ -349,35 +244,20 @@ class AStarShortestPathFrame(TraceFrame):
             if type(other[0]) is tuple:
                 for row, (cost, node) in enumerate(sorted(other)):
                     self._canvas_frame.highlight_pending_node(node)
-                    sub = ctk.CTkFrame(
-                        self._other,
-                        border_width=2,
-                        border_color="black",
-                    )
-                    sub.grid(
-                        sticky=ctk.NSEW,
-                        row=row,
-                    )
+                    sub = ttk.Frame(self._other, borderwidth=2)
+                    sub.grid(sticky=tk.NSEW, row=row)
                     sub.columnconfigure((0, 1), weight=1)
 
-                    ctk.CTkLabel(
-                        sub,
-                        text=self._canvas_frame.get_label_from_node(node),
-                        anchor=ctk.CENTER,
-                    ).grid(
-                        sticky=ctk.NSEW,
+                    ttk.Label(sub, text=self._canvas_frame.get_label_from_node(node), anchor=tk.CENTER, bootstyle="inverse-info").grid(
+                        sticky=tk.NSEW,
                         padx=(8, 2),
                         pady=3,
                         row=row,
                         column=0,
                     )
 
-                    ctk.CTkLabel(
-                        sub,
-                        text=cost,
-                        anchor=ctk.CENTER,
-                    ).grid(
-                        sticky=ctk.NSEW,
+                    ttk.Label(sub, text=cost, anchor=tk.CENTER, bootstyle="inverse-info").grid(
+                        sticky=tk.NSEW,
                         padx=(2, 8),
                         pady=3,
                         row=row,
@@ -391,23 +271,12 @@ class AStarShortestPathFrame(TraceFrame):
                 self._other.columnconfigure((0, 1, 2), weight=1)
 
                 for node in other:
-                    sub = ctk.CTkFrame(
-                        self._other,
-                        border_width=2,
-                        border_color="black",
-                    )
-                    sub.grid(
-                        sticky=ctk.NSEW,
-                        row=row,
-                        column=column,
-                    )
+                    sub = ttk.Frame(self._other, borderwidth=2)
+                    sub.grid(sticky=tk.NSEW, row=row, column=column)
+                    sub.columnconfigure(0, weight=1)
 
-                    ctk.CTkLabel(
-                        sub,
-                        text=self._canvas_frame.get_label_from_node(node),
-                        anchor=ctk.CENTER,
-                    ).grid(
-                        sticky=ctk.NSEW,
+                    ttk.Label(sub, text=self._canvas_frame.get_label_from_node(node), anchor=tk.CENTER, bootstyle="inverse-info").grid(
+                        sticky=tk.NSEW,
                         padx=8,
                         pady=3,
                     )

@@ -18,8 +18,7 @@ description = "A simple drag and drop application to help visualise various grap
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    # "customtkinter@git+https://github.com/DerSchinken/CustomTkinter.git@fix-1419"
-    "customtkinter>=5.2.2",
+    "ttkbootstrap>=1.14.0",
 ]
 license = { file = "LICENSE" }
 classifiers = [

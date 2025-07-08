@@ -1,27 +1,27 @@
-import customtkinter as ctk
+import ttkbootstrap as ttk
+import ttkbootstrap.constants as tk
 
 from .draw_controls_frame import DrawControlsFrame
 from .usage_controls_frame import UsageControlsFrame
 
 
-class ToolFrame(ctk.CTkTabview):
+class ToolFrame(ttk.Notebook):
     """
     Class to handle setting up the Notebook which holds all the control frames apart from the actual Canvas.
     """
 
     def __init__(self, parent, canvas_frame):
-        super().__init__(parent)
+        super().__init__(parent, bootstyle="secondary")
         self.__tabs = [
             DrawControlsFrame(
-                self.add("Draw"),
+                self,
                 canvas_frame,
-            ).pack(expand=True, fill=ctk.BOTH),
+            ),
             UsageControlsFrame(
-                self.add("Algorithms"),
+                self,
                 canvas_frame,
-            ).pack(expand=True, fill=ctk.BOTH),
-            RepresentationFrame(
-                self.add("Representation"),
-                canvas_frame,
-            ).pack(expand=True, fill=ctk.BOTH),
+            )
         ]
+
+        self.add(self.__tabs[0], text="Draw")
+        self.add(self.__tabs[1], text="Algorithms")

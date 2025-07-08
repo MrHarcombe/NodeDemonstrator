@@ -1,4 +1,5 @@
-import customtkinter as ctk
+import ttkbootstrap as ttk
+import ttkbootstrap.constants as tk
 
 from .state_model import StateModel
 from .trace_frame import TraceFrame, CustomScrollableFrame
@@ -16,22 +17,12 @@ class TraversalFrame(TraceFrame):
             self._processed.columnconfigure(0, weight=1)
             self._processed.columnconfigure((1, 2), weight=0)
 
-            sub = ctk.CTkFrame(
-                self._processed,
-                border_width=2,
-                border_color="black",
-            )
-            sub.grid(
-                sticky=ctk.NSEW,
-            )
+            sub = ttk.Frame(self._processed, borderwidth=2) #, border_color="black")
+            sub.grid(sticky=tk.NSEW)
             sub.columnconfigure(0, weight=1)
 
-            ctk.CTkLabel(
-                sub,
-                text="Empty",
-                anchor=ctk.CENTER,
-            ).grid(
-                sticky=ctk.NSEW,
+            ttk.Label(sub, text="Empty", anchor=tk.CENTER, bootstyle="inverse-info").grid(
+                sticky=tk.NSEW,
                 padx=8,
                 pady=3,
             )
@@ -44,24 +35,16 @@ class TraversalFrame(TraceFrame):
             for p in processed:
                 self._canvas_frame.highlight_processed_node(p)
 
-                sub = ctk.CTkFrame(
-                    self._processed,
-                    border_width=2,
-                    border_color="black",
-                )
+                sub = ttk.Frame(self._processed, borderwidth=2)
                 sub.grid(
-                    sticky=ctk.NSEW,
+                    sticky=tk.NSEW,
                     row=row,
                     column=column,
                 )
                 sub.columnconfigure(0, weight=1)
 
-                ctk.CTkLabel(
-                    sub,
-                    text=self._canvas_frame.get_label_from_node(p),
-                    anchor=ctk.CENTER,
-                ).grid(
-                    sticky=ctk.NSEW,
+                ttk.Label(sub, text=self._canvas_frame.get_label_from_node(p), anchor=tk.CENTER, bootstyle="inverse-info").grid(
+                    sticky=tk.NSEW,
                     padx=8,
                     pady=3,
                 )
@@ -79,22 +62,12 @@ class TraversalFrame(TraceFrame):
             self._other.columnconfigure(0, weight=1)
             self._other.columnconfigure((1, 2), weight=0)
 
-            sub = ctk.CTkFrame(
-                self._other,
-                border_width=2,
-                border_color="black",
-            )
-            sub.grid(
-                sticky=ctk.NSEW,
-            )
+            sub = ttk.Frame(self._other, borderwidth=2)
+            sub.grid(sticky=tk.NSEW)
             sub.columnconfigure(0, weight=1)
 
-            ctk.CTkLabel(
-                sub,
-                text="Empty",
-                anchor=ctk.CENTER,
-            ).grid(
-                sticky=ctk.NSEW,
+            ttk.Label(sub, text="Empty", anchor=tk.CENTER, bootstyle="inverse-info").grid(
+                sticky=tk.NSEW,
                 padx=8,
                 pady=3,
             )
@@ -107,24 +80,12 @@ class TraversalFrame(TraceFrame):
             for o in other:
                 self._canvas_frame.highlight_pending_node(o)
 
-                sub = ctk.CTkFrame(
-                    self._other,
-                    border_width=2,
-                    border_color="black",
-                )
-                sub.grid(
-                    sticky=ctk.NSEW,
-                    row=row,
-                    column=column,
-                )
+                sub = ttk.Frame(self._other, borderwidth=2) #, border_color="black")
+                sub.grid(sticky=tk.NSEW, row=row, column=column)
                 sub.columnconfigure(0, weight=1)
 
-                ctk.CTkLabel(
-                    sub,
-                    text=self._canvas_frame.get_label_from_node(o),
-                    anchor=ctk.CENTER,
-                ).grid(
-                    sticky=ctk.NSEW,
+                ttk.Label(sub, text=self._canvas_frame.get_label_from_node(o), anchor=tk.CENTER, bootstyle="inverse-info").grid(
+                    sticky=tk.NSEW,
                     padx=8,
                     pady=3,
                 )
