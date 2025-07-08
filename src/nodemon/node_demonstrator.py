@@ -32,13 +32,9 @@ class NodeApplication(ttk.Window):
         self.rowconfigure(0, weight=1)
 
     def destroy(self):
-        if (
-            StateModel().is_changed()
-            and dialogs.yesno(
-                message="Graph has changes. Continue and lose all changes?"
-            )
-            != tk.YES
-        ):
+        if (StateModel().is_changed() and dialogs.Messagebox.yesno(
+                message="Graph has changes. Continue and lose all changes?")
+                != tk.YES):
             return False
 
         super().destroy()

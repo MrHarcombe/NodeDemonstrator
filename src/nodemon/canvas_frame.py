@@ -938,7 +938,7 @@ class CanvasFrame(ttk.Frame):
                 if node_label is None:
                     node_label = node_loopback
 
-                if dialogs.yesno(
+                if dialogs.Messagebox.yesno(
                     message=f"Are you sure you want to delete '{node_label}'?"
                 ):
                     StateModel().delete_node(node_loopback)
@@ -969,7 +969,7 @@ class CanvasFrame(ttk.Frame):
                             node_loopback = tag[14:]
 
             if node_loopback is not None:
-                if dialogs.yesno(
+                if dialogs.Messagebox.yesno(
                     message=f"Are you sure you want to delete the loopback edge on '{node_loopback}'?"
                 ):
                     StateModel().delete_edge(node_loopback, node_loopback)
@@ -977,7 +977,7 @@ class CanvasFrame(ttk.Frame):
                     self.__canvas.delete(f"cost_loopback_{node_loopback}")
 
             else:
-                if dialogs.yesno(
+                if dialogs.Messagebox.yesno(
                     message=f"Are you sure you want to delete the edge from '{node_from}' to '{node_to}'?"
                 ):
                     StateModel().delete_edge(node_from, node_to)
