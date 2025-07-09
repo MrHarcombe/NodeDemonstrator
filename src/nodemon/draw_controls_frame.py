@@ -104,11 +104,11 @@ class DrawControlsFrame(ttk.Frame):
 
     def __create_new(self):
         if StateModel().is_changed():
-            if (dialogs.Messagebox.yesno(message="Graph has changes. Do you wish to save, before starting over?") == tk.YES):
+            if (dialogs.Messagebox.yesno(message="Graph has changes. Do you wish to save, before starting over?") == "Yes"):
                 if not self.__save_file():
                     return False
 
-        weighted = dialogs.Messagebox.yesno(message="Will the graph be weighted?") == tk.YES
+        weighted = dialogs.Messagebox.yesno(message="Will the graph be weighted?") == "Yes"
         StateModel().create_new(weighted)
         self.__canvas_frame.empty()
         self.__operation.set("Nodes")
@@ -156,7 +156,7 @@ class DrawControlsFrame(ttk.Frame):
 
     def __load_file(self):
         if StateModel().is_changed():
-            if (dialogs.Messagebox.yesno(message="Graph has changes. Do you wish to save, before starting over?") == tk.YES):
+            if (dialogs.Messagebox.yesno(message="Graph has changes. Do you wish to save, before starting over?") == "Yes"):
                 if not self.__save_file():
                     return False
 
