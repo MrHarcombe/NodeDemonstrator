@@ -8,6 +8,10 @@ packages = ["src/nodemon"]
 # [tool.hatch.metadata]
 # allow-direct-references = true
 
+[tool.black]
+line.length = 96
+
+
 [project]
 name = "nodemon"
 version = "0.1.1"

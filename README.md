@@ -20,10 +20,11 @@ Building a drag and drop desktop (Tkinter) application to help visualise various
 - available algorithms 
   - breadth-first / depth-first from a given start point (with or without end point, ie traversal and/or search)
   - Dijkstra and A* shortest path
+  - tree traversal algorithms (within certain constraints)
 
 ## Usage
 
-- Currently, this project uses the tweaked version of CustomTkinter that needs to be obtained directly from [here](https://github.com/DerSchinken/CustomTkinter/tree/fix-1419) until the [submitted PR](https://github.com/TomSchimansky/CustomTkinter/pull/2240) is approved into the main project.
+- This project uses the ttkbootstrap library (it should have installed as part of the process - need to add a way to override the theme)
 - To run, install package then launch with "python -m nodemon"
 
 ## Future algorithm support
