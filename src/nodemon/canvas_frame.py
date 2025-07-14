@@ -989,7 +989,7 @@ class CanvasFrame(ttk.Frame):
                     self.__canvas.delete(id)
                     self.__canvas.delete(f"cost_loopback_{node_loopback}")
 
-            else:
+            elif node_from is not None and node_to is not None:
                 if (
                     dialogs.Messagebox.yesno(
                         message=f"Are you sure you want to delete the edge from '{node_from}' to '{node_to}'?"

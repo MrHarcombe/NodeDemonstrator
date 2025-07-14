@@ -424,7 +424,7 @@ class MatrixGraph:
         if node in self.matrix[0]:
             index = self.matrix[0].index(node)
             del self.matrix[0][index]
-            del self.matrix[index]
+            del self.matrix[index+1]
             for n in range(1, len(self.matrix)):
                 del self.matrix[n][index]
 
@@ -698,6 +698,13 @@ if __name__ == "__main__":
 
         visited = g.breadth_first("A")
         print("breadth first from A: ", ",".join(visited))
+        
+        g.delete_edge("A", "B")
+        g.delete_node("B")
+        g.add_node("B")
+        g.add_node("I")
+        g.add_edge("A", "B")
+        g.add_edge("A", "I")
         print("...done")
 
     def test_weighted_graph():
@@ -769,4 +776,5 @@ if __name__ == "__main__":
         print(g.matrix)
 
     # test_red_black_tree()
-    test_weighted_graph()
+    # test_weighted_graph()
+    test_matrix_graph()
