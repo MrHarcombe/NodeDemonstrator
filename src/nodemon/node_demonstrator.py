@@ -22,18 +22,27 @@ class NodeApplication(ttk.Window):
         self.title("Node Demonstrator")
         self.geometry(f"{WIDTH}x{HEIGHT}+10+10")
 
-        self.canvas = CanvasFrame(self)
-        self.canvas.grid(column=0, row=0, sticky=tk.NSEW)
+        pane = ttk.PanedWindow(self, orient=tk.HORIZONTAL)
+        pane.grid(sticky=tk.NSEW)
 
-        self.tools = ToolFrame(self, self.canvas)
-        self.tools.grid(column=1, row=0, sticky=tk.NSEW)
+        self.canvas = CanvasFrame(pane)
+        pane.add(self.canvas, weight=14)
+
+        self.tools = ToolFrame(pane, self.canvas)
+        pane.add(self.tools, weight=1)
 
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
 
     def destroy(self):
-        if StateModel().is_changed() and dialogs.Messagebox.yesno(message="Graph has changes. Continue and lose all changes?") != 'Yes':
-                return False
+        if (
+            StateModel().is_changed()
+            and dialogs.Messagebox.yesno(
+                message="Graph has changes. Continue and lose all changes?"
+            )
+            != "Yes"
+        ):
+            return False
 
         super().destroy()
 
