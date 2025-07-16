@@ -24,7 +24,7 @@ class AnimatedMatrixGraph(MatrixGraph):
         connected = True
 
         if len(self) > 0:
-            nodes = sum([1 for node in self.breadth_first(self.matrix[0][0])]) - 1
+            nodes = sum([1 for node in self.breadth_first(self.nodes[0])]) - 1
             # print(nodes, "vs", len(self))
             connected = len(self) == nodes
 
@@ -34,7 +34,7 @@ class AnimatedMatrixGraph(MatrixGraph):
         cyclic = False
 
         if len(self) > 0:
-            start_node = self.matrix[0][0]
+            start_node = self.nodes[0]
 
             visited = []
             queue = [(start_node, None)]
@@ -52,7 +52,7 @@ class AnimatedMatrixGraph(MatrixGraph):
         return cyclic
 
     def depth_first(self, start_node, end_node=None):
-        if start_node in self.matrix[0]:
+        if start_node in self.nodes:
             discovered = set([start_node])
             visited = []
             stack = [start_node]
@@ -78,7 +78,7 @@ class AnimatedMatrixGraph(MatrixGraph):
         return None
 
     def breadth_first(self, start_node, end_node=None):
-        if start_node in self.matrix[0]:
+        if start_node in self.nodes:
             discovered = set([start_node])
             visited = []
             queue = [start_node]
@@ -104,7 +104,7 @@ class AnimatedMatrixGraph(MatrixGraph):
         return None
 
     def pre_order(self, start_node, end_node=None):
-        if start_node in self.matrix[0]:
+        if start_node in self.nodes:
             stack = []
             processed = []
             current = start_node
@@ -138,7 +138,7 @@ class AnimatedMatrixGraph(MatrixGraph):
                     yield (current, processed, [])
 
     def in_order(self, start_node, end_node=None):
-        if start_node in self.matrix[0]:
+        if start_node in self.nodes:
             stack = []
             processed = []
             visited = []
@@ -187,7 +187,7 @@ class AnimatedMatrixGraph(MatrixGraph):
                     yield (current, processed, [])
 
     def post_order(self, start_node, end_node=None):
-        if start_node in self.matrix[0]:
+        if start_node in self.nodes:
             stack = []
             processed = []
             visited = []
@@ -234,9 +234,6 @@ class AnimatedWeightedMatrixGraph(AnimatedMatrixGraph):
     """a weighted, (maybe) directional graph, with optimisation methods that can be used to pause and/or step through
     the methods as required"""
 
-    def __init__(self, undirected=False):
-        super().__init__(undirected)
-
     def add_edge(self, from_node, to_node, weight=1, undirected=False):
         """
         Adds an edge from one node to another; re-add to update the edge
@@ -247,12 +244,12 @@ class AnimatedWeightedMatrixGraph(AnimatedMatrixGraph):
             weight (int, optional): Cost of travelling the edge. Defaults to 1.
             undirected (bool, optional): If True, will create the matching edge in reverse. Defaults to False.
         """
-        if from_node in self.matrix[0] and to_node in self.matrix[0]:
-            from_index = self.matrix[0].index(from_node)
-            to_index = self.matrix[0].index(to_node)
-            self.matrix[from_index + 1][to_index] = weight
+        if from_node in self.nodes and to_node in self.nodes:
+            from_index = self.nodes.index(from_node)
+            to_index = self.nodes.index(to_node)
+            self.matrix[from_index][to_index] = weight
             if self.undirected or undirected:
-                self.matrix[to_index + 1][from_index] = weight
+                self.matrix[to_index][from_index] = weight
 
     def dijkstra(self, start_node, end_node=None):
         """

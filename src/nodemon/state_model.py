@@ -54,7 +54,7 @@ class StateModel:
         self.__filename = None
 
     def get_graph_matrix(self):
-        return self.__graph.matrix
+        return [self.__graph.nodes] + self.__graph.matrix
 
     def set_graph_matrix(self, saved_matrix, is_weighted):
         if is_weighted:
@@ -62,8 +62,9 @@ class StateModel:
         else:
             self.__graph = AnimatedMatrixGraph(True)
 
-        self.__graph.matrix = saved_matrix
-        last_node = max(self.__graph.matrix[0])
+        self.__graph.nodes = saved_matrix[0]
+        self.__graph.matrix = saved_matrix[1:]
+        last_node = max(self.__graph.nodes)
 
         # restart the node name generator
         self.__generator = StateModel.__next_node_name_generator()

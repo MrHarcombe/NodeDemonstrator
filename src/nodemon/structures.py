@@ -395,82 +395,78 @@ class ListGraph:
 
 
 class MatrixGraph:
-    """an unweighted, (maybe) directional graph"""
+    """an unweighted, (possibly) directional graph"""
 
     def __init__(self, undirected=False):
+        self.nodes = []
         self.matrix = [[]]
         self.undirected = undirected
 
     def is_empty(self):
-        return len(self.matrix[0]) == 0
+        return len(self) == 0
 
     def __len__(self):
-        return len(self.matrix[0])
-
-    def contains(self, node):
-        return node in self.matrix[0]
+        return len(self.nodes)
 
     def __contains__(self, node):
-        return self.contains(node)
+        return node in self.nodes
 
     def add_node(self, node):
-        if node not in self.matrix[0]:
-            self.matrix[0].append(node)
-            for n in range(1, len(self.matrix)):
-                self.matrix[n].append(False)
-            self.matrix.append([False for n in range(len(self.matrix[0]))])
+        if node not in self.nodes:
+            self.nodes.append(node)
+            for existing in self.matrix:
+                existing.append(False)
+            if len(self.nodes) > 1:
+                self.matrix.append([False for n in range(len(self.nodes))])
 
     def delete_node(self, node):
-        if node in self.matrix[0]:
-            index = self.matrix[0].index(node)
-            del self.matrix[0][index]
-            del self.matrix[index+1]
-            for n in range(1, len(self.matrix)):
+        if node in self.nodes:
+            index = self.nodes.index(node)
+            del self.nodes[index]
+            del self.matrix[index]
+            for n in range(len(self.matrix)):
                 del self.matrix[n][index]
 
     def add_edge(self, from_node, to_node, undirected=False):
-        if from_node not in self.matrix[0]:
+        if from_node not in self.nodes:
             self.add_node(from_node)
-        if to_node not in self.matrix[0]:
+        if to_node not in self.nodes:
             self.add_node(to_node)
         if not self.is_connected(from_node, to_node):
-            from_index = self.matrix[0].index(from_node)
-            to_index = self.matrix[0].index(to_node)
-            self.matrix[from_index + 1][to_index] = True
-            self.matrix[to_index + 1][from_index] = True
+            from_index = self.nodes.index(from_node)
+            to_index = self.nodes.index(to_node)
+            self.matrix[from_index][to_index] = True
             if self.undirected or undirected:
-                self.matrix[to_index + 1][from_index] = True
+                self.matrix[to_index][from_index] = True
 
     def delete_edge(self, from_node, to_node, undirected=False):
         if self.is_connected(from_node, to_node):
-            from_index = self.matrix[0].index(from_node)
-            to_index = self.matrix[0].index(to_node)
-            self.matrix[from_index + 1][to_index] = False
+            from_index = self.nodes.index(from_node)
+            to_index = self.nodes.index(to_node)
+            self.matrix[from_index][to_index] = False
             if self.undirected or undirected:
-                self.matrix[to_index + 1][from_index] = False
+                self.matrix[to_index][from_index] = False
 
     def is_connected(self, from_node, to_node):
-        if from_node in self.matrix[0] and to_node in self.matrix[0]:
-            from_index = self.matrix[0].index(from_node)
-            to_index = self.matrix[0].index(to_node)
-            return self.matrix[from_index + 1][to_index]
+        if from_node in self.nodes and to_node in self.nodes:
+            from_index = self.nodes.index(from_node)
+            to_index = self.nodes.index(to_node)
+            return self.matrix[from_index][to_index]
         return False
 
     def get_connections(self, node):
-        if node in self.matrix[0]:
+        if node in self.nodes:
             return iter(
                 [
                     c
-                    for c in zip(
-                        self.matrix[0], self.matrix[self.matrix[0].index(node) + 1]
-                    )
+                    for c in zip(self.nodes, self.matrix[self.nodes.index(node)])
                     if c[1]
                 ]
             )
         return []
 
     def depth_first(self, start_node, end_node=None):
-        if start_node in self.matrix[0]:
+        if start_node in self.nodes:
             discovered = set([start_node])
             visited = []
             stack = [start_node]
@@ -490,7 +486,7 @@ class MatrixGraph:
         return None
 
     def breadth_first(self, start_node, end_node=None):
-        if start_node in self.matrix[0]:
+        if start_node in self.nodes:
             discovered = set([start_node])
             visited = []
             queue = [start_node]
@@ -526,12 +522,12 @@ class WeightedMatrixGraph(MatrixGraph):
             weight (int, optional): Cost of travelling the edge. Defaults to 1.
             undirected (bool, optional): If True, will create the matching edge in reverse. Defaults to False.
         """
-        if from_node in self.matrix[0] and to_node in self.matrix[0]:
-            from_index = self.matrix[0].index(from_node)
-            to_index = self.matrix[0].index(to_node)
-            self.matrix[from_index + 1][to_index] = weight
+        if from_node in self.nodes and to_node in self.nodes:
+            from_index = self.nodes.index(from_node)
+            to_index = self.nodes.index(to_node)
+            self.matrix[from_index][to_index] = weight
             if self.undirected or undirected:
-                self.matrix[to_index + 1][from_index] = weight
+                self.matrix[to_index][from_index] = weight
 
     def dijkstra(self, start_node, end_node=None):
         queue = []
@@ -693,12 +689,18 @@ if __name__ == "__main__":
         print("D" in g)
         print(g.is_connected("D", "F"))
 
+        # before deletions
+        print(g.nodes)
+        for row in g.matrix:
+            print(row)
+        print()
+
         visited = g.depth_first("A")
         print("depth first from A: ", ",".join(visited))
 
         visited = g.breadth_first("A")
         print("breadth first from A: ", ",".join(visited))
-        
+
         g.delete_edge("A", "B")
         g.delete_node("B")
         g.add_node("B")
@@ -706,6 +708,11 @@ if __name__ == "__main__":
         g.add_edge("A", "B")
         g.add_edge("A", "I")
         print("...done")
+
+        # after deletions
+        print(g.nodes)
+        for row in g.matrix:
+            print(row)
 
     def test_weighted_graph():
         print("Testing graph (adjacency matrix)...")
@@ -762,6 +769,8 @@ if __name__ == "__main__":
         print("shortest path from F to C:", ",".join(g.dijkstra("F", "C")))
 
         print("...done")
+        print(g.nodes)
+        print(g.matrix)
 
     def test_graph_connections():
         g = WeightedMatrixGraph()

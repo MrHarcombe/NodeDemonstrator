@@ -19,12 +19,12 @@ class RepresentationFrame(ttk.Frame):
         self.__scroll.columnconfigure(0, weight=1)
         self.__scroll.rowconfigure(0, weight=1)
 
-        columns, rows, height = self.__generate_table_data()
+        # columns, rows, height = self.__generate_table_data()
         self.__adjacency_matrix = Tableview(
             master=self.__scroll,
-            coldata=columns,
-            rowdata=rows,
-            height=height,
+            coldata=[],
+            rowdata=[[]],
+            height=0,
             autofit=True,
             autoalign=False,
             paginated=False,
@@ -45,11 +45,15 @@ class RepresentationFrame(ttk.Frame):
     def update_table(self):
         StateModel().set_current_tab(self.__class__.__name__)
         columns, rows, height = self.__generate_table_data()
-        self.__adjacency_matrix.build_table_data(columns, rows)
-        self.__adjacency_matrix.configure(height=height)
+        if height is not None:
+            self.__adjacency_matrix.build_table_data(columns, rows)
+            self.__adjacency_matrix.configure(height=height)
 
     def __generate_table_data(self):
         internal_matrix = StateModel().get_graph_matrix()
+
+        if len(internal_matrix[0]) == 0:
+            return (None, None, None)
 
         column_headings = [""] + internal_matrix[0]
         row_values = [
