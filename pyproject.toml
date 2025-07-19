@@ -14,7 +14,7 @@ line.length = 96
 
 [project]
 name = "nodemon"
-version = "0.1.1"
+version = "0.1.2"
 authors = [
     { name="Ian Harcombe", email="ian.harcombe@gmail.com" },
 ]

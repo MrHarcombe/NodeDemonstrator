@@ -1,6 +1,7 @@
 from abc import abstractmethod
 from collections import defaultdict
 from heapq import heappush, heappop
+from random import choice
 from time import time
 
 
@@ -478,7 +479,7 @@ class MatrixGraph:
                 if current == end_node:
                     break
 
-                for node, weight in self.get_connections(current):
+                for node, _ in self.get_connections(current):
                     if node not in discovered:
                         discovered.add(node)
                         stack.append(node)
@@ -498,7 +499,7 @@ class MatrixGraph:
                 if current == end_node:
                     break
 
-                for node, weight in self.get_connections(current):
+                for node, _ in self.get_connections(current):
                     if node not in discovered:
                         discovered.add(node)
                         queue.append(node)
@@ -597,6 +598,83 @@ class WeightedMatrixGraph(MatrixGraph):
                     f_score[friend] = friend_f_score
                     if friend not in open_set:
                         heappush(open_set, (friend_f_score, friend))
+
+    def prims_mst(self):
+        """
+        Finds the minimum spanning tree of a fully connected graph, using Prim's algorithm
+        """
+        in_mst = defaultdict(lambda: False)
+        key_values = defaultdict(lambda: float("inf"))
+        parents = defaultdict(lambda: None)
+
+        key_values[choice(self.nodes)] = 0  # starting node
+
+        results = []
+        for _ in range(len(self)):
+            next_cheapest = min(
+                (node for node in self.nodes if not in_mst[node]),
+                key=lambda node: key_values[node],
+            )
+
+            in_mst[next_cheapest] = True
+
+            # Skip adding for the first vertex since it has no parent
+            if parents[next_cheapest] is not None:
+                results.append(
+                    [
+                        (parents[next_cheapest], next_cheapest),
+                        self.is_connected(next_cheapest, parents[next_cheapest]),
+                    ]
+                )
+
+            for neighbour, weight in self.get_connections(next_cheapest):
+                if 0 < weight < key_values[neighbour] and not in_mst[neighbour]:
+                    key_values[neighbour] = weight
+                    parents[neighbour] = next_cheapest
+
+        return results
+
+    def kruskals_mst(self):
+        def find(parents, node):
+            if parents[node] is None:
+                return node
+
+            return find(parents, parents[node])
+
+        def union(parents, ranks, node1, node2):
+            node1_root = find(parents, node1)
+            node2_root = find(parents, node2)
+
+            if ranks[node1_root] < ranks[node2_root]:
+                parents[node1_root] = node2_root
+            elif ranks[node1_root] > ranks[node2_root]:
+                parents[node2_root] = node1_root
+            else:
+                parents[node2_root] = node1_root
+                ranks[node1_root] += 1
+
+        results = []  # MST
+
+        # create a sorted collection of edges by weight from smallest up
+        edges = {}
+        for node in self.nodes:
+            for neighbour, weight in self.get_connections(node):
+                if (node, neighbour) not in edges and (
+                    (neighbour, node) not in edges or edges[(neighbour, node)] != weight
+                ):
+                    edges[(node, neighbour)] = weight
+
+        parents = defaultdict(lambda: None)
+        ranks = defaultdict(lambda: 0)
+
+        for (edge1, edge2), weight in sorted(edges.items(), key=lambda i: i[1]):
+            parent1 = find(parents, edge1)
+            parent2 = find(parents, edge2)
+            if parent1 != parent2:
+                results.append(((edge1, edge2), weight))
+                union(parents, ranks, parent1, parent2)
+
+        return results
 
 
 if __name__ == "__main__":
@@ -784,6 +862,44 @@ if __name__ == "__main__":
             print("Connected to", e)
         print(g.matrix)
 
+    def test_mst_algorithms():
+        g = WeightedMatrixGraph(True)
+        g.add_node("A")
+        g.add_node("B")
+        g.add_node("C")
+        g.add_node("D")
+        g.add_node("E")
+        g.add_node("F")
+        g.add_node("G")
+        g.add_node("H")
+        g.add_edge("A", "B", 4)
+        g.add_edge("A", "D", 3)
+        g.add_edge("B", "C", 3)
+        g.add_edge("B", "D", 5)
+        g.add_edge("B", "E", 6)
+        g.add_edge("C", "E", 4)
+        g.add_edge("C", "H", 2)
+        g.add_edge("D", "E", 7)
+        g.add_edge("D", "F", 4)
+        g.add_edge("E", "F", 5)
+        g.add_edge("E", "G", 3)
+        g.add_edge("F", "G", 7)
+        g.add_edge("G", "H", 5)
+        print("Prim's MST:")
+        print("Edge \tWeight")
+        mst = g.prims_mst()
+        for (edge1, edge2), weight in sorted(mst, key=lambda i: sorted(i[0])):
+            e1, e2 = sorted([edge1, edge2])
+            print(f"{e1}-{e2} \t{weight}")
+        print()
+        print("Kruskal's MST:")
+        print("Edge \tWeight")
+        mst = g.kruskals_mst()
+        for (edge1, edge2), weight in sorted(mst, key=lambda i: sorted(i[0])):
+            e1, e2 = sorted([edge1, edge2])
+            print(f"{e1}-{e2} \t{weight}")
+
     # test_red_black_tree()
+    # test_matrix_graph()
     # test_weighted_graph()
-    test_matrix_graph()
+    test_mst_algorithms()
