@@ -373,6 +373,107 @@ class AnimatedWeightedMatrixGraph(AnimatedMatrixGraph):
 
                 yield current, (f_score, g_score, came_from), open_set
 
+    def prims_mst(self):
+        """
+        Implements Prim's algorithm to find the minimum spanning tree of a fully connected graph.
+        Always starts from a randomly selected node.
+
+        Returns:
+            list: List of edges (ie pairs of nodes) and costs making up the minimum spanning tree.
+
+        Yields:
+            tuple: at the beginning of each iteration through the algorithm, the cheapest edge, the list of nodes
+                that are in the MST, the current shortest distance from each node to each node outside of the MST,
+                and the parents of each node.
+        """
+        in_mst = defaultdict(lambda: False)
+        key_values = defaultdict(lambda: float("inf"))
+        parents = defaultdict(lambda: None)
+
+        key_values[choice(self.nodes)] = 0  # starting node
+
+        results = []
+        for _ in range(len(self)):
+            next_cheapest = min(
+                (node for node in self.nodes if not in_mst[node]),
+                key=lambda node: key_values[node],
+            )
+
+            in_mst[next_cheapest] = True
+
+            yield next_cheapest, in_mst, key_values, parents
+
+            # Skip adding for the first vertex since it has no parent
+            if parents[next_cheapest] is not None:
+                results.append(
+                    [
+                        (parents[next_cheapest], next_cheapest),
+                        self.is_connected(next_cheapest, parents[next_cheapest]),
+                    ]
+                )
+
+            for neighbour, weight in self.get_connections(next_cheapest):
+                if 0 < weight < key_values[neighbour] and not in_mst[neighbour]:
+                    key_values[neighbour] = weight
+                    parents[neighbour] = next_cheapest
+
+        yield results
+
+    def kruskals_mst(self):
+        """
+        Implements Kruskal's algorithm to find the minimum spanning tree (or forest) of a graph.
+        Always starts from the lowest weighted edge.
+
+        Returns:
+            list: List of edges (ie pairs of nodes) and costs making up the minimum spanning tree (or forest).
+
+        Yields:
+            tuple: at the beginning of each iteration through the algorithm, the cheapest edge, the collection of
+                parents of each node and their rankings within the algorithm.
+        """
+        def find(parents, node):
+            if parents[node] is None:
+                return node
+
+            return find(parents, parents[node])
+
+        def union(parents, ranks, node1, node2):
+            node1_root = find(parents, node1)
+            node2_root = find(parents, node2)
+
+            if ranks[node1_root] < ranks[node2_root]:
+                parents[node1_root] = node2_root
+            elif ranks[node1_root] > ranks[node2_root]:
+                parents[node2_root] = node1_root
+            else:
+                parents[node2_root] = node1_root
+                ranks[node1_root] += 1
+
+        results = []  # MST
+
+        # create a sorted collection of edges by weight from smallest up
+        edges = {}
+        for node in self.nodes:
+            for neighbour, weight in self.get_connections(node):
+                if (node, neighbour) not in edges and (
+                    (neighbour, node) not in edges or edges[(neighbour, node)] != weight
+                ):
+                    edges[(node, neighbour)] = weight
+
+        parents = defaultdict(lambda: None)
+        ranks = defaultdict(lambda: 0)
+
+        for (edge1, edge2), weight in sorted(edges.items(), key=lambda i: i[1]):
+            yield ((edge1, edge2), weight), parents, ranks
+
+            parent1 = find(parents, edge1)
+            parent2 = find(parents, edge2)
+            if parent1 != parent2:
+                results.append(((edge1, edge2), weight))
+                union(parents, ranks, parent1, parent2)
+
+        yield results
+
 
 if __name__ == "__main__":
 

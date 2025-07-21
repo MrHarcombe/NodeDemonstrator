@@ -7,7 +7,7 @@ from abc import ABCMeta, abstractmethod
 
 class CustomScrollableFrame(ScrolledFrame):
     def __init__(self, master, title):
-        super().__init__(master) #, label_text=title, label_anchor=tk.CENTER)
+        super().__init__(master)  # , label_text=title, label_anchor=tk.CENTER)
         # self._scrollbar.configure(height=0)
 
 
@@ -17,7 +17,11 @@ class TraceFrame(ttk.Frame, metaclass=ABCMeta):
         self._canvas_frame = canvas_frame
         self._iterator = None
 
-        self._from = canvas_frame.get_node_from_label(from_node)
+        self._from = (
+            canvas_frame.get_node_from_label(from_node)
+            if from_node is not None and len(from_node.strip()) > 0
+            else None
+        )
         self._to = (
             canvas_frame.get_node_from_label(to_node)
             if to_node is not None and len(to_node.strip()) > 0
@@ -32,7 +36,6 @@ class TraceFrame(ttk.Frame, metaclass=ABCMeta):
 
         self.highlight_anchor_points()
 
-    
     def initial_setup(self, upper_class, lower_class):
         self._processed = upper_class(self)
         self._processed.grid(sticky=tk.NSEW, pady=(0, 15))
@@ -42,7 +45,9 @@ class TraceFrame(ttk.Frame, metaclass=ABCMeta):
         empty_frame.grid(sticky=tk.NSEW)
         empty_frame.columnconfigure(0, weight=1)
 
-        ttk.Label(empty_frame, text="Empty", anchor=tk.CENTER, bootstyle="inverse-info").grid(
+        ttk.Label(
+            empty_frame, text="Empty", anchor=tk.CENTER, bootstyle="inverse-info"
+        ).grid(
             sticky=tk.NSEW,
             padx=8,
             pady=3,
@@ -56,7 +61,9 @@ class TraceFrame(ttk.Frame, metaclass=ABCMeta):
         empty_frame.grid(sticky=tk.NSEW)
         empty_frame.columnconfigure(0, weight=1)
 
-        ttk.Label(empty_frame, text="Empty", anchor=tk.CENTER, bootstyle="inverse-info").grid(
+        ttk.Label(
+            empty_frame, text="Empty", anchor=tk.CENTER, bootstyle="inverse-info"
+        ).grid(
             sticky=tk.NSEW,
             padx=8,
             pady=3,
