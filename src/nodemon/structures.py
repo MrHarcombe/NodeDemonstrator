@@ -437,7 +437,7 @@ class MatrixGraph:
             from_index = self.nodes.index(from_node)
             to_index = self.nodes.index(to_node)
             self.matrix[from_index][to_index] = True
-            if self.undirected or undirected:
+            if self.undirected and undirected:
                 self.matrix[to_index][from_index] = True
 
     def delete_edge(self, from_node, to_node, undirected=False):
@@ -445,7 +445,7 @@ class MatrixGraph:
             from_index = self.nodes.index(from_node)
             to_index = self.nodes.index(to_node)
             self.matrix[from_index][to_index] = False
-            if self.undirected or undirected:
+            if self.undirected and undirected:
                 self.matrix[to_index][from_index] = False
 
     def is_connected(self, from_node, to_node):

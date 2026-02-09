@@ -17,10 +17,11 @@ Building a drag and drop desktop (Tkinter) application to help visualise various
     - double-click to change the weight of an edge
     - double-right click to delete an edge
 - choice of stepped or timed trace of supported algorithms
-- available algorithms 
-  - breadth-first / depth-first from a given start point (with or without end point, ie traversal and/or search)
-  - Dijkstra and A* shortest path
-  - tree traversal algorithms (within certain constraints)
+  - available algorithms 
+    - breadth-first / depth-first from a given start point (with or without end point, ie traversal and/or search)
+    - Dijkstra and A* shortest path
+    - tree traversal algorithms (within certain constraints)
+- view of the adjacency matrix behind the drawn graph
 
 ## Usage
 

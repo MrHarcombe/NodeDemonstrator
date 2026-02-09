@@ -248,7 +248,7 @@ class AnimatedWeightedMatrixGraph(AnimatedMatrixGraph):
             from_index = self.nodes.index(from_node)
             to_index = self.nodes.index(to_node)
             self.matrix[from_index][to_index] = weight
-            if self.undirected or undirected:
+            if self.undirected and undirected:
                 self.matrix[to_index][from_index] = weight
 
     def dijkstra(self, start_node, end_node=None):

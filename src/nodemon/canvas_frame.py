@@ -804,9 +804,12 @@ class CanvasFrame(ttk.Frame):
                         if "edge" in tags:
                             from_node = None
                             to_node = None
+                            undirected = False
                             for tag in tags:
                                 if tag.startswith("edge_fromto_"):
                                     _, _, from_node, to_node = tag.split("_")
+                                if tag.startswith("edge_tofrom_"):
+                                    undirected = True
 
                             fromto = StateModel().has_edge(from_node, to_node)
                             tofrom = StateModel().has_edge(to_node, from_node)
@@ -816,7 +819,7 @@ class CanvasFrame(ttk.Frame):
                             if (
                                 not isinstance(fromto, bool)
                                 and not isinstance(tofrom, bool)
-                                and fromto != tofrom
+                                and not undirected
                             ):
                                 values = amend_edge_dialog(
                                     self,
@@ -851,7 +854,7 @@ class CanvasFrame(ttk.Frame):
                                         )
                                         # also need to update the to cost text and tag
                                         cost_id = self.__canvas.find_withtag(
-                                            f"cost_tofrom_{to_node}_{from_node}"
+                                            f"cost_fromto_{to_node}_{from_node}"
                                         )
                                         self.__canvas.dchars(cost_id, 0, "end")
                                         self.__canvas.insert(
@@ -865,7 +868,7 @@ class CanvasFrame(ttk.Frame):
                                             cost_id,
                                         )
                             else:
-                                # found the edge as "_fromto_" (or "_loopback_") so use that value
+                                # found the edge as only "_fromto_" (or "_loopback_") so use that value
                                 values = amend_edge_dialog(
                                     self,
                                     "Amend edge weight",
@@ -876,7 +879,7 @@ class CanvasFrame(ttk.Frame):
                                 if values:
                                     if values[0] != "None":
                                         StateModel().add_edge(
-                                            from_node, to_node, True, int(values[0])
+                                            from_node, to_node, undirected, int(values[0])
                                         )
                                         # also need to update the cost text and tag
                                         cost_id = self.__canvas.find_withtag(
