@@ -1,10 +1,11 @@
-modules = ["python-3.10"]
+modules = ["python-3.11"]
 
 [nix]
 channel = "stable-24_05"
+packages = ["tk", "python311Packages.tkinter"]
 
 [workflows]
-runButton = "Run Node Demonstrator"
+runButton = "Project"
 
 [[workflows.workflow]]
 name = "Run Node Demonstrator"
@@ -14,3 +15,26 @@ mode = "sequential"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "python -m nodemon"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Tkinter App"
+
+[[workflows.workflow]]
+name = "Tkinter App"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python main.py"
+
+[workflows.workflow.metadata]
+outputType = "vnc"
+
+[agent]
+expertMode = true
