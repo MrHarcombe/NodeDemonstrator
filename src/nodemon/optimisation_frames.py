@@ -15,8 +15,8 @@ class DijkstraShortestPathFrame(TraceFrame):
         super().__init__(master, canvas_frame, title, from_node, to_node)
         self._iterator = iter(StateModel().dijkstra(self._from, self._to))
         self.initial_setup(
-            lambda master: CustomScrollableFrame(master, "Current Data"),
-            lambda master: CustomScrollableFrame(master, "Current Queue"),
+            lambda master: CustomScrollableFrame(master, "Processed Node / Cost from Start / Previous"),
+            lambda master: CustomScrollableFrame(master, "Queued Node / Step Cost"),
         )
 
     
@@ -147,8 +147,8 @@ class AStarShortestPathFrame(TraceFrame):
         super().__init__(master, canvas_frame, title, from_node, to_node)
         self._iterator = iter(StateModel().a_star(self._from, self._to))
         self.initial_setup(
-            lambda master: CustomScrollableFrame(master, "Current Data"),
-            lambda master: CustomScrollableFrame(master, "Current Queue"),
+            lambda master: CustomScrollableFrame(master, "Processed Node / F-Score / G-Score / Previous"),
+            lambda master: CustomScrollableFrame(master, "Queued Node / Estimated Total Cost"),
         )
 
     

@@ -12,7 +12,7 @@ class CustomScrollableFrame(ScrolledFrame):
 
 
 class TraceFrame(ttk.Frame, metaclass=ABCMeta):
-    def __init__(self, master, canvas_frame, title, from_node, to_node):
+    def __init__(self, master, canvas_frame, title, from_node=None, to_node=None):
         super().__init__(master)
         self._canvas_frame = canvas_frame
         self._iterator = None
@@ -57,23 +57,28 @@ class TraceFrame(ttk.Frame, metaclass=ABCMeta):
         self._other.grid(sticky=tk.NSEW)
         self._other.columnconfigure(0, weight=1)
 
-        empty_frame = ttk.Frame(self._other, borderwidth=2)
-        empty_frame.grid(sticky=tk.NSEW)
-        empty_frame.columnconfigure(0, weight=1)
+        if type(self._other) == ttk.Frame:
+            empty_frame = ttk.Frame(self._other, borderwidth=2)
+            empty_frame.grid(sticky=tk.NSEW)
+            empty_frame.columnconfigure(0, weight=1)
 
-        ttk.Label(
-            empty_frame, text="Empty", anchor=tk.CENTER, bootstyle="inverse-info"
-        ).grid(
-            sticky=tk.NSEW,
-            padx=8,
-            pady=3,
-        )
+            ttk.Label(
+                empty_frame, text="Empty", anchor=tk.CENTER, bootstyle="inverse-info"
+            ).grid(
+                sticky=tk.NSEW,
+                padx=8,
+                pady=3,
+            )
 
-        self.rowconfigure((1, 2), weight=1)
+            self.rowconfigure((1, 2), weight=1)
+        else:
+            self.rowconfigure(1, weight=1)
+
         self.columnconfigure(0, weight=1)
 
     def highlight_anchor_points(self):
-        self._canvas_frame.highlight_start_node(self._from)
+        if self._from is not None:
+            self._canvas_frame.highlight_start_node(self._from)
         if self._to is not None:
             self._canvas_frame.highlight_end_node(self._to)
         if self._current is not None:

@@ -5,6 +5,7 @@ import ttkbootstrap.dialogs as dialogs
 from .state_model import StateModel
 from .traversal_frames import BreadthFirstFrame, DepthFirstFrame, TreeTraversalFrame
 from .optimisation_frames import DijkstraShortestPathFrame, AStarShortestPathFrame
+from .spanning_frames import PrimsSpanningFrame, KruskalsSpanningFrame
 
 
 class UsageControlsFrame(ttk.Frame):
@@ -21,6 +22,7 @@ class UsageControlsFrame(ttk.Frame):
     WEIGHTED_ALGOCHOICES = UNWEIGHTED_ALGOCHOICES + [
         "Dijkstra's Shortest Path",
         "A* Shortest Path",
+        "Prim's Minimum Spanning Tree",
     ]
 
     TREE_ALGOCHOICES = UNWEIGHTED_ALGOCHOICES + [
@@ -198,6 +200,11 @@ class UsageControlsFrame(ttk.Frame):
                         message='Both "From" and "To" nodes are required to trace A* shortest path',
                     )
 
+            case "Prim's Minimum Spanning Tree":
+                self.__trace_frame = PrimsSpanningFrame(
+                    self, self.__canvas_frame, from_node
+                )
+
             case "Pre Order Traversal":
                 if from_given:
                     self.__trace_frame = TreeTraversalFrame(
@@ -285,6 +292,7 @@ class UsageControlsFrame(ttk.Frame):
 
     def __reset_trace(self):
         self.__canvas_frame.unhighlight_all_nodes()
+        self.__canvas_frame.unhighlight_all_edges()
         self.__trace_frame.grid_remove()
         self.__step_button.configure(state=tk.NORMAL)
         self.__step_button.configure(text="Step Trace")

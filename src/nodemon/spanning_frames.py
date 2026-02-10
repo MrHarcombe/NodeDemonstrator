@@ -6,14 +6,17 @@ from .trace_frame import TraceFrame, CustomScrollableFrame
 
 
 class PrimsSpanningFrame(TraceFrame):
-    def __init__(self, master, canvas_frame):
-        title = f"Prim's Minimum Spanning Tree"
+    def __init__(self, master, canvas_frame, from_node):
+        if from_node is None or len(from_node.strip()) == 0:
+            title = "Prim's Minimum Spanning Tree"
+        else:
+            title = "Prim's Minimum Spanning Tree from {from_node}"
 
-        super().__init__(master, canvas_frame, title, None, None)
-        self._iterator = iter(StateModel().prims_mst())
+        super().__init__(master, canvas_frame, title, from_node)
+        self._iterator = iter(StateModel().prims_mst(from_node))
         self.initial_setup(
-            lambda master: CustomScrollableFrame(master, "Cheapest Edge"),
-            lambda master: CustomScrollableFrame(master, "Current Workings"),
+            lambda master: CustomScrollableFrame(master, "Nodes in MST / Shortest External Edge / Parent"),
+            lambda master: ttk.Label(master),
         )
 
     
@@ -35,69 +38,17 @@ class PrimsSpanningFrame(TraceFrame):
             self._processed.columnconfigure(0, weight=1)
 
         else:
-            self._processed.columnconfigure(0, weight=1)
-
-            for row, node in enumerate(sorted(processed, key=lambda node: self._canvas_frame.get_label_from_node(node))):
-                cost, previous = processed[node]
-                self._canvas_frame.highlight_processed_node(node)
+            # incoming tuples mean algorithm is still on-going
+            if type(processed) is tuple:
+                in_mst, key_values, parents = processed
 
                 sub = ttk.Frame(self._processed, borderwidth=2)
-                sub.grid(sticky=tk.NSEW)
-                sub.columnconfigure((0, 1, 2), weight=1)
+                sub.grid(sticky=tk.NSEW, row=0)
 
-                ttk.Label(sub, text=self._canvas_frame.get_label_from_node(node), anchor=tk.CENTER, bootstyle="inverse-info").grid(
-                    sticky=tk.NSEW,
-                    padx=(8, 2),
-                    pady=3,
-                    row=row,
-                    column=0,
-                )
-
-                ttk.Label(sub, text=cost, anchor=tk.CENTER, bootstyle="inverse-info").grid(
-                    sticky=tk.NSEW,
-                    padx=(2, 2),
-                    pady=3,
-                    row=row,
-                    column=1,
-                )
-
-                ttk.Label(sub, text=(self._canvas_frame.get_label_from_node(previous) if previous is not None else "-"), anchor=tk.CENTER, bootstyle="inverse-info").grid(
-                    sticky=tk.NSEW,
-                    padx=(2, 8),
-                    pady=3,
-                    row=row,
-                    column=2,
-                )
-
-    
-    def display_other(self, other):
-        for child in self._other.winfo_children():
-            child.grid_remove()
-
-        if len(other) == 0:
-            sub = ttk.Frame(self._other, borderwidth=2)
-            sub.grid(sticky=tk.NSEW)
-
-            ttk.Label(sub, text="Empty", anchor=tk.CENTER, bootstyle="inverse-info").grid(
-                sticky=tk.NSEW,
-                padx=8,
-                pady=3,
-            )
-
-            sub.columnconfigure(0, weight=1)
-            self._other.columnconfigure(0, weight=1)
-
-        else:
-            self._other.columnconfigure(0, weight=1)
-
-            # incoming tuples mean algorithm is still on-going
-            if type(other[0]) is tuple:
-                for row, (cost, node) in enumerate(sorted(other)):
-                    self._canvas_frame.highlight_pending_node(node)
-                    sub = ttk.Frame(self._other, borderwidth=2)
-                    sub.grid(sticky=tk.NSEW, row=row)
-                    sub.columnconfigure((0, 1), weight=1)
-
+                for row, node in enumerate(filter(lambda node: in_mst[node], sorted(in_mst, key=lambda node:self._canvas_frame.get_label_from_node(node)))):
+                    if key_values[node] != float("inf"):
+                        self._canvas_frame.highlight_pending_node(node)
+                    
                     ttk.Label(sub, text=self._canvas_frame.get_label_from_node(node), anchor=tk.CENTER, bootstyle="inverse-info").grid(
                         sticky=tk.NSEW,
                         padx=(8, 2),
@@ -106,7 +57,7 @@ class PrimsSpanningFrame(TraceFrame):
                         column=0,
                     )
 
-                    ttk.Label(sub, text=cost, anchor=tk.CENTER, bootstyle="inverse-info").grid(
+                    ttk.Label(sub, text=key_values[node], anchor=tk.CENTER, bootstyle="inverse-info").grid(
                         sticky=tk.NSEW,
                         padx=(2, 8),
                         pady=3,
@@ -114,28 +65,56 @@ class PrimsSpanningFrame(TraceFrame):
                         column=1,
                     )
 
-            # if it's not a tuple, it should be a string, which we'd get for an end point
+
+                    ttk.Label(sub, text=parents[node], anchor=tk.CENTER, bootstyle="inverse-info").grid(
+                        sticky=tk.NSEW,
+                        padx=(2, 8),
+                        pady=3,
+                        row=row,
+                        column=2,
+                    )
+
+                sub.columnconfigure((0, 1, 2), weight=1)
+                self._processed.columnconfigure(0, weight=1)
+
+            # if it's not a tuple, it should be a list, which we'd get on completion
             else:
-                row = 0
-                column = 0
-                self._other.columnconfigure((0, 1, 2), weight=1)
+                sub = ttk.Frame(self._processed, borderwidth=2)
+                sub.grid(sticky=tk.NSEW, row=0, column=0)
+                sub.columnconfigure(0, weight=1)
 
-                for node in other:
-                    sub = ttk.Frame(self._other, borderwidth=2)
-                    sub.grid(sticky=tk.NSEW, row=row, column=column)
-                    sub.columnconfigure(0, weight=1)
+                end_points = set()
 
-                    ttk.Label(sub, text=self._canvas_frame.get_label_from_node(node), anchor=tk.CENTER, bootstyle="inverse-info").grid(
+                for row, ((from_node, to_node), weight) in enumerate(processed):
+                    self._canvas_frame.highlight_processed_edge(from_node, to_node)
+                    
+                    ttk.Label(
+                        sub,
+                        text=f"{self._canvas_frame.get_label_from_node(from_node)} - {self._canvas_frame.get_label_from_node(to_node)}",
+                        anchor=tk.CENTER,
+                        bootstyle="inverse-info"
+                    ).grid(
                         sticky=tk.NSEW,
                         padx=8,
                         pady=3,
+                        column=0,
+                        row=row,
                     )
 
-                    column += 1
-                    if column > 2:
-                        row += 1
-                        column = 0
+                    ttk.Label(sub, text=weight, anchor=tk.CENTER, bootstyle="inverse-info").grid(
+                        sticky=tk.NSEW,
+                        padx=8,
+                        pady=3,
+                        column=1,
+                        row=row,
+                    )
 
+                self._processed.columnconfigure(0, weight=1)
+                sub.columnconfigure((0, 1), weight=1)
+
+
+    def display_other(self, other):
+        pass
 
 class KruskalsSpanningFrame(TraceFrame):
     def __init__(self, master, canvas_frame):

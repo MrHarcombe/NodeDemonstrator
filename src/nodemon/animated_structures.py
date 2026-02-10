@@ -373,24 +373,24 @@ class AnimatedWeightedMatrixGraph(AnimatedMatrixGraph):
 
                 yield current, (f_score, g_score, came_from), open_set
 
-    def prims_mst(self):
+    def prims_mst(self, starting_node=None):
         """
         Implements Prim's algorithm to find the minimum spanning tree of a fully connected graph.
-        Always starts from a randomly selected node.
+        Usually starts from a randomly selected node (although one can be provided).
 
         Returns:
             list: List of edges (ie pairs of nodes) and costs making up the minimum spanning tree.
 
         Yields:
             tuple: at the beginning of each iteration through the algorithm, the cheapest edge, the list of nodes
-                that are in the MST, the current shortest distance from each node to each node outside of the MST,
+                that are in the MST, the current shortest distance from each node to a node outside of the MST,
                 and the parents of each node.
         """
         in_mst = defaultdict(lambda: False)
         key_values = defaultdict(lambda: float("inf"))
         parents = defaultdict(lambda: None)
 
-        key_values[choice(self.nodes)] = 0  # starting node
+        key_values[choice(self.nodes) if starting_node is None else starting_node] = 0  # starting node
 
         results = []
         for _ in range(len(self)):
@@ -401,7 +401,7 @@ class AnimatedWeightedMatrixGraph(AnimatedMatrixGraph):
 
             in_mst[next_cheapest] = True
 
-            yield next_cheapest, in_mst, key_values, parents
+            yield next_cheapest, (in_mst, key_values, parents), None
 
             # Skip adding for the first vertex since it has no parent
             if parents[next_cheapest] is not None:
@@ -417,7 +417,7 @@ class AnimatedWeightedMatrixGraph(AnimatedMatrixGraph):
                     key_values[neighbour] = weight
                     parents[neighbour] = next_cheapest
 
-        yield results
+        yield None, results, None
 
     def kruskals_mst(self):
         """

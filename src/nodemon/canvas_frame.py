@@ -137,8 +137,8 @@ class CanvasFrame(ttk.Frame):
                     )
 
             elif type == "line":
-                # True (ie non-zero) if there is a tag containing "tofrom" thus the edge was undirected
-                if len([tag for tag in tags if "tofrom" in tag]):
+                # Will only be one if the edge was undirected
+                if len([tag for tag in tags if "fromto" in tag]) == 2:
                     self.__canvas.tag_lower(
                         self.__canvas.create_line(
                             *coords,
@@ -273,6 +273,51 @@ class CanvasFrame(ttk.Frame):
                         self.__canvas.itemconfig(aid, fill=text_colour)
                     else:
                         self.__canvas.itemconfig(aid, fill="white")
+
+    def highlight_processed_edge(self, from_node, to_node):
+        self.__highlight_edge(
+            from_node,
+            to_node,
+            True,
+            "#CD5C5C",  # "indian red"
+            "#FFFF00",  # yellow
+        )
+
+    def unhighlight_all_edges(self):
+        for from_node in self.get_node_labels():
+            for to_node in self.get_node_labels():
+                self.__highlight_edge(from_node, to_node, False, "", "")
+
+    def __highlight_edge(self, from_node, to_node, highlight, shape_colour, text_colour):
+        from_node_name = self.get_node_from_label(from_node)
+        to_node_name = self.get_node_from_label(to_node)
+
+        id = self.__canvas.find_withtag(f"edge_fromto_{from_node_name}_{to_node_name}")
+        if len(id) == 0:
+            id = self.__canvas.find_withtag(f"edge_fromto_{to_node_name}_{from_node_name}")
+            
+        if len(id) > 0:
+            associated = self.__find_associated_edge_ids(id)
+            for aid in associated:
+                tags = self.__canvas.gettags(aid)
+                undirected = len([t for t in tags if t.startswith("edge_fromto_")]) == 2
+                
+                # print(aid, self.__canvas.type(aid), "->", tags)
+                for tag in tags:
+                    if tag.startswith("edge_fromto_"):
+                        if highlight:
+                            # print("setting", aid, "fill red")
+                            self.__canvas.itemconfig(aid, fill=shape_colour)
+                        elif undirected:
+                            self.__canvas.itemconfig(aid, fill="black")
+                        else:
+                            self.__canvas.itemconfig(aid, fill="blue")
+                    elif tag.startswith("cost_fromto_"):
+                        if highlight:
+                            # print("setting", aid, "fill", text_colour)
+                            self.__canvas.itemconfig(aid, fill=text_colour)
+                        else:
+                            self.__canvas.itemconfig(aid, fill="black")
 
     def __click(self, event):
         """
@@ -485,7 +530,7 @@ class CanvasFrame(ttk.Frame):
                         tx1, ty1, tx2, ty2 = self.__canvas.bbox(f"node_{to_node}")
                         tcx, tcy = (tx1 + tx2) / 2, (ty1 + ty2) / 2
 
-                        if f"edge_tofrom_{from_node}_{to_node}" in tags:
+                        if len([tag for tag in tags if "fromto" in tag]) == 2:
                             self.__canvas.coords(id, fcx, fcy, tcx, tcy)
                             # self.__canvas.tag_lower(id, "node")
 
@@ -672,7 +717,7 @@ class CanvasFrame(ttk.Frame):
                                     f"edge_{from_node}",
                                     f"edge_{to_node}",
                                     f"edge_fromto_{from_node}_{to_node}",
-                                    f"edge_tofrom_{from_node}_{to_node}",
+                                    f"edge_fromto_{to_node}_{from_node}",
                                 ),
                             ),
                             "node",
@@ -690,7 +735,7 @@ class CanvasFrame(ttk.Frame):
                                         f"cost_{from_node}",
                                         f"cost_{to_node}",
                                         f"cost_fromto_{from_node}_{to_node}",
-                                        f"cost_tofrom_{from_node}_{to_node}",
+                                        f"cost_fromto_{to_node}_{from_node}",
                                         f"costvalue_{weight}",
                                     ),
                                 ),
@@ -804,12 +849,10 @@ class CanvasFrame(ttk.Frame):
                         if "edge" in tags:
                             from_node = None
                             to_node = None
-                            undirected = False
+                            undirected = len([tag for tag in tags if "fromto" in tag]) == 2
                             for tag in tags:
                                 if tag.startswith("edge_fromto_"):
                                     _, _, from_node, to_node = tag.split("_")
-                                if tag.startswith("edge_tofrom_"):
-                                    undirected = True
 
                             fromto = StateModel().has_edge(from_node, to_node)
                             tofrom = StateModel().has_edge(to_node, from_node)
@@ -1050,6 +1093,44 @@ class CanvasFrame(ttk.Frame):
             elif "edge" in tags or "cost" in tags:
                 pass
 
+            else:
+                raise ValueError(f"Unknown object on canvas with tags {tags}")
+
+        # print(associated)
+        return list(associated)
+
+    def __find_associated_edge_ids(self, possible):
+        associated = set()
+
+        for tagOrId in possible:
+            tags = self.__canvas.gettags(tagOrId)
+            if "node" in tags:
+                pass
+
+            elif "edge_loopback" in tags:
+                associated = associated.union([tagOrId])
+
+                for tag in tags:
+                    if tag.startswith("edge_"):
+                        node = tag[5:]
+                        associated = associated.union(
+                            self.__canvas.find_withtag(f"cost_loopback_{node}")
+                        )
+
+            elif "edge" in tags or "cost" in tags:
+                associated = associated.union([tagOrId])
+
+                for tag in tags:
+                    if tag.startswith("edge_fromto_"):
+                        parts = tag.split("_")
+                        from_node = parts[2]
+                        to_node = parts[3]
+                    
+                    elif tag.startswith("cost_fromto_"):
+                        parts = tag.split("_")
+                        from_node = parts[2]
+                        to_node = parts[3]
+                    
             else:
                 raise ValueError(f"Unknown object on canvas with tags {tags}")
 

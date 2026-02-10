@@ -166,9 +166,9 @@ class StateModel:
     def post_order(self, start_node, end_node):
         yield from self.__graph.post_order(start_node, end_node)
 
-    def prims_mst(self):
+    def prims_mst(self, start_node=None):
         if isinstance(self.__graph, AnimatedWeightedMatrixGraph):
-            yield from self.__graph.prims_mst()
+            yield from self.__graph.prims_mst(start_node)
 
     def kruskals_mst(self):
         if isinstance(self.__graph, AnimatedWeightedMatrixGraph):
