@@ -34,7 +34,7 @@ outputType = "vnc"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "python launch.py"
+args = "python src/launch.py"
 
 [agent]
 expertMode = true
