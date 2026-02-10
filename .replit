@@ -2,7 +2,7 @@ modules = ["python-3.11"]
 
 [nix]
 channel = "stable-24_05"
-packages = ["tk", "python311Packages.tkinter"]
+packages = ["python311Packages.tkinter", "tk"]
 
 [workflows]
 runButton = "Project"
@@ -29,12 +29,12 @@ args = "Tkinter App"
 name = "Tkinter App"
 author = "agent"
 
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "python main.py"
-
 [workflows.workflow.metadata]
 outputType = "vnc"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python launch.py"
 
 [agent]
 expertMode = true
