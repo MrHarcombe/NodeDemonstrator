@@ -50,7 +50,8 @@ class RepresentationFrame(ttk.Frame):
                 column_headings.append(
                     ttk.Button(
                         master=self.__adjacency_matrix,
-                        text=column, bootstyle=tk.PRIMARY
+                        text=column,
+                        bootstyle=tk.PRIMARY
                     ))
                 column_headings[-1].grid(sticky=tk.NSEW, row=index+1, column=0)
             column_headings.append(ttk.Label(master=self.__adjacency_matrix, text=" ", style="half_height.TLabel"))
@@ -87,7 +88,7 @@ class RepresentationFrame(ttk.Frame):
         if len(internal_matrix[0]) == 0:
             return (None, None, None)
 
-        column_headings = internal_matrix[0]
+        column_headings = [self.__canvas_frame.get_label_from_node(node) for node in internal_matrix[0]]
         row_values = [
             [value if value else "-" for value in row]
             for col, row in enumerate(internal_matrix[1:])

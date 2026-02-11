@@ -82,14 +82,14 @@ class UsageControlsFrame(ttk.Frame):
         from_combo = ttk.Combobox(
             nodes_frame,
             textvariable=self.__from,
-            values=self.__canvas_frame.get_node_labels(),
+            values=[""] + self.__canvas_frame.get_node_labels(),
             state="readonly",
         )
         from_combo.grid(row=2, column=1, sticky=tk.NSEW, pady=(0, 3))
         from_combo.bind(
             "<Expose>",
             lambda event: from_combo.configure(
-                values=self.__canvas_frame.get_node_labels()
+                values=[""] + self.__canvas_frame.get_node_labels()
             ),
         )
 
@@ -101,14 +101,14 @@ class UsageControlsFrame(ttk.Frame):
         to_combo = ttk.Combobox(
             nodes_frame,
             textvariable=self.__to,
-            values=self.__canvas_frame.get_node_labels(),
+            values=[""] + self.__canvas_frame.get_node_labels(),
             state="readonly",
         )
         to_combo.grid(row=3, column=1, sticky=tk.NSEW)
         to_combo.bind(
             "<Expose>",
             lambda event: to_combo.configure(
-                values=self.__canvas_frame.get_node_labels()
+                values=[""] + self.__canvas_frame.get_node_labels()
             ),
         )
 

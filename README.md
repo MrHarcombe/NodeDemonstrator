@@ -20,6 +20,7 @@ Building a drag and drop desktop (Tkinter) application to help visualise various
   - available algorithms 
     - breadth-first / depth-first from a given start point (with or without end point, ie traversal and/or search)
     - Dijkstra and A* shortest path
+    - Prim's minimum spanning tree
     - tree traversal algorithms (within certain constraints)
 - view of the adjacency matrix behind the drawn graph
 
@@ -30,6 +31,6 @@ Building a drag and drop desktop (Tkinter) application to help visualise various
 
 ## Future algorithm support
 
-- Kruskal's and Prim's minimum spanning trees
+- Kruskal's minimum spanning trees
 - Other algorithms from [here](https://memgraph.com/blog/graph-algorithms-applications), or [here](https://memgraph.com/blog/graph-algorithms-list) or [here](https://towardsdatascience.com/10-graph-algorithms-visually-explained-e57faa1336f3)?
 - Any other suggestions?
