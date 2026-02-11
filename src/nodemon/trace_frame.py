@@ -6,9 +6,8 @@ from abc import ABCMeta, abstractmethod
 
 
 class CustomScrollableFrame(ScrolledFrame):
-    def __init__(self, master, title):
-        super().__init__(master)  # , label_text=title, label_anchor=tk.CENTER)
-        # self._scrollbar.configure(height=0)
+    def __init__(self, master):
+        super().__init__(master)
 
 
 class TraceFrame(ttk.Frame, metaclass=ABCMeta):

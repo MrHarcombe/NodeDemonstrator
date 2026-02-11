@@ -1,5 +1,6 @@
 from collections import defaultdict
 from heapq import heappush, heappop
+from random import choice
 
 from .structures import MatrixGraph
 
@@ -464,7 +465,7 @@ class AnimatedWeightedMatrixGraph(AnimatedMatrixGraph):
         ranks = defaultdict(lambda: 0)
 
         for (edge1, edge2), weight in sorted(edges.items(), key=lambda i: i[1]):
-            yield ((edge1, edge2), weight), parents, ranks
+            yield ((edge1, edge2), weight), (parents, ranks), edges
 
             parent1 = find(parents, edge1)
             parent2 = find(parents, edge2)
@@ -472,7 +473,7 @@ class AnimatedWeightedMatrixGraph(AnimatedMatrixGraph):
                 results.append(((edge1, edge2), weight))
                 union(parents, ranks, parent1, parent2)
 
-        yield results
+        yield None, results, None
 
 
 if __name__ == "__main__":

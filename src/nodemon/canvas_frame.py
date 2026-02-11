@@ -274,6 +274,15 @@ class CanvasFrame(ttk.Frame):
                     else:
                         self.__canvas.itemconfig(aid, fill="white")
 
+    def highlight_current_edge(self, from_node, to_node):
+        self.__highlight_edge(
+            from_node,
+            to_node,
+            True,
+            "#00FF00",  # lime
+            "#000000",  # black
+        )
+
     def highlight_processed_edge(self, from_node, to_node):
         self.__highlight_edge(
             from_node,

@@ -23,6 +23,7 @@ class UsageControlsFrame(ttk.Frame):
         "Dijkstra's Shortest Path",
         "A* Shortest Path",
         "Prim's Minimum Spanning Tree",
+        "Kruskal's Minimum Spanning Tree",
     ]
 
     TREE_ALGOCHOICES = UNWEIGHTED_ALGOCHOICES + [
@@ -202,7 +203,12 @@ class UsageControlsFrame(ttk.Frame):
 
             case "Prim's Minimum Spanning Tree":
                 self.__trace_frame = PrimsSpanningFrame(
-                    self, self.__canvas_frame, from_node
+                    self, self.__canvas_frame, from_node,
+                )
+
+            case "Kruskal's Minimum Spanning Tree":
+                self.__trace_frame = KruskalsSpanningFrame(
+                    self, self.__canvas_frame,
                 )
 
             case "Pre Order Traversal":

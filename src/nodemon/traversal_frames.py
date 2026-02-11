@@ -106,8 +106,8 @@ class BreadthFirstFrame(TraversalFrame):
         super().__init__(master, canvas_frame, title, from_node, to_node)
         self._iterator = iter(StateModel().breadth_first(self._from, self._to))
         self.initial_setup(
-            lambda master: CustomScrollableFrame(master, "Processed Nodes"),
-            lambda master: CustomScrollableFrame(master, "Pending Queue"),
+            lambda master: CustomScrollableFrame(master), # Processed Nodes
+            lambda master: CustomScrollableFrame(master), # Pending Queue
         )
 
 
@@ -121,8 +121,8 @@ class DepthFirstFrame(TraversalFrame):
         super().__init__(master, canvas_frame, title, from_node, to_node)
         self._iterator = iter(StateModel().depth_first(self._from, self._to))
         self.initial_setup(
-            lambda master: CustomScrollableFrame(master, "Processed Nodes"),
-            lambda master: CustomScrollableFrame(master, "Pending Stack"),
+            lambda master: CustomScrollableFrame(master), # Processed Nodes
+            lambda master: CustomScrollableFrame(master), # Pending Stack
         )
 
 
@@ -143,6 +143,9 @@ class TreeTraversalFrame(TraversalFrame):
                 self._iterator = iter(StateModel().post_order(self._from, self._to))
 
         self.initial_setup(
-            lambda master: CustomScrollableFrame(master, "Processed Nodes"),
-            lambda master: CustomScrollableFrame(master, "Pending Stack"),
+            lambda master: CustomScrollableFrame(master), # Processed Nodes
+            lambda master: ttk.Label(master),
         )
+        
+    def display_other(self, other):
+        pass
