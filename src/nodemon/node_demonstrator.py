@@ -22,7 +22,7 @@ class NodeApplication(ttk.Window):
         self.title("Node Demonstrator")
         self.geometry(f"{WIDTH}x{HEIGHT}+10+10")
 
-        pane = ttk.PanedWindow(self, orient=tk.HORIZONTAL)
+        pane = ttk.Panedwindow(self, orient=tk.HORIZONTAL)
         pane.grid(sticky=tk.NSEW)
 
         self.canvas = CanvasFrame(pane)
