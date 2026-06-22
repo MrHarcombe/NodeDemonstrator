@@ -1,8 +1,7 @@
 from abc import abstractmethod
 from collections import defaultdict
 from heapq import heappush, heappop
-from random import choice
-from time import time
+from random import choice, sample
 
 
 class TreeNode:
@@ -38,11 +37,12 @@ class TreeNode:
         op(self)
 
     def __str__(self):
-        return
-        f"TreeNode({self.value}, "
-        f"{'Root' if self.parent is None else 'HasParent'}, "
-        f"{'NoLeft' if self.left is None else 'HasLeft'}, "
-        f"{'NoRight' if self.right is None else 'HasRight'})"
+        return (
+            f"TreeNode({self.value}, "
+            f"{'Root' if self.parent is None else 'HasParent'}, "
+            f"{'NoLeft' if self.left is None else 'HasLeft'}, "
+            f"{'NoRight' if self.right is None else 'HasRight'})"
+        )
 
 
 class RedBlackNode(TreeNode):
@@ -55,12 +55,13 @@ class RedBlackNode(TreeNode):
         self.is_black = False
 
     def __str__(self):
-        return
-        f"RedBlackNode({self.value}, "
-        f"{'Black' if self.is_black else 'Red'}, "
-        f"{'Root' if self.parent is None else 'HasParent'}, "
-        f"{'NoLeft' if self.left is None else 'HasLeft'}, "
-        f"{'NoRight' if self.right is None else 'HasRight'})"
+        return (
+            f"RedBlackNode({self.value}, "
+            f"{'Black' if self.is_black else 'Red'}, "
+            f"{'Root' if self.parent is None else 'HasParent'}, "
+            f"{'NoLeft' if self.left is None else 'HasLeft'}, "
+            f"{'NoRight' if self.right is None else 'HasRight'})"
+        )
 
     @staticmethod
     def is_right_child(node):
@@ -78,7 +79,7 @@ class Tree:
     def is_empty(self):
         return self.root is None
 
-    def _insert(self, value: object, parent: TreeNode, on_right: bool):
+    def _insert(self, value, parent, on_right):
         new_node = TreeNode(value)
 
         if parent is None:
@@ -92,7 +93,7 @@ class Tree:
             parent.left = new_node
             new_node.parent = parent
 
-    def add(self, value: object):
+    def add(self, value):
         if self.is_empty():
             self._insert(value, None, True)
 
@@ -115,10 +116,10 @@ class Tree:
                         current = current.right
 
     @abstractmethod
-    def _delete(self, candidate: TreeNode):
+    def _delete(self, candidate):
         pass
 
-    def remove(self, value: object):
+    def remove(self, value):
         if self.is_empty():
             return
 
@@ -283,6 +284,9 @@ class RedBlackTree(Tree):
                 break
         # end of the (do while)-loop
 
+
+        def _delete(self, candidate):
+            pass
 
 """
         def _delete(self, candidate : RedBlackNode):
@@ -466,6 +470,16 @@ class MatrixGraph:
             )
         return []
 
+    def get_all_connections(self):
+        all = []
+        for node in self.nodes:
+            all += [
+                (node, c[0], c[1])
+                for c in zip(self.nodes, self.matrix[self.nodes.index(node)])
+                if c[1]
+            ]
+        return all
+
     def depth_first(self, start_node, end_node=None):
         if start_node in self.nodes:
             discovered = set([start_node])
@@ -561,6 +575,7 @@ class WeightedMatrixGraph(MatrixGraph):
         path.append(current)
         return path[::-1]
 
+    @staticmethod
     def astar_manhattan_distance(node_from, node_to):
         return sum(abs(val1 - val2) for val1, val2 in zip(node_from, node_to))
 
@@ -598,6 +613,157 @@ class WeightedMatrixGraph(MatrixGraph):
                     f_score[friend] = friend_f_score
                     if friend not in open_set:
                         heappush(open_set, (friend_f_score, friend))
+
+    def bellman_ford(self, start_node, end_node=None):
+        """
+        Uses the current graph, fills two arrays (distance and predecessor)
+        holding the shortest path from the source to each vertex
+        Original algorithm taken from...
+            https://en.wikipedia.org/wiki/Bellman%E2%80%93Ford_algorithm
+        ...then modified for early termination
+        """
+
+        # Step 1: initialize graph
+        # Initialize the distance to all vertices to infinity
+        distance = defaultdict(lambda: float("inf"))
+        # ...and having a null predecessor
+        predecessor = defaultdict(lambda: None)
+
+        # The distance from the source to itself is zero
+        distance[start_node] = 0
+
+        # Step 2: relax edges repeatedly
+        for _ in range(len(self.nodes) - 1):
+            changed = 0
+            for u, v, weight in self.get_all_connections():
+                if distance[u] + weight < distance[v]:
+                    distance[v] = distance[u] + weight
+                    predecessor[v] = u
+                    changed += 1
+            if not changed:
+                break
+
+        # Step 3: check for negative-weight cycles
+        for u, v, weight in self.get_all_connections():
+            if distance[u] + weight < distance[v]:
+                predecessor[v] = u
+
+                # A negative cycle exists;
+                # find a vertex on the cycle
+                visited = defaultdict(lambda: False)
+                visited[v] = True
+                while not visited[u]:
+                    visited[u] = True
+                    u = predecessor[u]
+
+                # u is a vertex in a negative cycle,
+                # find the cycle itself
+                ncycle = [u]
+                v = predecessor[u]
+                while v != u:
+                    ncycle.append(v)
+                    v = predecessor[v]
+
+                raise ValueError("Graph contains a negative-weight cycle", ncycle)
+
+        # no target, so return all data
+        if end_node is None:
+            return distance, predecessor
+
+        current = end_node
+        path = [current]
+        while current != start_node:
+            current = predecessor[current]
+            path = [current] + path
+
+        return distance[end_node], path
+
+    def randomized_bellman_ford(self, start_node, end_node=None):
+        """
+        Uses the current graph, fills two arrays (distance and predecessor)
+        holding the shortest path from the source to each vertex
+        Original algorithm taken from...
+            https://en.wikipedia.org/wiki/Bellman%E2%80%93Ford_algorithm
+        ...then modified for performance, from...
+            https://arxiv.org/abs/1111.5414 (PDF version)
+        """
+
+        # Step 1: initialize graph
+        distance = defaultdict(lambda: float("inf"))
+        predecessor = defaultdict(lambda: None)
+
+        # The distance from the source to itself is zero
+        distance[start_node] = 0
+
+        # Step 2: relax edges repeatedly
+        # first randomise the order of nodes, preserving the starting node
+        ordering = sample(self.nodes, len(self.nodes))
+        start_index = ordering.index(start_node)
+        ordering[start_index], ordering[0] = ordering[0], ordering[start_index]
+
+        # then split for edges depending on u < v in the random ordering
+        increasing_edges = defaultdict(list)
+        decreasing_edges = defaultdict(list)
+        for u, v, w in self.get_all_connections():
+            if ordering.index(u) < ordering.index(v):
+                increasing_edges[u].append((u, v, w))
+            else:
+                decreasing_edges[u].append((u, v, w))
+
+        # then repeat until no more relaxations are required
+        affected = {start_node}
+        changed = defaultdict(lambda: False)
+        while len(affected):
+            for u in ordering:
+                for _, v, weight in increasing_edges[u]:
+                    if u in affected or changed[v]:
+                        if distance[u] + weight < distance[v]:
+                            distance[v] = distance[u] + weight
+                            predecessor[v] = u
+                            changed[v] = True
+
+            for u in ordering[::-1]:
+                for _, v, weight in decreasing_edges[u]:
+                    if u in affected or changed[v]:
+                        if distance[u] + weight < distance[v]:
+                            distance[v] = distance[u] + weight
+                            predecessor[v] = u
+                            changed[v] = True
+
+            affected = {n for n in changed if changed[n]}
+            changed.clear()
+
+        # Step 3: check for negative-weight cycles
+        for u, v, weight in self.get_all_connections():
+            if distance[u] + weight < distance[v]:
+                predecessor[v] = u
+                # A negative cycle exists;
+                # find each vertex on the cycle
+                visited = defaultdict(lambda: False)
+                visited[v] = True
+                while not visited[u]:
+                    visited[u] = True
+                    u = predecessor[u]
+                # u is a vertex in a negative cycle,
+                # find the cycle itself
+                ncycle = [u]
+                v = predecessor[u]
+                while v != u:
+                    ncycle.append(v)
+                    v = predecessor[v]
+                raise ValueError("Graph contains a negative-weight cycle", ncycle)
+
+        # no target, so return all data
+        if end_node is None:
+            return distance, predecessor
+
+        current = end_node
+        path = [current]
+        while current != start_node:
+            current = predecessor[current]
+            path = [current] + path
+
+        return distance[end_node], path
 
     def prims_mst(self):
         """
@@ -858,9 +1024,39 @@ if __name__ == "__main__":
         g.add_node("D")
         g.add_edge("A", "B")
         g.add_edge("A", "C")
+        print("Connections for A:")
         for e in g.get_connections("A"):
             print("Connected to", e)
-        print(g.matrix)
+        print("All connections:")
+        for c in g.get_all_connections():
+            print("Connection:", c)
+        # print(g.matrix)
+
+    def test_bellman_ford():
+        g = WeightedMatrixGraph()
+        g.add_node("A")
+        g.add_node("B")
+        g.add_node("C")
+        g.add_node("D")
+        g.add_node("E")
+        g.add_edge("A", "B", 6)
+        g.add_edge("A", "D", 7)
+        g.add_edge("B", "C", 5)
+        g.add_edge("B", "D", 8)
+        g.add_edge("B", "E", -4)
+        g.add_edge("C", "B", -2)
+        g.add_edge("D", "C", -3)
+        g.add_edge("D", "E", 9)
+        g.add_edge("E", "C", 7)
+
+        average = timeit(lambda: g.bellman_ford("A"), number=1000)
+        print("Total shortest bellman-ford path from A:", average)
+        average = timeit(lambda: g.bellman_ford("A", "E"), number=1000)
+        print("Total shortest bellman-ford path from A to E:", average)
+        average = timeit(lambda: g.randomized_bellman_ford("A"), number=1000)
+        print("Total shortest randomized bellman-ford path from A:", average)
+        average = timeit(lambda: g.randomized_bellman_ford("A", "E"), number=1000)
+        print("Total shortest randomized bellman-ford path from A to E:", average)
 
     def test_mst_algorithms():
         g = WeightedMatrixGraph(True)
@@ -899,7 +1095,14 @@ if __name__ == "__main__":
             e1, e2 = sorted([edge1, edge2])
             print(f"{e1}-{e2} \t{weight}")
 
+
+if __name__ == "__main__":
+    from time import time
+    from timeit import timeit
+
     # test_red_black_tree()
     # test_matrix_graph()
+    # test_graph_connections()
     # test_weighted_graph()
-    test_mst_algorithms()
+    test_bellman_ford()
+    # test_mst_algorithms()
