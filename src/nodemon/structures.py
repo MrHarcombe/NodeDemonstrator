@@ -432,7 +432,7 @@ class MatrixGraph:
             for n in range(len(self.matrix)):
                 del self.matrix[n][index]
 
-    def add_edge(self, from_node, to_node, undirected=False):
+    def add_edge(self, from_node, to_node, undirected=None):
         if from_node not in self.nodes:
             self.add_node(from_node)
         if to_node not in self.nodes:
@@ -441,7 +441,10 @@ class MatrixGraph:
             from_index = self.nodes.index(from_node)
             to_index = self.nodes.index(to_node)
             self.matrix[from_index][to_index] = True
-            if self.undirected and undirected:
+            if (
+                (undirected is None and self.undirected) or
+                (undirected is not None and undirected)
+               ):
                 self.matrix[to_index][from_index] = True
 
     def delete_edge(self, from_node, to_node, undirected=False):
@@ -527,7 +530,7 @@ class WeightedMatrixGraph(MatrixGraph):
     def __init__(self, undirected=False):
         super().__init__(undirected)
 
-    def add_edge(self, from_node, to_node, weight=1, undirected=False):
+    def add_edge(self, from_node, to_node, weight=1, undirected=None):
         """
         Adds an edge from one node to another; re-add to update the edge
 
@@ -541,7 +544,10 @@ class WeightedMatrixGraph(MatrixGraph):
             from_index = self.nodes.index(from_node)
             to_index = self.nodes.index(to_node)
             self.matrix[from_index][to_index] = weight
-            if self.undirected or undirected:
+            if (
+                (undirected is None and self.undirected) or
+                (undirected is not None and undirected)
+               ):
                 self.matrix[to_index][from_index] = weight
 
     def dijkstra(self, start_node, end_node=None):
@@ -626,7 +632,7 @@ class WeightedMatrixGraph(MatrixGraph):
         # Step 1: initialize graph
         # Initialize the distance to all vertices to infinity
         distance = defaultdict(lambda: float("inf"))
-        # ...and having a null predecessor
+        # ...and having no predecessor
         predecessor = defaultdict(lambda: None)
 
         # The distance from the source to itself is zero
@@ -634,12 +640,12 @@ class WeightedMatrixGraph(MatrixGraph):
 
         # Step 2: relax edges repeatedly
         for _ in range(len(self.nodes) - 1):
-            changed = 0
+            changed = False
             for u, v, weight in self.get_all_connections():
                 if distance[u] + weight < distance[v]:
                     distance[v] = distance[u] + weight
                     predecessor[v] = u
-                    changed += 1
+                    changed = True
             if not changed:
                 break
 
@@ -1047,7 +1053,10 @@ if __name__ == "__main__":
         g.add_edge("C", "B", -2)
         g.add_edge("D", "C", -3)
         g.add_edge("D", "E", 9)
+        g.add_edge("E", "A", 2)
         g.add_edge("E", "C", 7)
+        print(g.nodes)
+        print([print(row) for row in g.matrix])
 
         average = timeit(lambda: g.bellman_ford("A"), number=1000)
         print("Total shortest bellman-ford path from A:", average)

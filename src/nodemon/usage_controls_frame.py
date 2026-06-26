@@ -4,7 +4,7 @@ import ttkbootstrap.dialogs as dialogs
 
 from .state_model import StateModel
 from .traversal_frames import BreadthFirstFrame, DepthFirstFrame, TreeTraversalFrame
-from .optimisation_frames import DijkstraShortestPathFrame, AStarShortestPathFrame
+from .optimisation_frames import DijkstraShortestPathFrame, AStarShortestPathFrame, BellmanFordShortestPathFrame
 from .spanning_frames import PrimsSpanningFrame, KruskalsSpanningFrame
 
 
@@ -22,6 +22,7 @@ class UsageControlsFrame(ttk.Frame):
     WEIGHTED_ALGOCHOICES = UNWEIGHTED_ALGOCHOICES + [
         "Dijkstra's Shortest Path",
         "A* Shortest Path",
+        "Bellman-Ford Shortest Path",
         "Prim's Minimum Spanning Tree",
         "Kruskal's Minimum Spanning Tree",
     ]
@@ -199,6 +200,17 @@ class UsageControlsFrame(ttk.Frame):
                     dialogs.Messagebox.show_error(
                         title="Required Nodes",
                         message='Both "From" and "To" nodes are required to trace A* shortest path',
+                    )
+
+            case "Bellman-Ford Shortest Path":
+                if from_given:
+                    self.__trace_frame = BellmanFordShortestPathFrame(
+                        self, self.__canvas_frame, from_node, to_node
+                    )
+                else:
+                    dialogs.Messagebox.show_error(
+                        title="Required Node",
+                        message='At least the "From" node is required to trace the Bellman-Ford shortest path',
                     )
 
             case "Prim's Minimum Spanning Tree":
