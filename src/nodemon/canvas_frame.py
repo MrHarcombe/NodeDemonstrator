@@ -847,9 +847,9 @@ class CanvasFrame(ttk.Frame):
                     canvas_xy.y + NODE_RADIUS // 8,
                 )
 
-                print("found possibles near edge...")
-                for p in possible:
-                    print(p, "->", self.__canvas.gettags(p))
+                # print("found possibles near edge...")
+                # for p in possible:
+                #     print(p, "->", self.__canvas.gettags(p))
 
                 if len(possible) != 0:
                     for p in possible:
@@ -866,7 +866,7 @@ class CanvasFrame(ttk.Frame):
                             fromto = StateModel().has_edge(from_node, to_node)
                             tofrom = StateModel().has_edge(to_node, from_node)
 
-                            print(type(fromto), fromto, type(tofrom), tofrom)
+                            # print(type(fromto), fromto, type(tofrom), tofrom)
 
                             if (
                                 not isinstance(fromto, bool)
@@ -979,10 +979,10 @@ class CanvasFrame(ttk.Frame):
                 selected = self.__find_associated_ids(possible)
 
                 # DEBUG: print out the associated id/labels of the node the user has doouble-clicked to delete
-                for tagOrId in selected:
-                    print(
-                        f"Deleting: {tagOrId} / {', '.join(self.__canvas.gettags(tagOrId))}"
-                    )
+                # for tagOrId in selected:
+                #     print(
+                #         f"Deleting: {tagOrId} / {', '.join(self.__canvas.gettags(tagOrId))}"
+                #     )
 
                 node_loopback = None
                 node_label = None

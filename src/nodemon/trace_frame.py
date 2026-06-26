@@ -26,7 +26,9 @@ class TraceFrame(ttk.Frame, metaclass=ABCMeta):
             if to_node is not None and len(to_node.strip()) > 0
             else None
         )
-        self._current = None
+        self._current_value = None
+        self._processed_value = None
+        self._other_value = None
 
         ttk.Label(self, text=title, anchor=tk.CENTER).grid(
             sticky=tk.NSEW,
@@ -80,14 +82,14 @@ class TraceFrame(ttk.Frame, metaclass=ABCMeta):
             self._canvas_frame.highlight_start_node(self._from)
         if self._to is not None:
             self._canvas_frame.highlight_end_node(self._to)
-        if self._current is not None:
-            self._canvas_frame.highlight_current_node(self._current)
+        if self._current_value is not None:
+            self._canvas_frame.highlight_current_node(self._current_value)
 
     def step(self):
         try:
-            self._current, processed, other = next(self._iterator)
-            self.display_processed(processed)
-            self.display_other(other)
+            self._current_value, self._processed_value, self._other_value = next(self._iterator)
+            self.display_processed()
+            self.display_other()
             self.highlight_anchor_points()
             return True
         except StopIteration:
@@ -103,9 +105,9 @@ class TraceFrame(ttk.Frame, metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def display_processed(self, processed):
+    def display_processed(self):
         pass
 
     @abstractmethod
-    def display_other(self, other):
+    def display_other(self):
         pass

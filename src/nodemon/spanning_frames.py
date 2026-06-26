@@ -20,11 +20,11 @@ class PrimsSpanningFrame(TraceFrame):
         )
 
     
-    def display_processed(self, processed):
+    def display_processed(self):
         for child in self._processed.winfo_children():
             child.grid_remove()
 
-        if len(processed) == 0:
+        if len(self._processed_value) == 0:
             sub = ttk.Frame(self._processed, borderwidth=2)
             sub.grid(sticky=tk.NSEW)
 
@@ -39,8 +39,8 @@ class PrimsSpanningFrame(TraceFrame):
 
         else:
             # incoming tuples mean algorithm is still on-going
-            if type(processed) is tuple:
-                in_mst, key_values, parents = processed
+            if type(self._processed_value) is tuple:
+                in_mst, key_values, parents = self._processed_value
 
                 sub = ttk.Frame(self._processed, borderwidth=2)
                 sub.grid(sticky=tk.NSEW, row=0)
@@ -83,7 +83,7 @@ class PrimsSpanningFrame(TraceFrame):
                 sub.grid(sticky=tk.NSEW, row=0, column=0)
                 sub.columnconfigure(0, weight=1)
 
-                for row, ((from_node, to_node), weight) in enumerate(processed):
+                for row, ((from_node, to_node), weight) in enumerate(self._processed_value):
                     self._canvas_frame.highlight_processed_edge(from_node, to_node)
                     
                     ttk.Label(
@@ -111,7 +111,7 @@ class PrimsSpanningFrame(TraceFrame):
                 sub.columnconfigure((0, 1), weight=1)
 
 
-    def display_other(self, other):
+    def display_other(self):
         pass
 
 class KruskalsSpanningFrame(TraceFrame):
@@ -134,16 +134,16 @@ class KruskalsSpanningFrame(TraceFrame):
             self._canvas_frame.highlight_start_node(self._from)
         if self._to is not None:
             self._canvas_frame.highlight_end_node(self._to)
-        if self._current is not None:
+        if self._current_value is not None:
             # specialist case
-            (from_node, to_node), weight = self._current
+            (from_node, to_node), weight = self._current_value
             self._canvas_frame.highlight_current_edge(from_node, to_node)
 
-    def display_processed(self, processed):
+    def display_processed(self):
         for child in self._processed.winfo_children():
             child.grid_remove()
 
-        if len(processed) == 0:
+        if len(self._processed_value) == 0:
             sub = ttk.Frame(self._processed, borderwidth=2)
             sub.grid(sticky=tk.NSEW)
 
@@ -158,8 +158,8 @@ class KruskalsSpanningFrame(TraceFrame):
 
         else:
             # incoming tuples mean algorithm is still on-going
-            if type(processed) is tuple:
-                parents, ranks = processed
+            if type(self._processed_value) is tuple:
+                parents, ranks = self._processed_value
 
                 sub = ttk.Frame(self._processed, borderwidth=2)
                 sub.grid(sticky=tk.NSEW, row=0)
@@ -210,7 +210,7 @@ class KruskalsSpanningFrame(TraceFrame):
                 sub.grid(sticky=tk.NSEW, row=0, column=0)
                 sub.columnconfigure(0, weight=1)
 
-                for row, ((from_node, to_node), weight) in enumerate(processed):
+                for row, ((from_node, to_node), weight) in enumerate(self._processed_value):
                     self._canvas_frame.highlight_processed_edge(from_node, to_node)
                     
                     ttk.Label(
@@ -238,11 +238,11 @@ class KruskalsSpanningFrame(TraceFrame):
                 sub.columnconfigure((0, 1), weight=1)
 
     
-    def display_other(self, other):
+    def display_other(self):
         for child in self._other.winfo_children():
             child.grid_remove()
 
-        if other is None:
+        if self._other_value is None:
             self._other.columnconfigure(0, weight=1)
 
             sub = ttk.Frame(self._other, borderwidth=2)
@@ -263,7 +263,7 @@ class KruskalsSpanningFrame(TraceFrame):
             sub.columnconfigure((0, 1), weight=1)
 
             # only ever expecting a dictionary of edges and weights
-            for row, ((from_node, to_node), weight) in enumerate(sorted(other.items(), key=lambda item: item[1])):
+            for row, ((from_node, to_node), weight) in enumerate(sorted(self._other_value.items(), key=lambda item: item[1])):
                 ttk.Label(
                     sub,
                     text=f"{self._canvas_frame.get_label_from_node(from_node)} - {self._canvas_frame.get_label_from_node(to_node)}",
@@ -277,7 +277,7 @@ class KruskalsSpanningFrame(TraceFrame):
                     column=0,
                 )
 
-                ttk.Label(sub, text=other[(from_node, to_node)], anchor=tk.CENTER, bootstyle="inverse-info").grid(
+                ttk.Label(sub, text=self._other_value[(from_node, to_node)], anchor=tk.CENTER, bootstyle="inverse-info").grid(
                     sticky=tk.NSEW,
                     padx=(2, 8),
                     pady=3,

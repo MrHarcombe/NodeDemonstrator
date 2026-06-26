@@ -9,11 +9,11 @@ class TraversalFrame(TraceFrame):
     def __init__(self, master, canvas_frame, title, from_node, to_node):
         super().__init__(master, canvas_frame, title, from_node, to_node)
 
-    def display_processed(self, processed):
+    def display_processed(self):
         for child in self._processed.winfo_children():
             child.grid_remove()
 
-        if len(processed) == 0:
+        if len(self._processed_value) == 0:
             self._processed.columnconfigure(0, weight=1)
             self._processed.columnconfigure((1, 2), weight=0)
 
@@ -32,7 +32,7 @@ class TraversalFrame(TraceFrame):
             column = 0
             self._processed.columnconfigure((0, 1, 2), weight=1)
 
-            for p in processed:
+            for p in self._processed_value:
                 self._canvas_frame.highlight_processed_node(p)
 
                 sub = ttk.Frame(self._processed, borderwidth=2)
@@ -54,11 +54,11 @@ class TraversalFrame(TraceFrame):
                     row += 1
                     column = 0
 
-    def display_other(self, other):
+    def display_other(self):
         for child in self._other.winfo_children():
             child.grid_remove()
 
-        if len(other) == 0:
+        if len(self._other_value) == 0:
             self._other.columnconfigure(0, weight=1)
             self._other.columnconfigure((1, 2), weight=0)
 
@@ -77,7 +77,7 @@ class TraversalFrame(TraceFrame):
             column = 0
             self._other.columnconfigure((0, 1, 2), weight=1)
 
-            for o in other:
+            for o in self._other_value:
                 self._canvas_frame.highlight_pending_node(o)
 
                 sub = ttk.Frame(self._other, borderwidth=2) #, border_color="black")
@@ -147,5 +147,5 @@ class TreeTraversalFrame(TraversalFrame):
             lambda master: ttk.Label(master),
         )
         
-    def display_other(self, other):
+    def display_other(self):
         pass

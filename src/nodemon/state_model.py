@@ -157,6 +157,13 @@ class StateModel:
                 StateModel.ascii_heuristic,
             )
 
+    def bellman_ford(self, start_node, end_node):
+        if isinstance(self.__graph, AnimatedWeightedMatrixGraph):
+            yield from self.__graph.bellman_ford(
+                start_node,
+                end_node,
+            )
+
     def pre_order(self, start_node, end_node):
         yield from self.__graph.pre_order(start_node, end_node)
 

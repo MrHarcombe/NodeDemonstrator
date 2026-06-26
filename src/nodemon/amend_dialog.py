@@ -44,7 +44,7 @@ class AmendEdgeDialog(ttk.Toplevel):
 
             try:
                 weight = int(self.__weight_var.get())
-                if weight < 1:
+                if weight == 0:
                     weight = None
             except ValueError:
                 pass
@@ -58,14 +58,14 @@ class AmendEdgeDialog(ttk.Toplevel):
 
             try:
                 from_to = int(self.__from_to_var.get())
-                if from_to < 1:
+                if from_to == 0:
                     from_to = None
             except ValueError:
                 pass
 
             try:
                 to_from = int(self.__to_from_var.get())
-                if to_from < 1:
+                if to_from == 0:
                     to_from = None
             except ValueError:
                 pass
