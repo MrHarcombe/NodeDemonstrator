@@ -184,7 +184,8 @@ class Tree:
 
 
 class RedBlackTree(Tree):
-    """Implementation of the RedBlackTree detailed on Wikipedia as a child class of the
+    """
+    Implementation of the RedBlackTree detailed on Wikipedia as a child class of the
     binary search tree implemented above (see https://en.wikipedia.org/wiki/Red%E2%80%93black_tree).
     """
 
@@ -284,9 +285,9 @@ class RedBlackTree(Tree):
                 break
         # end of the (do while)-loop
 
-
         def _delete(self, candidate):
             pass
+
 
 """
         def _delete(self, candidate : RedBlackNode):
@@ -338,9 +339,7 @@ class RedBlackTree(Tree):
 
 
 class ListGraph:
-
     class ListGraphNode:
-
         def __init__(self, node):
             self.node = node
             self.paths = []
