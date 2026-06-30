@@ -207,6 +207,17 @@ class CanvasFrame(ttk.Frame):
                 nodelabel = tag[10:]
         return nodelabel
 
+    def get_node_coordinates(self, node_name):
+        id = self.__canvas.find_withtag(f"nodename_{node_name}")
+
+        ids = self.__find_associated_ids(id)
+        for id in ids:
+            tags = self.__canvas.gettags(id)
+            for tag in tags:
+                if tag.startswith("node_"):
+                    x1,y1,x2,y2 = self.__canvas.coords(id)
+                    return (x1+(x2-x1)/2, y1+(y2-y1)/2)
+
     def highlight_start_node(self, node_name):
         self.__highlight_node(
             node_name,

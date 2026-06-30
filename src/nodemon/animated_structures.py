@@ -249,10 +249,9 @@ class AnimatedWeightedMatrixGraph(AnimatedMatrixGraph):
             from_index = self.nodes.index(from_node)
             to_index = self.nodes.index(to_node)
             self.matrix[from_index][to_index] = weight
-            if (
-                (undirected is None and self.undirected) or
-                (undirected is not None and undirected)
-               ):
+            if (undirected is None and self.undirected) or (
+                undirected is not None and undirected
+            ):
                 self.matrix[to_index][from_index] = weight
 
     def dijkstra(self, start_node, end_node=None):
@@ -310,10 +309,6 @@ class AnimatedWeightedMatrixGraph(AnimatedMatrixGraph):
             path.append(current)
             yield "", data, path[::-1]
 
-    @staticmethod
-    def astar_manhattan_distance(node_from, node_to):
-        return sum(abs(val1 - val2) for val1, val2 in zip(node_from, node_to))
-
     def astar(self, start_node, end_node, func):
         """
         Implements the standard A* shortest path algorithm. Nodes are explored according to the rules of the
@@ -333,7 +328,7 @@ class AnimatedWeightedMatrixGraph(AnimatedMatrixGraph):
             _type_: at the beginning of each iteration through the algorithm, a tuple containing the current node, the
             state of visited nodes, and heapq of nodes to be processed.
         """
-        
+
         def reconstruct_path(came_from, current):
             total_path = [current]
             while current in came_from:
@@ -476,7 +471,9 @@ class AnimatedWeightedMatrixGraph(AnimatedMatrixGraph):
         key_values = defaultdict(lambda: float("inf"))
         parents = defaultdict(lambda: None)
 
-        key_values[choice(self.nodes) if starting_node is None else starting_node] = 0  # starting node
+        key_values[choice(self.nodes) if starting_node is None else starting_node] = (
+            0  # starting node
+        )
 
         results = []
         for _ in range(len(self)):
@@ -517,6 +514,7 @@ class AnimatedWeightedMatrixGraph(AnimatedMatrixGraph):
             tuple: at the beginning of each iteration through the algorithm, the cheapest edge, the collection of
                 parents of each node and their rankings within the algorithm.
         """
+
         def find(parents, node):
             if parents[node] is None:
                 return node
@@ -618,7 +616,9 @@ if __name__ == "__main__":
     def test_animated_weighted_matrix_graph():
         @staticmethod
         def ascii_manhattan_distance(node_from, node_to):
-            return sum(abs(ord(val1) - ord(val2)) for val1, val2 in zip(node_from, node_to))
+            return sum(
+                abs(ord(val1) - ord(val2)) for val1, val2 in zip(node_from, node_to)
+            )
 
         print("Testing animated weighted adjacency matrix...")
         g = AnimatedWeightedMatrixGraph(True)
@@ -663,8 +663,10 @@ if __name__ == "__main__":
                     "currently at:",
                     current,
                     "; processed:",
-                    " / f-scores " + ", ".join(f"{k}: {v}" for k, v in f_scores.items()),
-                    " / g-scores " + ", ".join(f"{k}: {v}" for k, v in g_scores.items()),
+                    " / f-scores "
+                    + ", ".join(f"{k}: {v}" for k, v in f_scores.items()),
+                    " / g-scores "
+                    + ", ".join(f"{k}: {v}" for k, v in g_scores.items()),
                     " / current path " + " ".join(came_from),
                     "; queue:",
                     ", ".join(f"{k}: {v}" for k, v in processing),
@@ -672,13 +674,15 @@ if __name__ == "__main__":
             else:
                 print(
                     "Completed; processed:",
-                    " / f-scores " + ", ".join(f"{k}: {v}" for k, v in f_scores.items()),
-                    " / g-scores " + ", ".join(f"{k}: {v}" for k, v in g_scores.items()),
+                    " / f-scores "
+                    + ", ".join(f"{k}: {v}" for k, v in f_scores.items()),
+                    " / g-scores "
+                    + ", ".join(f"{k}: {v}" for k, v in g_scores.items()),
                     # " / current path " + " ".join(came_from),
                     "; final path:",
                     ", ".join(f"{item}" for item in processing),
                 )
-                
+
     def test_bellman_ford():
         print("Bellman-Ford...")
         g = AnimatedWeightedMatrixGraph()
@@ -707,8 +711,10 @@ if __name__ == "__main__":
                             "step:",
                             count,
                             "; processed:",
-                            " distances " + ", ".join(f"{k}: {v}" for k, v in distances.items()),
-                            " / predecessors " + ", ".join(f"{k}: {v}" for k, v in predecessors.items())
+                            " distances "
+                            + ", ".join(f"{k}: {v}" for k, v in distances.items()),
+                            " / predecessors "
+                            + ", ".join(f"{k}: {v}" for k, v in predecessors.items()),
                         )
                 else:
                     _, path, output = step

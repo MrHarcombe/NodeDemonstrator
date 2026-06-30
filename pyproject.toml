@@ -5,12 +5,9 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 packages = ["src/nodemon"]
 
-# [tool.hatch.metadata]
-# allow-direct-references = true
-
 [tool.black]
-line.length = 96
-
+line-length = 96
+fast = 1
 
 [project]
 name = "nodemon"

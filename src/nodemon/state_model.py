@@ -146,15 +146,12 @@ class StateModel:
         if isinstance(self.__graph, AnimatedWeightedMatrixGraph):
             yield from self.__graph.dijkstra(start_node, end_node)
 
-    def ascii_heuristic(a, b):
-        return abs(ord(b) - ord(a))
-
-    def a_star(self, start_node, end_node):
+    def a_star(self, start_node, end_node, heuristic):
         if isinstance(self.__graph, AnimatedWeightedMatrixGraph):
             yield from self.__graph.astar(
                 start_node,
                 end_node,
-                StateModel.ascii_heuristic,
+                heuristic,
             )
 
     def bellman_ford(self, start_node, end_node):
